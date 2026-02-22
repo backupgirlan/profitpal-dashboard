@@ -66,6 +66,12 @@ const Management = () => {
     if (error) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     } else {
+      // Update balance with profit
+      const { data: profileData } = await supabase.from('profiles').select('balance').eq('user_id', user.id).single();
+      if (profileData) {
+        const newBalance = Number(profileData.balance) + profit;
+        await supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id);
+      }
       setPairName('');
       fetchTrades();
       toast({ title: 'Operação registrada!' });

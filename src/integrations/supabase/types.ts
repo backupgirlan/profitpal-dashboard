@@ -76,6 +76,7 @@ export type Database = {
           balance: number | null
           created_at: string | null
           display_name: string | null
+          entry_percentage: number | null
           id: string
           last_login_date: string | null
           soros_enabled: boolean | null
@@ -91,6 +92,7 @@ export type Database = {
           balance?: number | null
           created_at?: string | null
           display_name?: string | null
+          entry_percentage?: number | null
           id?: string
           last_login_date?: string | null
           soros_enabled?: boolean | null
@@ -106,6 +108,7 @@ export type Database = {
           balance?: number | null
           created_at?: string | null
           display_name?: string | null
+          entry_percentage?: number | null
           id?: string
           last_login_date?: string | null
           soros_enabled?: boolean | null

@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./components/DashboardLayout";
 import AdminMessagePopup from "./components/AdminMessagePopup";
+import DashboardHome from "./pages/dashboard/DashboardHome";
 import TraderCalculator from "./pages/dashboard/TraderCalculator";
 import Management from "./pages/dashboard/Management";
 import Rankings from "./pages/dashboard/Rankings";
@@ -39,7 +40,8 @@ const AppRoutes = () => (
     <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><TraderCalculator /></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><DashboardHome /></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/calculator" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><TraderCalculator /></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/management" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Management /></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/rankings" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Rankings /></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/evolution" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Evolution /></DashboardLayout></ProtectedRoute>} />

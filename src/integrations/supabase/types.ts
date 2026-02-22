@@ -14,16 +14,217 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          is_global: boolean | null
+          is_read: boolean | null
+          target_user_id: string | null
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          is_read?: boolean | null
+          target_user_id?: string | null
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_global?: boolean | null
+          is_read?: boolean | null
+          target_user_id?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      daily_rewards: {
+        Row: {
+          claimed: boolean | null
+          created_at: string | null
+          id: string
+          reward_date: string | null
+          reward_type: string | null
+          user_id: string
+        }
+        Insert: {
+          claimed?: boolean | null
+          created_at?: string | null
+          id?: string
+          reward_date?: string | null
+          reward_type?: string | null
+          user_id: string
+        }
+        Update: {
+          claimed?: boolean | null
+          created_at?: string | null
+          id?: string
+          reward_date?: string | null
+          reward_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          display_name: string | null
+          id: string
+          last_login_date: string | null
+          soros_enabled: boolean | null
+          soros_level: number | null
+          stop_loss: number | null
+          stop_win: number | null
+          streak_days: number | null
+          total_profit: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          balance?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          last_login_date?: string | null
+          soros_enabled?: boolean | null
+          soros_level?: number | null
+          stop_loss?: number | null
+          stop_win?: number | null
+          streak_days?: number | null
+          total_profit?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          balance?: number | null
+          created_at?: string | null
+          display_name?: string | null
+          id?: string
+          last_login_date?: string | null
+          soros_enabled?: boolean | null
+          soros_level?: number | null
+          stop_loss?: number | null
+          stop_win?: number | null
+          streak_days?: number | null
+          total_profit?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      psychology_content: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          id: string
+          pair_name: string
+          payout: number
+          profit: number | null
+          result: string
+          soros_level: number | null
+          trade_date: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string
+          pair_name: string
+          payout: number
+          profit?: number | null
+          result: string
+          soros_level?: number | null
+          trade_date?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          id?: string
+          pair_name?: string
+          payout?: number
+          profit?: number | null
+          result?: string
+          soros_level?: number | null
+          trade_date?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      profit_rankings: {
+        Row: {
+          display_name: string | null
+          losses: number | null
+          total_profit: number | null
+          total_trades: number | null
+          user_id: string | null
+          wins: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +351,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

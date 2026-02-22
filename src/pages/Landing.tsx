@@ -47,7 +47,7 @@ const Landing = () => {
                 Criar Conta
               </Button>
             </Link>
-            <a href="https://broker-qx.pro/sign-up/?lid=1711160" target="_blank" rel="noopener noreferrer">
+            <a href="https://broker-qx.pro/sign-up/?lid=2011722" target="_blank" rel="noopener noreferrer">
               <Button size="lg" variant="outline" className="w-full text-lg border-accent/50 text-accent hover:bg-accent/10">
                 <UserPlus className="w-5 h-5 mr-2" />
                 Cadastre na Corretora
@@ -64,7 +64,7 @@ const Landing = () => {
           className="flex flex-wrap justify-center gap-4 pb-4"
         >
           <a
-            href="https://broker-qx.pro/sign-up/?lid=1711160"
+            href="https://broker-qx.pro/sign-up/?lid=2011722"
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_advice: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       admin_messages: {
         Row: {
           content: string
@@ -227,6 +248,27 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      youtube_videos: {
+        Row: {
+          created_at: string | null
+          id: string
+          title: string
+          youtube_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          title: string
+          youtube_url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          title?: string
+          youtube_url?: string
         }
         Relationships: []
       }

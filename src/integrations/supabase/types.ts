@@ -102,6 +102,7 @@ export type Database = {
           display_name: string | null
           entry_percentage: number | null
           id: string
+          is_vip: boolean
           last_login_date: string | null
           soros_enabled: boolean | null
           soros_level: number | null
@@ -118,6 +119,7 @@ export type Database = {
           display_name?: string | null
           entry_percentage?: number | null
           id?: string
+          is_vip?: boolean
           last_login_date?: string | null
           soros_enabled?: boolean | null
           soros_level?: number | null
@@ -134,6 +136,7 @@ export type Database = {
           display_name?: string | null
           entry_percentage?: number | null
           id?: string
+          is_vip?: boolean
           last_login_date?: string | null
           soros_enabled?: boolean | null
           soros_level?: number | null

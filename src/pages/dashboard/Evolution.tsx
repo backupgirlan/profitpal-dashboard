@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { TrendingUp } from 'lucide-react';
 
 const Evolution = () => {
@@ -40,38 +40,51 @@ const Evolution = () => {
       </div>
 
       <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-display text-sm font-bold text-foreground mb-4">Lucro Acumulado</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 16%)" />
-              <XAxis dataKey="date" stroke="hsl(0, 0%, 55%)" fontSize={12} />
-              <YAxis stroke="hsl(0, 0%, 55%)" fontSize={12} />
-              <Tooltip
-                contentStyle={{ backgroundColor: 'hsl(0, 0%, 7%)', border: '1px solid hsl(0, 0%, 16%)', borderRadius: '8px' }}
-                labelStyle={{ color: 'hsl(45, 100%, 50%)' }}
-              />
-              <Line type="monotone" dataKey="cumulative" stroke="hsl(45, 100%, 50%)" strokeWidth={2} dot={{ fill: 'hsl(45, 100%, 50%)' }} name="Lucro Acum." />
-            </LineChart>
-          </ResponsiveContainer>
+        <h3 className="font-display text-sm font-bold text-foreground mb-4">Evolução — Candles</h3>
+        <div className="h-72">
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 16%)" />
+                <XAxis dataKey="date" stroke="hsl(0, 0%, 55%)" fontSize={12} />
+                <YAxis stroke="hsl(0, 0%, 55%)" fontSize={12} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'hsl(0, 0%, 7%)', border: '1px solid hsl(0, 0%, 16%)', borderRadius: '8px' }}
+                  labelStyle={{ color: 'hsl(45, 100%, 50%)' }}
+                  formatter={(value: number, name: string) => [
+                    `R$ ${value.toFixed(2)}`,
+                    name === 'profit' ? 'Lucro do Dia' : 'Acumulado'
+                  ]}
+                />
+                <Bar dataKey="profit" radius={[2, 2, 0, 0]} name="Lucro do Dia">
+                  {chartData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.profit >= 0 ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)'}
+                      stroke={entry.profit >= 0 ? 'hsl(142, 76%, 46%)' : 'hsl(0, 84%, 70%)'}
+                      strokeWidth={1}
+                    />
+                  ))}
+                </Bar>
+                <Line type="monotone" dataKey="cumulative" stroke="hsl(45, 100%, 50%)" strokeWidth={2} dot={{ fill: 'hsl(45, 100%, 50%)' }} name="Acumulado" />
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+              Registre operações para ver sua evolução
+            </div>
+          )}
         </div>
-      </div>
-
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-display text-sm font-bold text-foreground mb-4">Lucro Diário</h3>
-        <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 16%)" />
-              <XAxis dataKey="date" stroke="hsl(0, 0%, 55%)" fontSize={12} />
-              <YAxis stroke="hsl(0, 0%, 55%)" fontSize={12} />
-              <Tooltip
-                contentStyle={{ backgroundColor: 'hsl(0, 0%, 7%)', border: '1px solid hsl(0, 0%, 16%)', borderRadius: '8px' }}
-                labelStyle={{ color: 'hsl(45, 100%, 50%)' }}
-              />
-              <Bar dataKey="profit" fill="hsl(45, 100%, 50%)" radius={[4, 4, 0, 0]} name="Lucro" />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="flex items-center justify-center gap-6 mt-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(142, 76%, 36%)' }} /> Win (Verde)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> Loss (Vermelho)
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(45, 100%, 50%)' }} /> Acumulado
+          </span>
         </div>
       </div>
     </div>

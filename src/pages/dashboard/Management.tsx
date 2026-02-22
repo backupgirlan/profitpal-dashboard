@@ -45,11 +45,7 @@ const Management = () => {
   const addTrade = async () => {
     if (!user || !pairName) return;
     const todayCount = trades.length;
-    if (todayCount >= 3) {
-      toast({ title: 'Limite atingido', description: 'Máximo 3 operações por dia.', variant: 'destructive' });
-      return;
-    }
-
+    // No trade limit - user can add unlimited trades
     const profit = result === 'win' ? amount * (payout / 100) : -amount;
 
     const { error } = await supabase.from('trades').insert({
@@ -90,8 +86,8 @@ const Management = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-bold text-primary text-glow">Gerenciamento 3x2</h1>
-        <p className="text-muted-foreground">Registre até 3 operações por dia</p>
+        <h1 className="text-2xl font-display font-bold text-primary text-glow">Gerenciamento</h1>
+        <p className="text-muted-foreground">Registre suas operações do dia</p>
       </div>
 
       {/* Summary */}
@@ -113,7 +109,7 @@ const Management = () => {
       </div>
 
       {/* Add trade */}
-      {trades.length < 3 && (
+      {(
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="font-display text-sm font-bold text-foreground mb-3">Nova Operação</h3>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

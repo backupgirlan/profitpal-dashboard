@@ -16,10 +16,11 @@ const TraderCalculator = () => {
   const [stopLoss, setStopLoss] = useState(20);
   const [stopWin, setStopWin] = useState(50);
   const [sorosEnabled, setSorosEnabled] = useState(false);
+  const [entryPercentage, setEntryPercentage] = useState(2);
   const [todayTrades, setTodayTrades] = useState(0);
 
   const maxOps = 3;
-  const entryValue = balance * 0.02; // 2% da banca
+  const entryValue = balance * (entryPercentage / 100);
   const sorosLevel1 = entryValue + (entryValue * payout / 100);
   const sorosLevel2 = sorosLevel1 + (sorosLevel1 * payout / 100);
 
@@ -33,6 +34,7 @@ const TraderCalculator = () => {
           setStopLoss(Number(data.stop_loss) || 20);
           setStopWin(Number(data.stop_win) || 50);
           setSorosEnabled(data.soros_enabled || false);
+          setEntryPercentage(Number(data.entry_percentage) || 2);
         }
       });
     // Count today trades
@@ -45,7 +47,7 @@ const TraderCalculator = () => {
   const saveProfile = async () => {
     if (!user) return;
     const { error } = await supabase.from('profiles').update({
-      balance, stop_loss: stopLoss, stop_win: stopWin, soros_enabled: sorosEnabled
+      balance, stop_loss: stopLoss, stop_win: stopWin, soros_enabled: sorosEnabled, entry_percentage: entryPercentage
     }).eq('user_id', user.id);
     if (error) toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     else toast({ title: 'Salvo!', description: 'Configurações atualizadas.' });
@@ -80,7 +82,7 @@ const TraderCalculator = () => {
           <p className="text-2xl font-display font-bold text-primary text-glow">
             R$ {entryValue.toFixed(2)}
           </p>
-          <p className="text-xs text-muted-foreground mt-1">2% da banca</p>
+          <p className="text-xs text-muted-foreground mt-1">{entryPercentage}% da banca</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
@@ -100,6 +102,10 @@ const TraderCalculator = () => {
           <div>
             <Label>Banca (R$)</Label>
             <Input type="number" value={balance} onChange={(e) => setBalance(Number(e.target.value))} className="bg-secondary" />
+          </div>
+          <div>
+            <Label>Entrada (%)</Label>
+            <Input type="number" value={entryPercentage} onChange={(e) => setEntryPercentage(Number(e.target.value))} min={0.1} max={100} step={0.5} className="bg-secondary" />
           </div>
           <div>
             <Label>Payout (%)</Label>

@@ -3,13 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
 import {
-  Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
+  Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
   Menu, X, TrendingUp, ClipboardList, MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const navItems = [
-  { path: '/dashboard', label: 'Calculadora', icon: Calculator },
+  { path: '/dashboard', label: 'Início', icon: Home },
+  { path: '/dashboard/calculator', label: 'Calculadora', icon: Calculator },
   { path: '/dashboard/management', label: 'Gerenciamento', icon: ClipboardList },
   { path: '/dashboard/rankings', label: 'Rankings', icon: Trophy },
   { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },

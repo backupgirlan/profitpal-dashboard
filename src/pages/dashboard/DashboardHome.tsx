@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Line } from 'recharts';
 import { DollarSign, TrendingUp, Target, BarChart3, UserPlus, MessageCircle, Youtube, Plus, CheckCircle, XCircle, Edit2, Save, AlertTriangle, Landmark } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +19,99 @@ interface Trade {
   profit: number;
   trade_date: string;
 }
+
+// Custom Candlestick Chart Component
+interface CandleData {
+  index: number;
+  open: number;
+  close: number;
+  color: string;
+  label: string;
+}
+
+const CandlestickChart = ({ candles }: { candles: CandleData[] }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  if (candles.length === 0) return null;
+
+  const allValues = candles.flatMap(c => [c.open, c.close]);
+  const minVal = Math.min(...allValues);
+  const maxVal = Math.max(...allValues);
+  const range = maxVal - minVal || 10;
+
+  const padding = 30;
+  const candleWidth = 12;
+  const gap = 6;
+  const chartWidth = Math.max(candles.length * (candleWidth + gap) + padding * 2, 300);
+  const chartHeight = 240;
+  const plotHeight = chartHeight - padding * 2;
+
+  const priceToY = (price: number) => {
+    return padding + plotHeight - ((price - minVal) / range) * plotHeight;
+  };
+
+  // Grid lines
+  const gridLines = 5;
+  const gridValues = Array.from({ length: gridLines }, (_, i) => minVal + (range / (gridLines - 1)) * i);
+
+  return (
+    <div ref={containerRef} className="w-full h-full overflow-x-auto">
+      <svg width={chartWidth} height={chartHeight} className="min-w-full">
+        {/* Grid */}
+        {gridValues.map((val, i) => (
+          <g key={i}>
+            <line
+              x1={padding} y1={priceToY(val)} x2={chartWidth - 10} y2={priceToY(val)}
+              stroke="hsl(0, 0%, 16%)" strokeDasharray="3 3"
+            />
+            <text x={5} y={priceToY(val) + 4} fill="hsl(0, 0%, 55%)" fontSize={9}>
+              {val.toFixed(0)}
+            </text>
+          </g>
+        ))}
+        {/* Zero line */}
+        {minVal <= 0 && maxVal >= 0 && (
+          <line
+            x1={padding} y1={priceToY(0)} x2={chartWidth - 10} y2={priceToY(0)}
+            stroke="hsl(0, 0%, 30%)" strokeWidth={1}
+          />
+        )}
+        {/* Candles */}
+        {candles.map((c, i) => {
+          const x = padding + i * (candleWidth + gap);
+          const yOpen = priceToY(c.open);
+          const yClose = priceToY(c.close);
+          const yTop = Math.min(yOpen, yClose);
+          const yBottom = Math.max(yOpen, yClose);
+          const bodyHeight = Math.max(yBottom - yTop, 2);
+          const fillColor = c.color === 'green' ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)';
+          const wickColor = c.color === 'green' ? 'hsl(142, 76%, 46%)' : 'hsl(0, 84%, 70%)';
+          const cx = x + candleWidth / 2;
+          // Wick extends a bit beyond body
+          const wickTop = yTop - 3;
+          const wickBottom = yBottom + 3;
+
+          return (
+            <g key={i}>
+              {/* Wick */}
+              <line x1={cx} y1={wickTop} x2={cx} y2={wickBottom} stroke={wickColor} strokeWidth={1.5} />
+              {/* Body */}
+              <rect
+                x={x}
+                y={yTop}
+                width={candleWidth}
+                height={bodyHeight}
+                fill={fillColor}
+                rx={1}
+                stroke={wickColor}
+                strokeWidth={0.5}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
 
 const MANAGEMENT_ADVICES = [
   "Lembre-se: gerenciamento é a chave para longevidade no mercado. Nunca arrisque mais do que pode perder.",
@@ -77,51 +169,32 @@ const DashboardHome = () => {
     supabase.from('profiles').select('*').eq('user_id', user.id).single()
       .then(({ data }) => { if (data) setProfile(data); });
 
-    supabase.from('trades').select('*').eq('user_id', user.id).order('trade_date', { ascending: true })
+    supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true })
       .then(({ data }) => {
         if (!data) return;
         setAllTrades(data as Trade[]);
-        // Build candlestick data: each trade is a candle
-        const candles = data.map((t, i) => {
-          const profit = Number(t.profit);
-          const open = 0;
-          const close = profit;
-          return {
-            name: `${t.pair_name} (${t.trade_date})`,
-            date: t.trade_date,
-            open,
-            close,
-            high: Math.max(open, close),
-            low: Math.min(open, close),
-            profit,
-            result: t.result,
-            pair: t.pair_name,
-          };
-        });
-        // Build cumulative line
-        let cumulative = 0;
-        const grouped: Record<string, { date: string; profit: number; cumulative: number; candles: typeof candles }> = {};
+        // Each candle = R$10. Convert each trade into multiple candles.
+        const CANDLE_VALUE = 10;
+        let cumPrice = 0;
+        const candleData: { index: number; open: number; close: number; color: string; label: string }[] = [];
         data.forEach((t) => {
-          const date = t.trade_date;
-          if (!grouped[date]) grouped[date] = { date, profit: 0, cumulative: 0, candles: [] };
-          grouped[date].profit += Number(t.profit);
-          grouped[date].candles.push({
-            name: t.pair_name,
-            date,
-            open: 0,
-            close: Number(t.profit),
-            high: Math.max(0, Number(t.profit)),
-            low: Math.min(0, Number(t.profit)),
-            profit: Number(t.profit),
-            result: t.result,
-            pair: t.pair_name,
-          });
+          const profit = Number(t.profit);
+          const numCandles = Math.max(1, Math.round(Math.abs(profit) / CANDLE_VALUE));
+          const direction = profit >= 0 ? 1 : -1;
+          const color = profit >= 0 ? 'green' : 'red';
+          for (let i = 0; i < numCandles; i++) {
+            const open = cumPrice;
+            cumPrice += direction * CANDLE_VALUE;
+            candleData.push({
+              index: candleData.length,
+              open,
+              close: cumPrice,
+              color,
+              label: `${t.pair_name} (${t.trade_date})`,
+            });
+          }
         });
-        const chartResult = Object.values(grouped).map(d => {
-          cumulative += d.profit;
-          return { ...d, cumulative: Number(cumulative.toFixed(2)), profit: Number(d.profit.toFixed(2)) };
-        });
-        setChartData(chartResult);
+        setChartData(candleData);
       });
 
     supabase.from('trades').select('*').eq('user_id', user.id).eq('trade_date', today).order('created_at', { ascending: false })
@@ -506,34 +579,9 @@ const DashboardHome = () => {
         <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-primary" /> Evolução — Gráfico de Candles
         </h3>
-        <div className="h-64">
+        <div className="h-64 overflow-x-auto">
           {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 16%)" />
-                <XAxis dataKey="date" stroke="hsl(0, 0%, 55%)" fontSize={11} />
-                <YAxis stroke="hsl(0, 0%, 55%)" fontSize={11} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: 'hsl(0, 0%, 7%)', border: '1px solid hsl(0, 0%, 16%)', borderRadius: '8px' }}
-                  labelStyle={{ color: 'hsl(45, 100%, 50%)' }}
-                  formatter={(value: number, name: string) => [
-                    `R$ ${value.toFixed(2)}`,
-                    name === 'profit' ? 'Lucro do Dia' : name
-                  ]}
-                />
-                <Bar dataKey="profit" radius={[2, 2, 0, 0]} name="Lucro do Dia">
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.profit >= 0 ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)'}
-                      stroke={entry.profit >= 0 ? 'hsl(142, 76%, 46%)' : 'hsl(0, 84%, 70%)'}
-                      strokeWidth={1}
-                    />
-                  ))}
-                </Bar>
-                <Line type="monotone" dataKey="cumulative" stroke="hsl(45, 100%, 50%)" strokeWidth={2} dot={{ fill: 'hsl(45, 100%, 50%)', r: 3 }} name="Acumulado" />
-              </ComposedChart>
-            </ResponsiveContainer>
+            <CandlestickChart candles={chartData} />
           ) : (
             <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
               Registre operações para ver sua evolução
@@ -548,7 +596,7 @@ const DashboardHome = () => {
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> Loss (Vermelho)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: 'hsl(45, 100%, 50%)' }} /> Acumulado
+            <span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> Cada candle = R$10
           </span>
         </div>
       </motion.div>

@@ -76,7 +76,7 @@ const Evolution = () => {
     supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true })
       .then(({ data }) => {
         if (!data) return;
-        const CANDLE_VALUE = 10;
+        const CANDLE_VALUE = 30;
         let cumPrice = 0;
         const candleData: CandleData[] = [];
         data.forEach((t) => {
@@ -110,7 +110,7 @@ const Evolution = () => {
       </div>
 
       <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-display text-sm font-bold text-foreground mb-4">Evolução — Candles (R$10 cada)</h3>
+        <h3 className="font-display text-sm font-bold text-foreground mb-4">Evolução — Candles (R$30 cada)</h3>
         <div className="h-72">
           {chartData.length > 0 ? (
             <CandlestickChart candles={chartData} />
@@ -128,7 +128,7 @@ const Evolution = () => {
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> Loss (Vermelho)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> Cada candle = R$10
+            <span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> Cada candle = R$30
           </span>
         </div>
       </div>

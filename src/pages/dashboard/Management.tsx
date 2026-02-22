@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, XCircle, PartyPopper, AlertTriangle } from 'lucide-react';
 
 interface Trade {
   id: string;
@@ -18,6 +19,18 @@ interface Trade {
   trade_date: string;
 }
 
+const WIN_MESSAGES = [
+  "🎉 Parabéns pela vitória! Continue seguindo o gerenciamento e colhendo os frutos da disciplina!",
+  "🏆 Excelente operação! Lembre-se: consistência é a chave. Não se empolgue, siga o plano!",
+  "✅ Win registrado! Você está no caminho certo. Mantenha o foco nas próximas entradas.",
+];
+
+const LOSS_MESSAGES = [
+  "Calma! O que foi perdido NÃO se recupera no mesmo instante. Respire fundo e aguarde um melhor momento para a segunda entrada. Você está passando por um ciclo ruim de mercado — isso é normal. Mantenha a regra das 3 entradas e nunca se vicie no gráfico.",
+  "Respire. Perdas fazem parte do processo. Não tente recuperar agora — o mercado vai te dar novas oportunidades. Siga a regra das 3 entradas, tenha paciência e não se desespere. O resultado vem com o tempo, não com a pressa.",
+  "Momento de cautela. Não se desespere tentando recuperar. Lembre-se: o prejuízo se recupera no decorrer do tempo, não no mesmo instante. Mantenha a disciplina, respeite as 3 entradas diárias e não fique viciado no gráfico.",
+];
+
 const Management = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -26,6 +39,11 @@ const Management = () => {
   const [payout, setPayout] = useState(80);
   const [result, setResult] = useState<string>('win');
   const [amount, setAmount] = useState(2);
+
+  // Popups
+  const [showWinPopup, setShowWinPopup] = useState(false);
+  const [showLossPopup, setShowLossPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -44,8 +62,6 @@ const Management = () => {
 
   const addTrade = async () => {
     if (!user || !pairName) return;
-    const todayCount = trades.length;
-    // No trade limit - user can add unlimited trades
     const profit = result === 'win' ? amount * (payout / 100) : -amount;
 
     const { error } = await supabase.from('trades').insert({
@@ -62,7 +78,6 @@ const Management = () => {
     if (error) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     } else {
-      // Update balance with profit
       const { data: profileData } = await supabase.from('profiles').select('balance').eq('user_id', user.id).single();
       if (profileData) {
         const newBalance = Number(profileData.balance) + profit;
@@ -71,6 +86,15 @@ const Management = () => {
       setPairName('');
       fetchTrades();
       toast({ title: 'Operação registrada!' });
+
+      // Show popup
+      if (result === 'win') {
+        setPopupMessage(WIN_MESSAGES[Math.floor(Math.random() * WIN_MESSAGES.length)]);
+        setShowWinPopup(true);
+      } else {
+        setPopupMessage(LOSS_MESSAGES[Math.floor(Math.random() * LOSS_MESSAGES.length)]);
+        setShowLossPopup(true);
+      }
     }
   };
 
@@ -85,6 +109,40 @@ const Management = () => {
 
   return (
     <div className="space-y-6">
+      {/* Win Popup */}
+      <Dialog open={showWinPopup} onOpenChange={setShowWinPopup}>
+        <DialogContent className="bg-card border-success/50 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 win-text font-display">
+              <PartyPopper className="w-5 h-5" /> Win! 🎉
+            </DialogTitle>
+            <DialogDescription className="text-foreground pt-2 text-sm leading-relaxed">
+              {popupMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setShowWinPopup(false)} className="gradient-gold text-primary-foreground font-display">
+            Continuar
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Loss Popup */}
+      <Dialog open={showLossPopup} onOpenChange={setShowLossPopup}>
+        <DialogContent className="bg-card border-destructive/50 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive font-display">
+              <AlertTriangle className="w-5 h-5" /> Loss
+            </DialogTitle>
+            <DialogDescription className="text-foreground pt-2 text-sm leading-relaxed">
+              {popupMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setShowLossPopup(false)} className="gradient-gold text-primary-foreground font-display">
+            Li e entendi
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       <div>
         <h1 className="text-2xl font-display font-bold text-primary text-glow">Gerenciamento</h1>
         <p className="text-muted-foreground">Registre suas operações do dia</p>
@@ -109,28 +167,26 @@ const Management = () => {
       </div>
 
       {/* Add trade */}
-      {(
-        <div className="bg-card border border-border rounded-lg p-4">
-          <h3 className="font-display text-sm font-bold text-foreground mb-3">Nova Operação</h3>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Input placeholder="Par (ex: EUR/USD)" value={pairName} onChange={(e) => setPairName(e.target.value)} className="bg-secondary" />
-            <Input type="number" placeholder="Payout %" value={payout} onChange={(e) => setPayout(Number(e.target.value))} className="bg-secondary" />
-            <Input type="number" placeholder="Valor R$" value={amount} onChange={(e) => setAmount(Number(e.target.value))} className="bg-secondary" />
-            <Select value={result} onValueChange={setResult}>
-              <SelectTrigger className="bg-secondary">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="win">✅ Win</SelectItem>
-                <SelectItem value="loss">❌ Loss</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={addTrade} className="gradient-gold text-primary-foreground gap-2">
-              <Plus className="w-4 h-4" /> Adicionar
-            </Button>
-          </div>
+      <div className="bg-card border border-border rounded-lg p-4">
+        <h3 className="font-display text-sm font-bold text-foreground mb-3">Nova Operação</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Input placeholder="Par (ex: EUR/USD)" value={pairName} onChange={(e) => setPairName(e.target.value)} className="bg-secondary" />
+          <Input type="number" placeholder="Payout %" value={payout} onChange={(e) => setPayout(Number(e.target.value))} className="bg-secondary" />
+          <Input type="number" placeholder="Valor R$" value={amount} onChange={(e) => setAmount(Number(e.target.value))} className="bg-secondary" />
+          <Select value={result} onValueChange={setResult}>
+            <SelectTrigger className="bg-secondary">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="win">✅ Win</SelectItem>
+              <SelectItem value="loss">❌ Loss</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={addTrade} className="gradient-gold text-primary-foreground gap-2">
+            <Plus className="w-4 h-4" /> Adicionar
+          </Button>
         </div>
-      )}
+      </div>
 
       {/* Trades table */}
       <div className="bg-card border border-border rounded-lg overflow-hidden">

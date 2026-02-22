@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield
+  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -17,6 +17,7 @@ const navItems = [
   { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
   { path: '/dashboard/psychology', label: 'Psicologia', icon: Brain },
   { path: '/dashboard/advice', label: 'Conselhos', icon: MessageSquare },
+  { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
   { path: '/dashboard/rewards', label: 'Brindes', icon: Gift },
 ];
 
@@ -26,17 +27,38 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [todayTradeCount, setTodayTradeCount] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
       .then(({ data }) => setIsAdmin(!!data));
+
+    supabase.from('profiles').select('display_name').eq('user_id', user.id).single()
+      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+
+    const today = new Date().toISOString().split('T')[0];
+    supabase.from('trades').select('id', { count: 'exact' }).eq('user_id', user.id).eq('trade_date', today)
+      .then(({ count }) => setTodayTradeCount(count || 0));
   }, [user]);
+
+  // Listen to route changes to refresh trade count
+  useEffect(() => {
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+    supabase.from('trades').select('id', { count: 'exact' }).eq('user_id', user.id).eq('trade_date', today)
+      .then(({ count }) => setTodayTradeCount(count || 0));
+  }, [location.pathname, user]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
+
+  // Mood: green if <= 3 trades today, red if > 3
+  const isGoodMood = todayTradeCount <= 3;
+  const moodEmoji = isGoodMood ? '😊' : '😡';
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -55,8 +77,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         }`}
       >
         <div className="p-6 border-b border-border">
-          <h2 className="font-display text-lg font-bold text-primary text-glow">TECHNICAL GIRLAN</h2>
-          <p className="text-xs text-muted-foreground mt-1 truncate">{user?.email}</p>
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-bold text-primary text-glow">TECHNICAL GIRLAN</h2>
+            <span className="text-2xl" title={isGoodMood ? 'Dentro do gerenciamento' : 'Fora do gerenciamento!'}>{moodEmoji}</span>
+          </div>
+          <p className="text-xs text-foreground mt-1 truncate font-medium">{displayName || user?.email}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">

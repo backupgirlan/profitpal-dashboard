@@ -174,7 +174,7 @@ const DashboardHome = () => {
         if (!data) return;
         setAllTrades(data as Trade[]);
         // Each candle = R$10. Convert each trade into multiple candles.
-        const CANDLE_VALUE = 10;
+        const CANDLE_VALUE = 30;
         let cumPrice = 0;
         const candleData: { index: number; open: number; close: number; color: string; label: string }[] = [];
         data.forEach((t) => {
@@ -596,7 +596,7 @@ const DashboardHome = () => {
             <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> Loss (Vermelho)
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> Cada candle = R$10
+            <span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> Cada candle = R$30
           </span>
         </div>
       </motion.div>
@@ -615,7 +615,7 @@ const DashboardHome = () => {
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <a href="https://broker-qx.pro/sign-up/?lid=1711160" target="_blank" rel="noopener noreferrer">
+          <a href="https://broker-qx.pro/sign-up/?lid=2011722" target="_blank" rel="noopener noreferrer">
             <Button size="lg" className="w-full gradient-gold text-primary-foreground font-display gap-2 box-glow hover:opacity-90">
               <UserPlus className="w-5 h-5" /> Cadastro Broker
             </Button>

@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import DashboardLayout from "./components/DashboardLayout";
 import AdminMessagePopup from "./components/AdminMessagePopup";
+import VipGate from "./components/VipGate";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import TraderCalculator from "./pages/dashboard/TraderCalculator";
 import Management from "./pages/dashboard/Management";
@@ -18,6 +19,7 @@ import Evolution from "./pages/dashboard/Evolution";
 import Psychology from "./pages/dashboard/Psychology";
 import Advice from "./pages/dashboard/Advice";
 import Rewards from "./pages/dashboard/Rewards";
+import AdminPanel from "./pages/dashboard/AdminPanel";
 
 const queryClient = new QueryClient();
 
@@ -40,14 +42,15 @@ const AppRoutes = () => (
     <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-    <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><DashboardHome /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/calculator" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><TraderCalculator /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/management" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Management /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/rankings" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Rankings /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/evolution" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Evolution /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/psychology" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Psychology /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/advice" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Advice /></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/rewards" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><Rewards /></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><DashboardHome /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/calculator" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><TraderCalculator /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/management" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Management /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/rankings" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Rankings /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/evolution" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Evolution /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/psychology" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Psychology /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/advice" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Advice /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/rewards" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Rewards /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/admin" element={<ProtectedRoute><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

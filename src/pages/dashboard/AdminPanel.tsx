@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Search, CheckCircle, XCircle, Plus, Trash2, Youtube, MessageSquare } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Shield, Search, CheckCircle, XCircle, Plus, Trash2, Youtube, MessageSquare, GraduationCap } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -34,6 +35,14 @@ const AdminPanel = () => {
   const [videoTitle, setVideoTitle] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
+  // Courses
+  const [courseCategories, setCourseCategories] = useState<any[]>([]);
+  const [courseVideos, setCourseVideos] = useState<any[]>([]);
+  const [newCatTitle, setNewCatTitle] = useState('');
+  const [newCourseVideoTitle, setNewCourseVideoTitle] = useState('');
+  const [newCourseVideoUrl, setNewCourseVideoUrl] = useState('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+
   useEffect(() => {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
@@ -43,6 +52,7 @@ const AdminPanel = () => {
           loadProfiles();
           loadAdvices();
           loadVideos();
+          loadCourseData();
         } else {
           setLoading(false);
         }
@@ -64,6 +74,47 @@ const AdminPanel = () => {
   const loadVideos = async () => {
     const { data } = await supabase.from('youtube_videos').select('*').order('created_at', { ascending: false });
     if (data) setVideos(data);
+  };
+
+  const loadCourseData = async () => {
+    const { data: cats } = await supabase.from('course_categories').select('*').order('sort_order');
+    if (cats) setCourseCategories(cats);
+    const { data: vids } = await supabase.from('course_videos').select('*').order('sort_order');
+    if (vids) setCourseVideos(vids);
+  };
+
+  const addCourseCategory = async () => {
+    if (!newCatTitle) return;
+    const { error } = await supabase.from('course_categories').insert({ title: newCatTitle, sort_order: courseCategories.length });
+    if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
+    setNewCatTitle('');
+    loadCourseData();
+    toast({ title: 'Categoria criada!' });
+  };
+
+  const deleteCourseCategory = async (id: string) => {
+    await supabase.from('course_categories').delete().eq('id', id);
+    loadCourseData();
+  };
+
+  const addCourseVideo = async () => {
+    if (!newCourseVideoTitle || !newCourseVideoUrl || !selectedCategoryId) return;
+    const { error } = await supabase.from('course_videos').insert({
+      title: newCourseVideoTitle,
+      youtube_url: newCourseVideoUrl,
+      category_id: selectedCategoryId,
+      sort_order: courseVideos.filter(v => v.category_id === selectedCategoryId).length,
+    });
+    if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
+    setNewCourseVideoTitle('');
+    setNewCourseVideoUrl('');
+    loadCourseData();
+    toast({ title: 'Vídeo do curso adicionado!' });
+  };
+
+  const deleteCourseVideo = async (id: string) => {
+    await supabase.from('course_videos').delete().eq('id', id);
+    loadCourseData();
   };
 
   const toggleVip = async (userId: string, currentVip: boolean) => {
@@ -128,10 +179,11 @@ const AdminPanel = () => {
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="bg-secondary w-full justify-start">
+        <TabsList className="bg-secondary w-full justify-start flex-wrap">
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="advice">Conselhos</TabsTrigger>
           <TabsTrigger value="videos">Vídeos</TabsTrigger>
+          <TabsTrigger value="courses">Cursos</TabsTrigger>
         </TabsList>
 
         {/* USERS TAB */}
@@ -234,6 +286,79 @@ const AdminPanel = () => {
               </div>
             ))}
             {videos.length === 0 && <p className="text-center text-muted-foreground text-sm py-4">Nenhum vídeo cadastrado</p>}
+          </div>
+        </TabsContent>
+
+        {/* COURSES TAB */}
+        <TabsContent value="courses" className="space-y-4">
+          {/* Add Category */}
+          <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
+              <GraduationCap className="w-4 h-4 text-primary" /> Nova Categoria
+            </h3>
+            <div className="flex gap-2">
+              <Input placeholder="Nome da categoria" value={newCatTitle} onChange={(e) => setNewCatTitle(e.target.value)} className="bg-secondary" />
+              <Button onClick={addCourseCategory} className="gradient-gold text-primary-foreground gap-2 shrink-0">
+                <Plus className="w-4 h-4" /> Criar
+              </Button>
+            </div>
+          </div>
+
+          {/* Add Video to Category */}
+          {courseCategories.length > 0 && (
+            <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+              <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
+                <Youtube className="w-4 h-4 text-primary" /> Adicionar Vídeo ao Curso
+              </h3>
+              <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+                <SelectTrigger className="bg-secondary">
+                  <SelectValue placeholder="Selecione a categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {courseCategories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input placeholder="Título do vídeo" value={newCourseVideoTitle} onChange={(e) => setNewCourseVideoTitle(e.target.value)} className="bg-secondary" />
+              <Input placeholder="Link do YouTube" value={newCourseVideoUrl} onChange={(e) => setNewCourseVideoUrl(e.target.value)} className="bg-secondary" />
+              <Button onClick={addCourseVideo} className="gradient-gold text-primary-foreground gap-2">
+                <Plus className="w-4 h-4" /> Adicionar Vídeo
+              </Button>
+            </div>
+          )}
+
+          {/* List Categories & Videos */}
+          <div className="space-y-3">
+            {courseCategories.map((cat) => {
+              const catVids = courseVideos.filter((v: any) => v.category_id === cat.id);
+              return (
+                <div key={cat.id} className="bg-card border border-border rounded-lg overflow-hidden">
+                  <div className="flex items-center justify-between p-3 bg-secondary/50">
+                    <span className="font-display text-sm font-bold text-foreground">{cat.title}</span>
+                    <Button variant="ghost" size="sm" onClick={() => deleteCourseCategory(cat.id)} className="text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {catVids.length === 0 ? (
+                    <p className="p-3 text-center text-muted-foreground text-xs">Nenhum vídeo</p>
+                  ) : (
+                    catVids.map((v: any) => (
+                      <div key={v.id} className="flex items-center justify-between px-3 py-2 border-t border-border/50">
+                        <div>
+                          <span className="text-sm text-foreground">{v.title}</span>
+                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">{v.youtube_url}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => deleteCourseVideo(v.id)} className="text-destructive shrink-0">
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              );
+            })}
+            {courseCategories.length === 0 && <p className="text-center text-muted-foreground text-sm py-4">Nenhuma categoria criada</p>}
           </div>
         </TabsContent>
       </Tabs>

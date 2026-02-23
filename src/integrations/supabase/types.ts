@@ -65,6 +65,62 @@ export type Database = {
         }
         Relationships: []
       }
+      course_categories: {
+        Row: {
+          created_at: string | null
+          id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      course_videos: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          id: string
+          sort_order: number
+          title: string
+          youtube_url: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          id?: string
+          sort_order?: number
+          title: string
+          youtube_url: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          id?: string
+          sort_order?: number
+          title?: string
+          youtube_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_videos_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "course_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_rewards: {
         Row: {
           claimed: boolean | null

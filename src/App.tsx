@@ -21,6 +21,7 @@ import Advice from "./pages/dashboard/Advice";
 import Rewards from "./pages/dashboard/Rewards";
 import AdminPanel from "./pages/dashboard/AdminPanel";
 import Videos from "./pages/dashboard/Videos";
+import Courses from "./pages/dashboard/Courses";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const AppRoutes = () => (
     <Route path="/dashboard/advice" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Advice /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/rewards" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Rewards /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/videos" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Videos /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/courses" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Courses /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/admin" element={<ProtectedRoute><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>

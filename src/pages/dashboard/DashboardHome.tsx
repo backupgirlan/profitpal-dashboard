@@ -590,31 +590,34 @@ const DashboardHome = () => {
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           className="bg-card border border-border rounded-lg overflow-hidden"
         >
-          <div className="p-3 border-b border-border bg-secondary/50">
+          <div className="p-3 border-b border-border bg-secondary/50 flex items-center justify-between">
             <h3 className="font-display text-xs font-bold text-muted-foreground">Operações de Hoje</h3>
+            <span className="text-[10px] text-muted-foreground">{todayTrades.length} operação(ões)</span>
           </div>
-          {todayTrades.map((t) => (
-            <div key={t.id} className="flex items-center justify-between px-4 py-2.5 border-b border-border/30 text-sm gap-2">
-              <span className="font-medium text-foreground">{t.pair_name}</span>
-              <span className="text-muted-foreground">{t.payout}%</span>
-              <span className="text-muted-foreground">R$ {Number(t.amount).toFixed(2)}</span>
-              <span className={t.result === 'win' ? 'win-text' : 'loss-text'}>
-                {t.result === 'win' ? <CheckCircle className="w-3.5 h-3.5 inline mr-1" /> : <XCircle className="w-3.5 h-3.5 inline mr-1" />}
-                {t.result === 'win' ? 'Win' : 'Loss'}
-              </span>
-              <span className={`font-bold ${Number(t.profit) >= 0 ? 'win-text' : 'loss-text'}`}>
-                R$ {Number(t.profit).toFixed(2)}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => deleteTrade(t)}
-                className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-          ))}
+          <div className="max-h-[200px] overflow-y-auto">
+            {todayTrades.map((t) => (
+              <div key={t.id} className="flex items-center justify-between px-4 py-2.5 border-b border-border/30 text-sm gap-2">
+                <span className="font-medium text-foreground">{t.pair_name}</span>
+                <span className="text-muted-foreground">{t.payout}%</span>
+                <span className="text-muted-foreground">R$ {Number(t.amount).toFixed(2)}</span>
+                <span className={t.result === 'win' ? 'win-text' : 'loss-text'}>
+                  {t.result === 'win' ? <CheckCircle className="w-3.5 h-3.5 inline mr-1" /> : <XCircle className="w-3.5 h-3.5 inline mr-1" />}
+                  {t.result === 'win' ? 'Win' : 'Loss'}
+                </span>
+                <span className={`font-bold ${Number(t.profit) >= 0 ? 'win-text' : 'loss-text'}`}>
+                  R$ {Number(t.profit).toFixed(2)}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => deleteTrade(t)}
+                  className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            ))}
+          </div>
         </motion.div>
       )}
 

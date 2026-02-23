@@ -5,12 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useManagementEngine, ManagementMode } from '@/hooks/useManagementEngine';
 import { useSorosEngine } from '@/hooks/useSorosEngine';
 import SorosGameUI from './SorosGameUI';
 import TradeConfirmDialog from '@/components/TradeConfirmDialog';
 import SorosTrophyDialog from '@/components/SorosTrophyDialog';
-import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp } from 'lucide-react';
+import { getRankForCycles } from '@/lib/sorosRanks';
+import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -46,7 +48,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [trophyGanhas, setTrophyGanhas] = useState(0);
   const [lastTrophyCount, setLastTrophyCount] = useState(0);
 
-  // Track completed Soros cycles for trophy (every 4 wins)
+  // Soros daily limit warning
+  const [showDailyWarning, setShowDailyWarning] = useState(false);
+  const [dailyWarningAcked, setDailyWarningAcked] = useState(false);
+
+  // Track completed Soros cycles for trophy
   useEffect(() => {
     const ganhas = sorosEngine.state.tentativasGanhas;
     if (ganhas > 0 && ganhas !== lastTrophyCount) {
@@ -54,6 +60,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       setTrophyLucro(sorosEngine.state.lucroSessao);
       setTrophyGanhas(ganhas);
       setTrophyOpen(true);
+
+      // Show daily limit warning after first completed cycle
+      if (ganhas >= 1 && !dailyWarningAcked) {
+        setTimeout(() => setShowDailyWarning(true), 1500);
+      }
     }
   }, [sorosEngine.state.tentativasGanhas]);
 
@@ -332,6 +343,41 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         lucro={trophyLucro}
         tentativasGanhas={trophyGanhas}
       />
+
+      {/* Soros Daily Limit Warning */}
+      <Dialog open={showDailyWarning} onOpenChange={setShowDailyWarning}>
+        <DialogContent className="bg-card border-primary/50 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-primary font-display">
+              <AlertTriangle className="w-5 h-5" /> Recomendação Diária
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">Proteja seus ganhos</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+              <p className="text-sm text-foreground leading-relaxed">
+                🏆 Você já completou <strong className="text-primary">{sorosEngine.state.tentativasGanhas} ciclo(s)</strong> de Soros hoje!
+              </p>
+              <p className="text-sm text-foreground leading-relaxed mt-2">
+                Lucro acumulado: <strong className={sorosEngine.state.lucroSessao >= 0 ? 'win-text' : 'loss-text'}>
+                  R$ {sorosEngine.state.lucroSessao.toFixed(2)}
+                </strong>
+              </p>
+            </div>
+            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3">
+              <p className="text-xs text-foreground leading-relaxed">
+                ⚠️ <strong>É recomendado fazer no máximo 1 ciclo de Soros por dia.</strong> Continuar operando pode colocar em risco o lucro já conquistado. Disciplina é a chave para a consistência!
+              </p>
+            </div>
+            <Button
+              onClick={() => { setShowDailyWarning(false); setDailyWarningAcked(true); }}
+              className="w-full gradient-gold text-primary-foreground font-display"
+            >
+              Entendi, vou avaliar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -111,15 +111,38 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   };
 
   const handleTradeConfirm = (pairName: string, payout: number) => {
+    let entryAmount = 0;
+    let profit = 0;
+    const payoutDecimal = payout / 100;
+
     if (confirmTarget === 'engine') {
+      entryAmount = engine.getEntradaAtual();
+      profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
       engine.registrarResultado(pendingResult);
     } else {
+      // Capture Soros entry before registering
+      const ss = sorosEngine.state;
+      if (ss.mode === 'conservador') {
+        const mult = [0.60, 0.70, 0.80, 0.90];
+        entryAmount = +(ss.saldoCiclo * mult[ss.nivelAtual - 1]).toFixed(2);
+      } else {
+        entryAmount = +ss.saldoCiclo.toFixed(2);
+      }
+      profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
       sorosEngine.registrarResultado(pendingResult);
     }
     setConfirmOpen(false);
     // Store trade info for the Management page via custom event
     window.dispatchEvent(new CustomEvent('trade-confirmed', {
-      detail: { resultado: pendingResult, pairName, payout, mode: activeMode }
+      detail: {
+        resultado: pendingResult,
+        pairName,
+        payout,
+        mode: activeMode,
+        amount: entryAmount,
+        profit,
+        sorosLevel: confirmTarget === 'soros' ? sorosEngine.state.nivelAtual : 0,
+      }
     }));
   };
 

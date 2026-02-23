@@ -136,11 +136,12 @@ export function useSorosEngine() {
     setState(newState);
   }, []);
 
-  const registrarResultado = useCallback((resultado: 'win' | 'loss') => {
+  const registrarResultado = useCallback((resultado: 'win' | 'loss', payoutOverride?: number) => {
     setState(prev => {
       if (!prev.ativo || prev.encerrado || prev.pausado) return prev;
 
       const entrada = calcEntradaNivel(prev.mode, prev.nivelAtual, prev.saldoCiclo);
+      const payoutUsado = payoutOverride !== undefined ? payoutOverride : prev.payout;
       let s = { ...prev };
       const entry: HistoryEntry = {
         tentativa: s.tentativaAtual,
@@ -152,7 +153,7 @@ export function useSorosEngine() {
       };
 
       if (resultado === 'win') {
-        const lucro = +(entrada * s.payout).toFixed(2);
+        const lucro = +(entrada * payoutUsado).toFixed(2);
         s.saldoCiclo = +(s.saldoCiclo + lucro).toFixed(2);
 
         // Turbo bonus (agressivo)

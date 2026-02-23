@@ -212,6 +212,13 @@ const DashboardHome = () => {
 
   useEffect(() => { loadData(); }, [user]);
 
+  // Refresh data when a trade is confirmed via management module
+  useEffect(() => {
+    const handler = () => { setTimeout(loadData, 500); };
+    window.addEventListener('trade-confirmed', handler);
+    return () => window.removeEventListener('trade-confirmed', handler);
+  }, [user]);
+
   // Check negative day after trades update
   useEffect(() => {
     if (todayTrades.length > 0 && todayStats.profit < 0 && !negativeDayAcknowledged) {

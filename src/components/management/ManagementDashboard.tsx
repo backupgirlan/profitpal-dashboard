@@ -111,17 +111,19 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   };
 
   const handleTradeConfirm = (pairName: string, payout: number) => {
+    const payoutDecimal = payout / 100;
     let entryAmount = 0;
     let profit = 0;
-    const payoutDecimal = payout / 100;
+    let sorosLevel = 0;
 
     if (confirmTarget === 'engine') {
       entryAmount = engine.getEntradaAtual();
       profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
       engine.registrarResultado(pendingResult);
     } else {
-      // Capture Soros entry before registering
+      // Capture Soros entry and level BEFORE registering result
       const ss = sorosEngine.state;
+      sorosLevel = ss.nivelAtual;
       if (ss.mode === 'conservador') {
         const mult = [0.60, 0.70, 0.80, 0.90];
         entryAmount = +(ss.saldoCiclo * mult[ss.nivelAtual - 1]).toFixed(2);
@@ -129,7 +131,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         entryAmount = +ss.saldoCiclo.toFixed(2);
       }
       profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
-      sorosEngine.registrarResultado(pendingResult);
+      // Pass dialog payout to engine so saldoCiclo grows by actual payout
+      sorosEngine.registrarResultado(pendingResult, payoutDecimal);
     }
     setConfirmOpen(false);
     // Store trade info for the Management page via custom event
@@ -141,7 +144,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         mode: activeMode,
         amount: entryAmount,
         profit,
-        sorosLevel: confirmTarget === 'soros' ? sorosEngine.state.nivelAtual : 0,
+        sorosLevel,
       }
     }));
   };

@@ -87,25 +87,41 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     navigate('/');
   };
 
-  // Mood: follow active management module rules
-  const getMaxTradesAllowed = (): number => {
+  // Mood: follow active management module rules per mode
+  const getMoodStatus = (): { isGood: boolean; label: string } => {
     try {
-      const mgmt = localStorage.getItem('management_engine_state');
-      if (mgmt) {
-        const state = JSON.parse(mgmt);
-        if (state.ativo) return state.maxTrades;
-      }
+      // Check Soros x4 engine
       const soros = localStorage.getItem('soros_management_state');
       if (soros) {
         const state = JSON.parse(soros);
-        if (state.ativo) return state.tentativasTotal;
+        if (state.ativo) {
+          // Soros: respeita tentativasTotal e se está encerrado/pausado
+          if (state.encerrado) return { isGood: false, label: 'Soros encerrado' };
+          if (state.pausado) return { isGood: false, label: 'Soros pausado' };
+          return { isGood: state.tentativasPerdidas < state.tentativasTotal, label: `Soros ${state.tentativaAtual}/${state.tentativasTotal}` };
+        }
+      }
+      // Check other management engines
+      const mgmt = localStorage.getItem('management_engine_state');
+      if (mgmt) {
+        const state = JSON.parse(mgmt);
+        if (state.ativo) {
+          if (state.encerrado || state.bloqueado) return { isGood: false, label: 'Sessão encerrada' };
+          // Intermediário: respeita maxTrades
+          // Conservador: respeita maxTrades e perdaSequencial
+          // Agressivo: respeita maxTrades
+          const overLimit = state.tradesDoDia >= state.maxTrades;
+          const overStopLoss = state.stopLossPct > 0 && state.lucroSessao < 0 && Math.abs(state.lucroSessao) >= (state.bancaInicial * state.stopLossPct / 100);
+          if (overLimit || overStopLoss) return { isGood: false, label: 'Limite atingido' };
+          return { isGood: true, label: `${state.tradesDoDia}/${state.maxTrades} trades` };
+        }
       }
     } catch {}
-    return 3; // default when no module active
+    // Livre: sem módulo ativo, usa limite padrão
+    return { isGood: todayTradeCount <= 3, label: 'Modo livre' };
   };
-  const maxAllowed = getMaxTradesAllowed();
-  const isGoodMood = todayTradeCount <= maxAllowed;
-  const moodEmoji = isGoodMood ? '😊' : '😡';
+  const moodStatus = getMoodStatus();
+  const moodEmoji = moodStatus.isGood ? '😊' : '😡';
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -126,7 +142,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-bold text-primary text-glow">TECHNICAL GIRLAN</h2>
-            <span className="text-2xl" title={isGoodMood ? 'Dentro do gerenciamento' : 'Fora do gerenciamento!'}>{moodEmoji}</span>
+            <span className="text-2xl" title={moodStatus.isGood ? 'Dentro do gerenciamento' : 'Fora do gerenciamento!'}>{moodEmoji}</span>
           </div>
           <p className="text-xs text-foreground mt-1 truncate font-medium">{displayName || user?.email}</p>
           <div className="mt-2">

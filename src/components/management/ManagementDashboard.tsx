@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useManagementEngine, ManagementMode } from '@/hooks/useManagementEngine';
 import { useSorosEngine } from '@/hooks/useSorosEngine';
 import SorosGameUI from './SorosGameUI';
+import TradeConfirmDialog from '@/components/TradeConfirmDialog';
 import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp } from 'lucide-react';
 
 type AllModes = ManagementMode | 'soros4x';
@@ -29,6 +30,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const sorosEngine = useSorosEngine();
   const s = engine.state;
   const [tab, setTab] = useState<AllModes>('soros4x');
+
+  // Trade confirm dialog state
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingResult, setPendingResult] = useState<'win' | 'loss'>('win');
+  const [confirmTarget, setConfirmTarget] = useState<'engine' | 'soros'>('engine');
 
   // Form state for 3 modules
   const [banca, setBanca] = useState('1000');
@@ -98,6 +104,25 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const activeMode: AllModes = isSorosActive ? 'soros4x' : isManagementActive ? s.mode : tab;
   const info = MODE_INFO[activeMode];
 
+  const handleTradeRequest = (resultado: 'win' | 'loss', target: 'engine' | 'soros') => {
+    setPendingResult(resultado);
+    setConfirmTarget(target);
+    setConfirmOpen(true);
+  };
+
+  const handleTradeConfirm = (pairName: string, payout: number) => {
+    if (confirmTarget === 'engine') {
+      engine.registrarResultado(pendingResult);
+    } else {
+      sorosEngine.registrarResultado(pendingResult);
+    }
+    setConfirmOpen(false);
+    // Store trade info for the Management page via custom event
+    window.dispatchEvent(new CustomEvent('trade-confirmed', {
+      detail: { resultado: pendingResult, pairName, payout, mode: activeMode }
+    }));
+  };
+
   // Progress calculations
   const stopLossVal = s.bancaInicial * (s.stopLossPct / 100);
   const stopWinVal = s.bancaInicial * (s.stopWinPct / 100);
@@ -161,7 +186,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         {/* SOROS x4 Tab */}
         <TabsContent value="soros4x">
           {isSorosActive ? (
-            <SorosGameUI engine={sorosEngine} modeInfo={{ label: 'Soros x4', desc: 'Risco fixo por tentativa', color: 'text-primary' }} />
+            <SorosGameUI engine={sorosEngine} modeInfo={{ label: 'Soros x4', desc: 'Risco fixo por tentativa', color: 'text-primary' }} onTradeRequest={(r: 'win' | 'loss') => handleTradeRequest(r, 'soros')} />
           ) : !isAnyActive ? (
             <div className="space-y-4 pt-2">
               <div className="text-sm text-primary font-display font-bold flex items-center gap-2">
@@ -208,7 +233,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           <TabsContent key={mode} value={mode}>
             {isManagementActive && s.mode === mode ? (
               <ActiveDashboard engine={engine} info={MODE_INFO[mode]} entradaAtual={entradaAtual}
-                lossProgress={lossProgress} winProgress={winProgress} tradeProgress={tradeProgress} />
+                lossProgress={lossProgress} winProgress={winProgress} tradeProgress={tradeProgress}
+                onTradeRequest={(r: 'win' | 'loss') => handleTradeRequest(r, 'engine')} />
             ) : !isAnyActive ? (
               <SetupForm
                 mode={mode} info={MODE_INFO[mode]}
@@ -227,12 +253,20 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Trade Confirm Dialog */}
+      <TradeConfirmDialog
+        open={confirmOpen}
+        resultado={pendingResult}
+        onConfirm={handleTradeConfirm}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }
 
 // Active Dashboard for conservador/intermediario/agressivo
-function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress, tradeProgress }: any) {
+function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress, tradeProgress, onTradeRequest }: any) {
   const s = engine.state;
 
   return (
@@ -318,10 +352,10 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
       {/* Action Buttons */}
       {!s.encerrado && !s.bloqueado && (
         <div className="flex gap-3">
-          <Button onClick={() => engine.registrarResultado('win')} className="flex-1 bg-success/20 text-success hover:bg-success/30 gap-2 border border-success/30">
+          <Button onClick={() => onTradeRequest?.('win') || engine.registrarResultado('win')} className="flex-1 bg-success/20 text-success hover:bg-success/30 gap-2 border border-success/30">
             <CheckCircle className="w-4 h-4" /> WIN
           </Button>
-          <Button onClick={() => engine.registrarResultado('loss')} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 gap-2 border border-destructive/30">
+          <Button onClick={() => onTradeRequest?.('loss') || engine.registrarResultado('loss')} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 gap-2 border border-destructive/30">
             <XCircle className="w-4 h-4" /> LOSS
           </Button>
         </div>

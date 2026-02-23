@@ -197,6 +197,42 @@ export type Database = {
         }
         Relationships: []
       }
+      streaks: {
+        Row: {
+          created_at: string
+          id: string
+          maior_streak: number
+          streak_atual: number
+          streak_freeze_disponivel: number
+          total_freezes: number
+          ultimo_dia_ativo: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          maior_streak?: number
+          streak_atual?: number
+          streak_freeze_disponivel?: number
+          total_freezes?: number
+          ultimo_dia_ativo?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          maior_streak?: number
+          streak_atual?: number
+          streak_freeze_disponivel?: number
+          total_freezes?: number
+          ultimo_dia_ativo?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           amount: number | null

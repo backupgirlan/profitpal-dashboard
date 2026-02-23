@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, Clock, Play } from 'lucide-react';
 interface Props {
   engine: any;
   modeInfo: { label: string; desc: string; color: string };
+  onTradeRequest?: (resultado: 'win' | 'loss') => void;
 }
 
 function calcEntradaNivel(mode: string, nivel: number, saldoCiclo: number): number {
@@ -14,9 +15,13 @@ function calcEntradaNivel(mode: string, nivel: number, saldoCiclo: number): numb
   return +saldoCiclo.toFixed(2);
 }
 
-export default function SorosGameUI({ engine, modeInfo }: Props) {
+export default function SorosGameUI({ engine, modeInfo, onTradeRequest }: Props) {
   const s = engine.state;
   const niveis = [1, 2, 3, 4];
+  const handleResult = (r: 'win' | 'loss') => {
+    if (onTradeRequest) onTradeRequest(r);
+    else engine.registrarResultado(r);
+  };
 
   return (
     <div className="space-y-4">
@@ -77,10 +82,10 @@ export default function SorosGameUI({ engine, modeInfo }: Props) {
                   <>
                     <p className="text-xs sm:text-sm font-bold text-primary truncate">R$ {entrada.toFixed(2)}</p>
                     <div className="flex flex-col sm:flex-row gap-1">
-                      <Button size="sm" onClick={() => engine.registrarResultado('win')} className="w-full bg-success/20 text-success hover:bg-success/30 text-[10px] sm:text-xs h-6 sm:h-7 px-1 gap-0.5">
+                      <Button size="sm" onClick={() => handleResult('win')} className="w-full bg-success/20 text-success hover:bg-success/30 text-[10px] sm:text-xs h-6 sm:h-7 px-1 gap-0.5">
                         <CheckCircle className="w-3 h-3 shrink-0" /> WIN
                       </Button>
-                      <Button size="sm" onClick={() => engine.registrarResultado('loss')} className="w-full bg-destructive/20 text-destructive hover:bg-destructive/30 text-[10px] sm:text-xs h-6 sm:h-7 px-1 gap-0.5">
+                      <Button size="sm" onClick={() => handleResult('loss')} className="w-full bg-destructive/20 text-destructive hover:bg-destructive/30 text-[10px] sm:text-xs h-6 sm:h-7 px-1 gap-0.5">
                         <XCircle className="w-3 h-3 shrink-0" /> LOSS
                       </Button>
                     </div>

@@ -7,6 +7,7 @@ import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
   Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound
 } from 'lucide-react';
+import StreakDisplay from '@/components/StreakDisplay';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -110,6 +111,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <span className="text-2xl" title={isGoodMood ? 'Dentro do gerenciamento' : 'Fora do gerenciamento!'}>{moodEmoji}</span>
           </div>
           <p className="text-xs text-foreground mt-1 truncate font-medium">{displayName || user?.email}</p>
+          <div className="mt-2">
+            <StreakDisplay />
+          </div>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">

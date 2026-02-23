@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Lock, MessageCircle, UserPlus, Youtube } from 'lucide-react';
+import { Lock, MessageCircle, UserPlus } from 'lucide-react';
+import brokerSignup from '@/assets/broker-signup.png';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -61,6 +62,9 @@ export default function VipGate({ children }: { children: React.ReactNode }) {
             </motion.div>
           </a>
         </div>
+        <a href="https://broker-qx.pro/sign-up/?lid=2011722" target="_blank" rel="noopener noreferrer" className="block mt-4">
+          <img src={brokerSignup} alt="Cadastro na Corretora" className="mx-auto rounded-lg border border-primary/20 w-56 hover:opacity-80 transition-opacity" />
+        </a>
       </div>
     </div>
   );

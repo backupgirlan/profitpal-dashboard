@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone, Trash2
+  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone, Trash2, GraduationCap
 } from 'lucide-react';
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
@@ -24,6 +24,7 @@ const navItems = [
   { path: '/dashboard/psychology', label: 'Psicologia', icon: Brain },
   { path: '/dashboard/advice', label: 'Conselhos', icon: MessageSquare },
   { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
+  { path: '/dashboard/courses', label: 'Curso', icon: GraduationCap },
   { path: '/dashboard/rewards', label: 'Brindes', icon: Gift },
 ];
 

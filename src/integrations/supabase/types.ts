@@ -118,6 +118,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active_management_mode: string | null
           balance: number | null
           created_at: string | null
           display_name: string | null
@@ -135,6 +136,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_management_mode?: string | null
           balance?: number | null
           created_at?: string | null
           display_name?: string | null
@@ -152,6 +154,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active_management_mode?: string | null
           balance?: number | null
           created_at?: string | null
           display_name?: string | null
@@ -198,7 +201,9 @@ export type Database = {
         Row: {
           amount: number | null
           created_at: string | null
+          entry_type: string | null
           id: string
+          management_mode: string | null
           pair_name: string
           payout: number
           profit: number | null
@@ -210,7 +215,9 @@ export type Database = {
         Insert: {
           amount?: number | null
           created_at?: string | null
+          entry_type?: string | null
           id?: string
+          management_mode?: string | null
           pair_name: string
           payout: number
           profit?: number | null
@@ -222,7 +229,9 @@ export type Database = {
         Update: {
           amount?: number | null
           created_at?: string | null
+          entry_type?: string | null
           id?: string
+          management_mode?: string | null
           pair_name?: string
           payout?: number
           profit?: number | null
@@ -278,6 +287,7 @@ export type Database = {
         Row: {
           display_name: string | null
           losses: number | null
+          management_mode: string | null
           total_profit: number | null
           total_trades: number | null
           user_id: string | null

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, LogIn } from 'lucide-react';
+import loginBg from '@/assets/login-bg.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -29,7 +30,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
+      {/* Hero image centered with black sides */}
+      <div className="w-full flex justify-center mb-6">
+        <img
+          src={loginBg}
+          alt="Technical Girlan"
+          className="h-48 sm:h-64 md:h-72 w-auto object-contain"
+        />
+      </div>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

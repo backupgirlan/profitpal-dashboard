@@ -50,7 +50,6 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   // Form state for Soros x4
   const [sorosBanca, setSorosBanca] = useState('1000');
   const [sorosTentativas, setSorosTentativas] = useState('10');
-  const [sorosPayoutInput, setSorosPayoutInput] = useState('80');
   const [sorosErrors, setSorosErrors] = useState<string[]>([]);
 
   const isManagementActive = s.ativo;
@@ -91,7 +90,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       mode: 'soros4x',
       banca: Number(sorosBanca),
       tentativas: Number(sorosTentativas),
-      payout: Number(sorosPayoutInput) / 100,
+      payout: 0.80, // default, will be overridden per trade
     });
   };
 
@@ -234,18 +233,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
                   <Label className="text-xs">Tentativas (mín. 10)</Label>
                   <Input type="number" value={sorosTentativas} onChange={e => setSorosTentativas(e.target.value)} min={10} className="bg-secondary" />
                 </div>
-                <div className="col-span-2">
-                  <Label className="text-xs">Payout (%)</Label>
-                  <Input type="number" value={sorosPayoutInput} onChange={e => setSorosPayoutInput(e.target.value)} className="bg-secondary" />
-                </div>
               </div>
               {sorosErrors.length > 0 && (
                 <div className="text-xs text-destructive space-y-1">
                   {sorosErrors.map((e, i) => <p key={i}>⚠️ {e}</p>)}
                 </div>
-              )}
-              {!sorosPayoutInput && (
-                <p className="text-xs text-accent">⚠️ Recomendado informar payout para cálculo real do Soros.</p>
               )}
               <Button onClick={handleSorosIniciar} className="w-full gradient-gold text-primary-foreground font-display gap-2">
                 <Play className="w-4 h-4" /> Iniciar Gerenciamento

@@ -38,15 +38,15 @@ export default function VipGate({ children }: { children: React.ReactNode }) {
           Acesso Bloqueado
         </h2>
         <p className="text-muted-foreground">
-          Sua conta ainda não foi liberada pelo administrador. Aguarde a aprovação do acesso VIP para utilizar todas as funcionalidades da plataforma.
+          Sua conta ainda não foi liberada. Entre em contato pelo Telegram para solicitar a liberação do VIP.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-          <a href="https://t.me/girlananalyst" target="_blank" rel="noopener noreferrer">
+          <a href="http://t.me/technicalgirlan" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 gap-2 w-full">
-              <MessageCircle className="w-4 h-4" /> Falar no Telegram
+              <MessageCircle className="w-4 h-4" /> Solicitar liberação no Telegram
             </Button>
           </a>
-          <a href="https://broker-qx.pro/sign-up/?lid=1711160" target="_blank" rel="noopener noreferrer">
+          <a href="https://broker-qx.pro/sign-up/?lid=2011722" target="_blank" rel="noopener noreferrer">
             <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 gap-2 w-full">
               <UserPlus className="w-4 h-4" /> Cadastrar na Corretora
             </Button>

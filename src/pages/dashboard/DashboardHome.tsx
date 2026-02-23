@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { DollarSign, TrendingUp, Target, BarChart3, UserPlus, MessageCircle, Youtube, Plus, CheckCircle, XCircle, Edit2, Save, AlertTriangle, Landmark } from 'lucide-react';
+import { DollarSign, TrendingUp, Target, BarChart3, UserPlus, MessageCircle, Youtube, Plus, CheckCircle, XCircle, Edit2, Save, AlertTriangle, Landmark, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import SorosModeTabs from '@/components/management/SorosModeTabs';
 
 interface Trade {
   id: string;
@@ -160,6 +161,7 @@ const DashboardHome = () => {
   const [showNegativeDayAdvice, setShowNegativeDayAdvice] = useState(false);
   const [negativeDayAdvice, setNegativeDayAdvice] = useState('');
   const [negativeDayAcknowledged, setNegativeDayAcknowledged] = useState(false);
+  const [showSorosModal, setShowSorosModal] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -359,11 +361,19 @@ const DashboardHome = () => {
         </DialogContent>
       </Dialog>
 
-      <div>
-        <h1 className="text-2xl font-display font-bold text-primary text-glow">
-          Bem-vindo de volta!
-        </h1>
-        <p className="text-muted-foreground">Resumo da sua conta de trading</p>
+      {/* Soros Management Modal */}
+      <SorosModeTabs open={showSorosModal} onOpenChange={setShowSorosModal} />
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-bold text-primary text-glow">
+            Bem-vindo de volta!
+          </h1>
+          <p className="text-muted-foreground">Resumo da sua conta de trading</p>
+        </div>
+        <Button onClick={() => setShowSorosModal(true)} className="gradient-gold text-primary-foreground font-display gap-2 box-glow">
+          <Briefcase className="w-4 h-4" /> Módulos de Banca
+        </Button>
       </div>
 
       {/* Account Info Cards */}

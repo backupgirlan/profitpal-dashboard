@@ -30,66 +30,71 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4">
-      {/* Hero image centered with black sides */}
-      <div className="w-full flex justify-center mb-6">
+    <div className="relative min-h-screen overflow-hidden bg-background">
+      {/* Full background image */}
+      <div className="absolute inset-0">
         <img
           src={loginBg}
           alt="Technical Girlan"
-          className="h-48 sm:h-64 md:h-72 w-auto object-contain"
+          className="w-full h-full object-cover object-top"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/50 to-background/90" />
       </div>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-md"
-      >
-        <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-8">
-          <ArrowLeft className="w-4 h-4" /> Voltar
-        </Link>
 
-        <div className="bg-card border border-border rounded-lg p-8 box-glow">
-          <h1 className="text-2xl font-display font-bold text-primary text-glow mb-2">Entrar</h1>
-          <p className="text-muted-foreground mb-6">Acesse sua conta de trader</p>
+      {/* Content over image */}
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-end px-4 pb-8 pt-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md"
+        >
+          <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary mb-4">
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </Link>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="seu@email.com"
-                required
-                className="bg-secondary border-border"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                className="bg-secondary border-border"
-              />
-            </div>
-            <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-display gap-2">
-              <LogIn className="w-4 h-4" />
-              {loading ? 'Entrando...' : 'Entrar'}
-            </Button>
-          </form>
+          <div className="bg-card/80 backdrop-blur-md border border-border rounded-lg p-8 box-glow">
+            <h1 className="text-2xl font-display font-bold text-primary text-glow mb-2">Entrar</h1>
+            <p className="text-muted-foreground mb-6">Acesse sua conta de trader</p>
 
-          <p className="text-center text-muted-foreground mt-4 text-sm">
-            Não tem conta?{' '}
-            <Link to="/register" className="text-primary hover:underline">Criar conta</Link>
-          </p>
-        </div>
-      </motion.div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  required
+                  className="bg-secondary border-border"
+                />
+              </div>
+              <div>
+                <Label htmlFor="password">Senha</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="bg-secondary border-border"
+                />
+              </div>
+              <Button type="submit" disabled={loading} className="w-full gradient-gold text-primary-foreground font-display gap-2">
+                <LogIn className="w-4 h-4" />
+                {loading ? 'Entrando...' : 'Entrar'}
+              </Button>
+            </form>
+
+            <p className="text-center text-muted-foreground mt-4 text-sm">
+              Não tem conta?{' '}
+              <Link to="/register" className="text-primary hover:underline">Criar conta</Link>
+            </p>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
-import { DollarSign, TrendingUp, Target, BarChart3, UserPlus, MessageCircle, Youtube, Plus, CheckCircle, XCircle, Edit2, Save, AlertTriangle, Landmark, Briefcase } from 'lucide-react';
+import { DollarSign, TrendingUp, Target, BarChart3, UserPlus, MessageCircle, Youtube, Plus, CheckCircle, XCircle, Edit2, Save, AlertTriangle, Landmark, Briefcase, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -214,10 +214,28 @@ const DashboardHome = () => {
 
   // Refresh data when a trade is confirmed via management module
   useEffect(() => {
-    const handler = () => { setTimeout(loadData, 500); };
+    const handler = () => { setTimeout(loadData, 1000); };
     window.addEventListener('trade-confirmed', handler);
     return () => window.removeEventListener('trade-confirmed', handler);
   }, [user]);
+
+  const deleteTrade = async (trade: Trade) => {
+    if (!user) return;
+    const { error } = await supabase.from('trades').delete().eq('id', trade.id);
+    if (error) {
+      toast({ title: 'Erro ao excluir', description: error.message, variant: 'destructive' });
+      return;
+    }
+    // Revert balance and total_profit
+    const { data: profile } = await supabase.from('profiles').select('balance, total_profit').eq('user_id', user.id).single();
+    if (profile) {
+      const newBalance = +(Number(profile.balance) - Number(trade.profit)).toFixed(2);
+      const newTotalProfit = +(Number(profile.total_profit) - Number(trade.profit)).toFixed(2);
+      await supabase.from('profiles').update({ balance: newBalance, total_profit: newTotalProfit }).eq('user_id', user.id);
+    }
+    loadData();
+    toast({ title: 'Operação excluída', description: `${trade.pair_name} removido e banca revertida.` });
+  };
 
   // Check negative day after trades update
   useEffect(() => {
@@ -576,7 +594,7 @@ const DashboardHome = () => {
             <h3 className="font-display text-xs font-bold text-muted-foreground">Operações de Hoje</h3>
           </div>
           {todayTrades.map((t) => (
-            <div key={t.id} className="flex items-center justify-between px-4 py-2.5 border-b border-border/30 text-sm">
+            <div key={t.id} className="flex items-center justify-between px-4 py-2.5 border-b border-border/30 text-sm gap-2">
               <span className="font-medium text-foreground">{t.pair_name}</span>
               <span className="text-muted-foreground">{t.payout}%</span>
               <span className="text-muted-foreground">R$ {Number(t.amount).toFixed(2)}</span>
@@ -587,6 +605,14 @@ const DashboardHome = () => {
               <span className={`font-bold ${Number(t.profit) >= 0 ? 'win-text' : 'loss-text'}`}>
                 R$ {Number(t.profit).toFixed(2)}
               </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => deleteTrade(t)}
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
             </div>
           ))}
         </motion.div>

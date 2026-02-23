@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Trophy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-type RankingMode = 'all' | 'conservador' | 'intermediario' | 'agressivo';
+type RankingMode = 'all' | 'conservador' | 'intermediario' | 'agressivo' | 'soros4x';
 
 const Rankings = () => {
   const [rankings, setRankings] = useState<any[]>([]);
@@ -34,8 +34,9 @@ const Rankings = () => {
       </div>
 
       <Tabs value={mode} onValueChange={(v) => setMode(v as RankingMode)}>
-        <TabsList className="grid grid-cols-4 w-full bg-secondary">
+        <TabsList className="grid grid-cols-5 w-full bg-secondary">
           <TabsTrigger value="all" className="text-xs">Todos</TabsTrigger>
+          <TabsTrigger value="soros4x" className="text-xs">Soros x4</TabsTrigger>
           <TabsTrigger value="conservador" className="text-xs">Conservador</TabsTrigger>
           <TabsTrigger value="intermediario" className="text-xs">Intermediário</TabsTrigger>
           <TabsTrigger value="agressivo" className="text-xs">Agressivo</TabsTrigger>
@@ -58,7 +59,7 @@ const Rankings = () => {
               <tbody>
                 {rankings.map((r, i) => {
                   const rate = r.total_trades > 0 ? ((r.wins / r.total_trades) * 100).toFixed(0) : '0';
-                  const modeLabel = r.management_mode === 'conservador' ? '🛡️' : r.management_mode === 'intermediario' ? '⚖️' : r.management_mode === 'agressivo' ? '🔥' : '—';
+                  const modeLabel = r.management_mode === 'conservador' ? '🛡️' : r.management_mode === 'intermediario' ? '⚖️' : r.management_mode === 'agressivo' ? '🔥' : r.management_mode === 'soros4x' ? '📈' : '—';
                   return (
                     <tr key={`${r.user_id}-${r.management_mode}-${i}`} className={`border-b border-border/50 ${i < 3 ? 'bg-primary/5' : ''}`}>
                       <td className="p-3 text-lg">{getMedal(i)}</td>

@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MessageCircle, Youtube, UserPlus } from 'lucide-react';
+import { MessageCircle, Youtube, UserPlus, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import InstallAppDialog from '@/components/InstallAppDialog';
 import heroBg from '@/assets/hero-bg.png';
 
 const Landing = () => {
+  const [installOpen, setInstallOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background">
       {/* Hero background */}
@@ -53,8 +57,14 @@ const Landing = () => {
                 Cadastre na Corretora
               </Button>
             </a>
+            <Button size="lg" variant="outline" className="w-full text-lg border-primary/30 text-primary hover:bg-primary/10" onClick={() => setInstallOpen(true)}>
+              <Smartphone className="w-5 h-5 mr-2" />
+              Instalar App
+            </Button>
           </div>
         </motion.div>
+
+        <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
 
         {/* Bottom links */}
         <motion.div

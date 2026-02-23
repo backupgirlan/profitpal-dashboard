@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Lock, MessageCircle, UserPlus, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 export default function VipGate({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
@@ -50,9 +51,14 @@ export default function VipGate({ children }: { children: React.ReactNode }) {
             </Button>
           </a>
           <a href="https://broker-qx.pro/sign-up/?lid=2011722" target="_blank" rel="noopener noreferrer">
-            <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 gap-2 w-full">
-              <UserPlus className="w-4 h-4" /> Cadastrar na Corretora
-            </Button>
+            <motion.div
+              animate={{ scale: [1, 1.08, 1], opacity: [1, 0.7, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 gap-2 w-full">
+                <UserPlus className="w-4 h-4" /> Cadastrar na Corretora
+              </Button>
+            </motion.div>
           </a>
         </div>
       </div>

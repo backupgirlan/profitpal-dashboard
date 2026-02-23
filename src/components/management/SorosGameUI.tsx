@@ -67,7 +67,7 @@ export default function SorosGameUI({ engine, modeInfo }: Props) {
             const entrada = isAtual ? calcEntradaNivel(s.mode, n, s.saldoCiclo) : 0;
 
             return (
-              <div key={n} className={`rounded-lg border p-3 text-center space-y-2 transition-all ${
+              <div key={n} className={`rounded-lg border p-2 sm:p-3 text-center space-y-1.5 transition-all overflow-hidden ${
                 isAtual ? 'border-primary/50 bg-primary/5 box-glow' :
                 isCompleto ? 'border-success/30 bg-success/5' :
                 'border-border bg-secondary/30 opacity-50'
@@ -75,13 +75,13 @@ export default function SorosGameUI({ engine, modeInfo }: Props) {
                 <p className="text-xs font-display font-bold text-foreground">N{n}</p>
                 {isAtual && (
                   <>
-                    <p className="text-sm font-bold text-primary">R$ {entrada.toFixed(2)}</p>
-                    <div className="flex gap-1">
-                      <Button size="sm" onClick={() => engine.registrarResultado('win')} className="flex-1 bg-success/20 text-success hover:bg-success/30 text-xs h-7 gap-1">
-                        <CheckCircle className="w-3 h-3" /> WIN
+                    <p className="text-xs sm:text-sm font-bold text-primary truncate">R$ {entrada.toFixed(2)}</p>
+                    <div className="flex flex-col sm:flex-row gap-1">
+                      <Button size="sm" onClick={() => engine.registrarResultado('win')} className="w-full bg-success/20 text-success hover:bg-success/30 text-[10px] sm:text-xs h-6 sm:h-7 px-1 gap-0.5">
+                        <CheckCircle className="w-3 h-3 shrink-0" /> WIN
                       </Button>
-                      <Button size="sm" onClick={() => engine.registrarResultado('loss')} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 text-xs h-7 gap-1">
-                        <XCircle className="w-3 h-3" /> LOSS
+                      <Button size="sm" onClick={() => engine.registrarResultado('loss')} className="w-full bg-destructive/20 text-destructive hover:bg-destructive/30 text-[10px] sm:text-xs h-6 sm:h-7 px-1 gap-0.5">
+                        <XCircle className="w-3 h-3 shrink-0" /> LOSS
                       </Button>
                     </div>
                   </>

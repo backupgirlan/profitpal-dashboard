@@ -5,9 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube
+  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 const navItems = [
   { path: '/dashboard', label: 'Início', icon: Home },
@@ -25,10 +29,34 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { signOut, user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [todayTradeCount, setTodayTradeCount] = useState(0);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleChangePassword = async () => {
+    if (newPassword.length < 6) {
+      toast({ title: 'Erro', description: 'Senha deve ter no mínimo 6 caracteres.', variant: 'destructive' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: 'Erro', description: 'As senhas não coincidem.', variant: 'destructive' });
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Senha atualizada com sucesso!' });
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPasswordDialog(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -119,7 +147,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           )}
         </nav>
 
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-1">
+          <Button
+            variant="ghost"
+            onClick={() => setShowPasswordDialog(true)}
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+          >
+            <KeyRound className="w-4 h-4" />
+            Trocar Senha
+          </Button>
           <Button
             variant="ghost"
             onClick={handleSignOut}
@@ -135,6 +171,28 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {sidebarOpen && (
         <div className="fixed inset-0 z-30 bg-background/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
+
+      {/* Password Change Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="bg-card border-border max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-primary">Trocar Senha</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs">Nova Senha</Label>
+              <Input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="bg-secondary" placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div>
+              <Label className="text-xs">Confirmar Senha</Label>
+              <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="bg-secondary" />
+            </div>
+            <Button onClick={handleChangePassword} className="w-full gradient-gold text-primary-foreground font-display">
+              Atualizar Senha
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Main */}
       <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-y-auto">

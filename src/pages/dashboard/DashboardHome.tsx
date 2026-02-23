@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import SorosModeTabs from '@/components/management/SorosModeTabs';
+import ManagementDashboard from '@/components/management/ManagementDashboard';
 
 interface Trade {
   id: string;
@@ -161,7 +161,7 @@ const DashboardHome = () => {
   const [showNegativeDayAdvice, setShowNegativeDayAdvice] = useState(false);
   const [negativeDayAdvice, setNegativeDayAdvice] = useState('');
   const [negativeDayAcknowledged, setNegativeDayAcknowledged] = useState(false);
-  const [showSorosModal, setShowSorosModal] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -361,8 +361,12 @@ const DashboardHome = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Soros Management Modal */}
-      <SorosModeTabs open={showSorosModal} onOpenChange={setShowSorosModal} />
+      {/* Management Modal */}
+      <Dialog open={showManagementModal} onOpenChange={setShowManagementModal}>
+        <DialogContent className="bg-card border-border max-w-3xl max-h-[90vh] overflow-y-auto">
+          <ManagementDashboard />
+        </DialogContent>
+      </Dialog>
 
       <div className="flex items-center justify-between">
         <div>
@@ -371,7 +375,7 @@ const DashboardHome = () => {
           </h1>
           <p className="text-muted-foreground">Resumo da sua conta de trading</p>
         </div>
-        <Button onClick={() => setShowSorosModal(true)} className="gradient-gold text-primary-foreground font-display gap-2 box-glow">
+        <Button onClick={() => setShowManagementModal(true)} className="gradient-gold text-primary-foreground font-display gap-2 box-glow">
           <Briefcase className="w-4 h-4" /> Módulos de Banca
         </Button>
       </div>

@@ -76,7 +76,7 @@ function generateTrophyCanvas(lucro: number, tentativasGanhas: number): Promise<
 
     ctx.font = '14px sans-serif';
     ctx.fillStyle = '#666666';
-    ctx.fillText('www.girlanbarreto.com', 360, 990);
+    ctx.fillText('www.girlanbarreto.com.br', 360, 990);
 
     canvas.toBlob((blob) => resolve(blob!), 'image/png');
   });
@@ -168,7 +168,7 @@ export default function SorosTrophyDialog({ open, onOpenChange, lucro, tentativa
             </Button>
           </div>
 
-          <p className="text-[9px] text-muted-foreground/50">www.girlanbarreto.com</p>
+          <p className="text-[9px] text-muted-foreground/50">www.girlanbarreto.com.br</p>
         </div>
       </DialogContent>
     </Dialog>

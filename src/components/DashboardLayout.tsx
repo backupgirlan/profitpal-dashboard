@@ -5,8 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound
+  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone
 } from 'lucide-react';
+import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -38,6 +39,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [installOpen, setInstallOpen] = useState(false);
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
@@ -168,6 +170,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="p-4 border-t border-border space-y-1">
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Button
+              variant="ghost"
+              onClick={() => setInstallOpen(true)}
+              className="w-full justify-start gap-3 text-primary hover:bg-primary/10 font-medium"
+            >
+              <Smartphone className="w-4 h-4" />
+              Instalar App
+            </Button>
+          </motion.div>
           <Button
             variant="ghost"
             onClick={() => setShowPasswordDialog(true)}
@@ -213,6 +228,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </DialogContent>
       </Dialog>
+
+      <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
 
       {/* Main */}
       <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-y-auto">

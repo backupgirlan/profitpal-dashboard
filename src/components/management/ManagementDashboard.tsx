@@ -49,7 +49,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   // Track completed Soros cycles for trophy (every 4 wins)
   useEffect(() => {
     const ganhas = sorosEngine.state.tentativasGanhas;
-    if (ganhas > 0 && ganhas % 4 === 0 && ganhas !== lastTrophyCount) {
+    if (ganhas > 0 && ganhas !== lastTrophyCount) {
       setLastTrophyCount(ganhas);
       setTrophyLucro(sorosEngine.state.lucroSessao);
       setTrophyGanhas(ganhas);

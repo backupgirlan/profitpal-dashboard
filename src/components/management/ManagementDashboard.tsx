@@ -9,6 +9,7 @@ import { useManagementEngine, ManagementMode } from '@/hooks/useManagementEngine
 import { useSorosEngine } from '@/hooks/useSorosEngine';
 import SorosGameUI from './SorosGameUI';
 import TradeConfirmDialog from '@/components/TradeConfirmDialog';
+import SorosTrophyDialog from '@/components/SorosTrophyDialog';
 import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,6 +39,23 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingResult, setPendingResult] = useState<'win' | 'loss'>('win');
   const [confirmTarget, setConfirmTarget] = useState<'engine' | 'soros'>('engine');
+
+  // Trophy dialog state
+  const [trophyOpen, setTrophyOpen] = useState(false);
+  const [trophyLucro, setTrophyLucro] = useState(0);
+  const [trophyGanhas, setTrophyGanhas] = useState(0);
+  const [lastTrophyCount, setLastTrophyCount] = useState(0);
+
+  // Track completed Soros cycles for trophy (every 4 wins)
+  useEffect(() => {
+    const ganhas = sorosEngine.state.tentativasGanhas;
+    if (ganhas > 0 && ganhas % 4 === 0 && ganhas !== lastTrophyCount) {
+      setLastTrophyCount(ganhas);
+      setTrophyLucro(sorosEngine.state.lucroSessao);
+      setTrophyGanhas(ganhas);
+      setTrophyOpen(true);
+    }
+  }, [sorosEngine.state.tentativasGanhas]);
 
   // Profile balance from DB
   const [profileBalance, setProfileBalance] = useState(0);
@@ -305,6 +323,14 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         resultado={pendingResult}
         onConfirm={handleTradeConfirm}
         onCancel={() => setConfirmOpen(false)}
+      />
+
+      {/* Soros Trophy Dialog */}
+      <SorosTrophyDialog
+        open={trophyOpen}
+        onOpenChange={setTrophyOpen}
+        lucro={trophyLucro}
+        tentativasGanhas={trophyGanhas}
       />
     </div>
   );

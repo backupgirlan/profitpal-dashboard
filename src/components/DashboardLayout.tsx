@@ -85,8 +85,24 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     navigate('/');
   };
 
-  // Mood: green if <= 3 trades today, red if > 3
-  const isGoodMood = todayTradeCount <= 3;
+  // Mood: follow active management module rules
+  const getMaxTradesAllowed = (): number => {
+    try {
+      const mgmt = localStorage.getItem('management_engine_state');
+      if (mgmt) {
+        const state = JSON.parse(mgmt);
+        if (state.ativo) return state.maxTrades;
+      }
+      const soros = localStorage.getItem('soros_management_state');
+      if (soros) {
+        const state = JSON.parse(soros);
+        if (state.ativo) return state.tentativasTotal;
+      }
+    } catch {}
+    return 3; // default when no module active
+  };
+  const maxAllowed = getMaxTradesAllowed();
+  const isGoodMood = todayTradeCount <= maxAllowed;
   const moodEmoji = isGoodMood ? '😊' : '😡';
 
   return (

@@ -123,18 +123,26 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       // Capture Soros entry and level BEFORE registering result
       const ss = sorosEngine.state;
       sorosLevel = ss.nivelAtual;
+      // calcEntradaNivel: for conservador uses multipliers, otherwise full saldoCiclo
       if (ss.mode === 'conservador') {
         const mult = [0.60, 0.70, 0.80, 0.90];
         entryAmount = +(ss.saldoCiclo * mult[ss.nivelAtual - 1]).toFixed(2);
       } else {
         entryAmount = +ss.saldoCiclo.toFixed(2);
       }
-      profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
+      // For win: profit is entry * payout
+      // For loss: loss is the riscoOperacional (the entire tentativa risk)
+      if (pendingResult === 'win') {
+        profit = +(entryAmount * payoutDecimal).toFixed(2);
+      } else {
+        profit = -ss.riscoOperacional;
+      }
       // Pass dialog payout to engine so saldoCiclo grows by actual payout
       sorosEngine.registrarResultado(pendingResult, payoutDecimal);
     }
     setConfirmOpen(false);
-    // Store trade info for the Management page via custom event
+
+    // Dispatch event with real values for DB persistence
     window.dispatchEvent(new CustomEvent('trade-confirmed', {
       detail: {
         resultado: pendingResult,

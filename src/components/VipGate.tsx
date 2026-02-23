@@ -37,8 +37,11 @@ export default function VipGate({ children }: { children: React.ReactNode }) {
         <h2 className="text-2xl font-display font-bold text-primary text-glow">
           Acesso Bloqueado
         </h2>
-        <p className="text-muted-foreground">
-          Sua conta ainda não foi liberada. Entre em contato pelo Telegram para solicitar a liberação do VIP.
+        <p className="text-muted-foreground leading-relaxed">
+          Sua conta ainda não foi liberada.<br />
+          Para agilizar o processo de liberação:<br />
+          Crie seu cadastro na corretora e<br />
+          entre em contato pelo Telegram para solicitar a liberação do VIP.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <a href="http://t.me/technicalgirlan" target="_blank" rel="noopener noreferrer">

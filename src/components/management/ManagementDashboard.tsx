@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { useSorosEngine } from '@/hooks/useSorosEngine';
 import SorosGameUI from './SorosGameUI';
 import TradeConfirmDialog from '@/components/TradeConfirmDialog';
 import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 type AllModes = ManagementMode | 'soros4x';
 
@@ -28,6 +30,7 @@ const MODE_INFO: Record<AllModes, { label: string; icon: any; desc: string; colo
 export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: Props) {
   const engine = useManagementEngine();
   const sorosEngine = useSorosEngine();
+  const { user } = useAuth();
   const s = engine.state;
   const [tab, setTab] = useState<AllModes>('soros4x');
 
@@ -36,8 +39,24 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [pendingResult, setPendingResult] = useState<'win' | 'loss'>('win');
   const [confirmTarget, setConfirmTarget] = useState<'engine' | 'soros'>('engine');
 
-  // Form state for 3 modules
-  const [banca, setBanca] = useState('1000');
+  // Profile balance from DB
+  const [profileBalance, setProfileBalance] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchBalance = async () => {
+      const { data } = await supabase.from('profiles').select('balance').eq('user_id', user.id).single();
+      if (data) setProfileBalance(Number(data.balance) || 0);
+    };
+    fetchBalance();
+    // Also refresh when a trade is confirmed
+    const handler = () => { setTimeout(fetchBalance, 1200); };
+    window.addEventListener('trade-confirmed', handler);
+    return () => window.removeEventListener('trade-confirmed', handler);
+  }, [user]);
+
+  // Form state for 3 modules — banca comes from profile
+  const banca = String(profileBalance);
   const [riscoPct, setRiscoPct] = useState('1');
   const [stopLossPct, setStopLossPct] = useState('2');
   const [stopWinPct, setStopWinPct] = useState('2');
@@ -47,8 +66,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [sorosMax, setSorosMax] = useState('4');
   const [martingaleAtivo, setMartingaleAtivo] = useState(false);
 
-  // Form state for Soros x4
-  const [sorosBanca, setSorosBanca] = useState('1000');
+  // Form state for Soros x4 — banca comes from profile
+  const sorosBanca = String(profileBalance);
   const [sorosTentativas, setSorosTentativas] = useState('10');
   const [sorosErrors, setSorosErrors] = useState<string[]>([]);
 
@@ -235,7 +254,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Banca (R$)</Label>
-                  <Input type="number" value={sorosBanca} onChange={e => setSorosBanca(e.target.value)} className="bg-secondary" />
+                  <Input type="number" value={sorosBanca} readOnly className="bg-secondary opacity-70 cursor-not-allowed" />
                 </div>
                 <div>
                   <Label className="text-xs">Tentativas (mín. 10)</Label>
@@ -264,7 +283,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
             ) : !isAnyActive ? (
               <SetupForm
                 mode={mode} info={MODE_INFO[mode]}
-                banca={banca} setBanca={setBanca}
+                banca={banca}
                 riscoPct={riscoPct} setRiscoPct={setRiscoPct}
                 stopLossPct={stopLossPct} setStopLossPct={setStopLossPct}
                 stopWinPct={stopWinPct} setStopWinPct={setStopWinPct}
@@ -429,7 +448,7 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
   );
 }
 
-function SetupForm({ mode, info, banca, setBanca, riscoPct, setRiscoPct, stopLossPct, setStopLossPct, stopWinPct, setStopWinPct, maxTrades, setMaxTrades, payoutInput, setPayoutInput, sorosAtivo, setSorosAtivo, sorosMax, setSorosMax, martingaleAtivo, setMartingaleAtivo, onIniciar }: any) {
+function SetupForm({ mode, info, banca, riscoPct, setRiscoPct, stopLossPct, setStopLossPct, stopWinPct, setStopWinPct, maxTrades, setMaxTrades, payoutInput, setPayoutInput, sorosAtivo, setSorosAtivo, sorosMax, setSorosMax, martingaleAtivo, setMartingaleAtivo, onIniciar }: any) {
   return (
     <div className="space-y-4 pt-2">
       <div className={`text-sm ${info.color} font-display font-bold flex items-center gap-2`}>
@@ -467,7 +486,7 @@ function SetupForm({ mode, info, banca, setBanca, riscoPct, setRiscoPct, stopLos
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">Banca (R$)</Label>
-          <Input type="number" value={banca} onChange={e => setBanca(e.target.value)} className="bg-secondary" />
+          <Input type="number" value={banca} readOnly className="bg-secondary opacity-70 cursor-not-allowed" />
         </div>
         <div>
           <Label className="text-xs">Risco por Trade (%)</Label>

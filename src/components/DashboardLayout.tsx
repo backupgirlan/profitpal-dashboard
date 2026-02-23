@@ -5,12 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone
+  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone, Trash2
 } from 'lucide-react';
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
@@ -40,6 +40,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [installOpen, setInstallOpen] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
@@ -85,6 +87,47 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleResetAccount = async () => {
+    if (!user) return;
+    setResetLoading(true);
+    try {
+      // Delete all trades
+      await supabase.from('trades').delete().eq('user_id', user.id);
+      // Delete all deposits
+      await supabase.from('deposits').delete().eq('user_id', user.id);
+      // Reset profile
+      await supabase.from('profiles').update({
+        balance: 0,
+        total_profit: 0,
+        stop_loss: 0,
+        stop_win: 0,
+        entry_percentage: 2,
+        soros_enabled: false,
+        soros_level: 0,
+        active_management_mode: null,
+      }).eq('user_id', user.id);
+      // Reset streaks
+      await supabase.from('streaks').update({
+        streak_atual: 0,
+        maior_streak: 0,
+        streak_freeze_disponivel: 0,
+        total_freezes: 0,
+        ultimo_dia_ativo: null,
+      }).eq('user_id', user.id);
+      // Clear localStorage
+      localStorage.removeItem('management_engine_state');
+      localStorage.removeItem('soros_management_state');
+      
+      toast({ title: '✅ Conta resetada!', description: 'Todos os dados foram apagados. Recarregando...' });
+      setShowResetDialog(false);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   // Mood: follow active management module rules per mode
@@ -209,6 +252,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </Button>
           <Button
             variant="ghost"
+            onClick={() => setShowResetDialog(true)}
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 className="w-4 h-4" />
+            Resetar Conta
+          </Button>
+          <Button
+            variant="ghost"
             onClick={handleSignOut}
             className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
           >
@@ -241,6 +292,50 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Button onClick={handleChangePassword} className="w-full gradient-gold text-primary-foreground font-display">
               Atualizar Senha
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Account Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="bg-card border-destructive/50 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive font-display">
+              <Trash2 className="w-5 h-5" /> Resetar Conta
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground">Esta ação não pode ser desfeita</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <p className="text-sm text-foreground leading-relaxed">
+                ⚠️ <strong>Todos os seus dados serão apagados permanentemente:</strong>
+              </p>
+              <ul className="text-xs text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                <li>Histórico de operações</li>
+                <li>Depósitos registrados</li>
+                <li>Banca e lucro total</li>
+                <li>Streaks e conquistas</li>
+                <li>Configurações de gerenciamento</li>
+              </ul>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowResetDialog(false)}
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleResetAccount}
+                disabled={resetLoading}
+                className="flex-1 gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                {resetLoading ? 'Apagando...' : 'Confirmar Reset'}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

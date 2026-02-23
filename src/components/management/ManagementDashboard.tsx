@@ -6,25 +6,31 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useManagementEngine, ManagementMode } from '@/hooks/useManagementEngine';
-import { Shield, BarChart3, Zap, CheckCircle, XCircle, AlertTriangle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp, Activity } from 'lucide-react';
+import { useSorosEngine } from '@/hooks/useSorosEngine';
+import SorosGameUI from './SorosGameUI';
+import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp } from 'lucide-react';
+
+type AllModes = ManagementMode | 'soros4x';
 
 interface Props {
   fullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }
 
-const MODE_INFO: Record<ManagementMode, { label: string; icon: any; desc: string; color: string; riskRange: string; stopLoss: string; stopWin: string }> = {
-  conservador: { label: 'Conservador Hard', icon: Shield, desc: 'Proteção total + Anti Dia Ruim', color: 'text-blue-400', riskRange: '0.5% - 1%', stopLoss: '2%', stopWin: '1% - 2%' },
+const MODE_INFO: Record<AllModes, { label: string; icon: any; desc: string; color: string; riskRange: string; stopLoss: string; stopWin: string }> = {
+  soros4x: { label: 'Soros x4', icon: TrendingUp, desc: 'Risco fixo por tentativa', color: 'text-primary', riskRange: 'Banca/Tentativas', stopLoss: '—', stopWin: '—' },
+  conservador: { label: 'Conservador', icon: Shield, desc: 'Proteção total + Anti Dia Ruim', color: 'text-blue-400', riskRange: '0.5% - 1%', stopLoss: '2%', stopWin: '1% - 2%' },
   intermediario: { label: 'Intermediário', icon: BarChart3, desc: 'Crescimento controlado', color: 'win-text', riskRange: '2%', stopLoss: '5%', stopWin: '3% - 5%' },
   agressivo: { label: 'Agressivo', icon: Zap, desc: 'Alto risco / alto retorno', color: 'text-destructive', riskRange: '3% - 5%', stopLoss: '10%', stopWin: '5% - 15%' },
 };
 
 export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: Props) {
   const engine = useManagementEngine();
+  const sorosEngine = useSorosEngine();
   const s = engine.state;
-  const [tab, setTab] = useState<ManagementMode>('conservador');
+  const [tab, setTab] = useState<AllModes>('soros4x');
 
-  // Form state
+  // Form state for 3 modules
   const [banca, setBanca] = useState('1000');
   const [riscoPct, setRiscoPct] = useState('1');
   const [stopLossPct, setStopLossPct] = useState('2');
@@ -35,10 +41,19 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [sorosMax, setSorosMax] = useState('4');
   const [martingaleAtivo, setMartingaleAtivo] = useState(false);
 
-  const handleTabChange = (mode: ManagementMode) => {
-    if (s.ativo) return;
+  // Form state for Soros x4
+  const [sorosBanca, setSorosBanca] = useState('1000');
+  const [sorosTentativas, setSorosTentativas] = useState('10');
+  const [sorosPayoutInput, setSorosPayoutInput] = useState('80');
+  const [sorosErrors, setSorosErrors] = useState<string[]>([]);
+
+  const isManagementActive = s.ativo;
+  const isSorosActive = sorosEngine.state.ativo;
+  const isAnyActive = isManagementActive || isSorosActive;
+
+  const handleTabChange = (mode: AllModes) => {
+    if (isAnyActive) return;
     setTab(mode);
-    // Set defaults per mode
     if (mode === 'conservador') { setRiscoPct('1'); setStopLossPct('2'); setStopWinPct('2'); setMaxTrades('3'); }
     if (mode === 'intermediario') { setRiscoPct('2'); setStopLossPct('5'); setStopWinPct('3'); setMaxTrades('5'); }
     if (mode === 'agressivo') { setRiscoPct('3'); setStopLossPct('10'); setStopWinPct('5'); setMaxTrades('10'); }
@@ -47,7 +62,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const handleIniciar = () => {
     if (Number(banca) <= 0) return;
     engine.iniciar({
-      mode: tab,
+      mode: tab as ManagementMode,
       banca: Number(banca),
       riscoPct: Number(riscoPct),
       stopLossPct: Number(stopLossPct),
@@ -60,9 +75,27 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     });
   };
 
+  const handleSorosIniciar = () => {
+    const errs: string[] = [];
+    if (Number(sorosBanca) <= 0) errs.push('Banca inválida.');
+    if (Number(sorosTentativas) < 10) errs.push('Mínimo 10 tentativas.');
+    setSorosErrors(errs);
+    if (errs.length > 0) return;
+    sorosEngine.iniciar({
+      mode: 'soros4x',
+      banca: Number(sorosBanca),
+      tentativas: Number(sorosTentativas),
+      payout: Number(sorosPayoutInput) / 100,
+    });
+  };
+
+  const handleResetar = () => {
+    engine.resetar();
+    sorosEngine.resetar();
+  };
+
   const entradaAtual = engine.getEntradaAtual();
-  const isActive = s.ativo;
-  const activeMode = isActive ? s.mode : tab;
+  const activeMode: AllModes = isSorosActive ? 'soros4x' : isManagementActive ? s.mode : tab;
   const info = MODE_INFO[activeMode];
 
   // Progress calculations
@@ -72,10 +105,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const winProgress = stopWinVal > 0 && s.lucroSessao > 0 ? Math.min((s.lucroSessao / stopWinVal) * 100, 100) : 0;
   const tradeProgress = s.maxTrades > 0 ? (s.tradesDoDia / s.maxTrades) * 100 : 0;
 
-  // Risk indicator
-  const riskLevel = activeMode === 'conservador' ? 'low' : activeMode === 'intermediario' ? 'medium' : 'high';
-  const riskColor = riskLevel === 'low' ? 'bg-blue-500' : riskLevel === 'medium' ? 'bg-yellow-500' : 'bg-destructive';
-  const riskLabel = riskLevel === 'low' ? 'Risco Baixo' : riskLevel === 'medium' ? 'Risco Moderado' : 'Risco Elevado';
+  const riskLevel = activeMode === 'conservador' ? 'low' : activeMode === 'intermediario' ? 'medium' : activeMode === 'agressivo' ? 'high' : 'medium';
+  const riskColor = riskLevel === 'low' ? 'bg-blue-500' : riskLevel === 'medium' ? 'bg-primary' : 'bg-destructive';
+  const riskLabel = riskLevel === 'low' ? 'Risco Baixo' : riskLevel === 'medium' ? 'Risco Controlado' : 'Risco Elevado';
+
+  const allModes: AllModes[] = ['soros4x', 'conservador', 'intermediario', 'agressivo'];
 
   return (
     <div className={`space-y-4 ${fullscreen ? 'p-6' : ''}`}>
@@ -92,8 +126,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
               {fullscreen ? 'Sair' : 'Tela Cheia'}
             </Button>
           )}
-          {isActive && (
-            <Button variant="destructive" size="sm" onClick={engine.resetar} className="gap-1">
+          {isAnyActive && (
+            <Button variant="destructive" size="sm" onClick={handleResetar} className="gap-1">
               <RotateCcw className="w-3 h-3" /> Resetar
             </Button>
           )}
@@ -108,26 +142,74 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       </div>
 
       {/* Mode Tabs */}
-      <Tabs value={activeMode} onValueChange={(v) => handleTabChange(v as ManagementMode)}>
-        <TabsList className="grid grid-cols-3 w-full bg-secondary">
-          {(Object.keys(MODE_INFO) as ManagementMode[]).map(mode => {
+      <Tabs value={activeMode} onValueChange={(v) => handleTabChange(v as AllModes)}>
+        <TabsList className="grid grid-cols-4 w-full bg-secondary">
+          {allModes.map(mode => {
             const m = MODE_INFO[mode];
+            const disabled = isAnyActive && activeMode !== mode;
             return (
-              <TabsTrigger key={mode} value={mode} disabled={isActive && s.mode !== mode}
-                className={`text-xs gap-1.5 data-[state=active]:bg-primary/20 ${isActive && s.mode !== mode ? 'opacity-30' : ''}`}>
-                <m.icon className="w-3.5 h-3.5" />
-                {m.label}
+              <TabsTrigger key={mode} value={mode} disabled={disabled}
+                className={`text-[10px] sm:text-xs gap-1 data-[state=active]:bg-primary/20 ${disabled ? 'opacity-30' : ''}`}>
+                <m.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span className="hidden sm:inline">{m.label}</span>
+                <span className="sm:hidden">{mode === 'soros4x' ? 'Soros' : mode === 'conservador' ? 'Cons.' : mode === 'intermediario' ? 'Inter.' : 'Agr.'}</span>
               </TabsTrigger>
             );
           })}
         </TabsList>
 
-        {(Object.keys(MODE_INFO) as ManagementMode[]).map(mode => (
+        {/* SOROS x4 Tab */}
+        <TabsContent value="soros4x">
+          {isSorosActive ? (
+            <SorosGameUI engine={sorosEngine} modeInfo={{ label: 'Soros x4', desc: 'Risco fixo por tentativa', color: 'text-primary' }} />
+          ) : !isAnyActive ? (
+            <div className="space-y-4 pt-2">
+              <div className="text-sm text-primary font-display font-bold flex items-center gap-2">
+                <TrendingUp className="w-4 h-4" /> Soros x4 — Risco Fixo por Tentativa
+              </div>
+              <div className="text-xs text-muted-foreground bg-secondary p-3 rounded-lg space-y-1">
+                <p>📊 <strong>Cada tentativa é um ciclo Soros com 4 níveis (N1→N4)</strong></p>
+                <p>• Risco máximo por tentativa = Banca ÷ Tentativas</p>
+                <p>• Para zerar a banca, você teria que perder TODAS as tentativas</p>
+                <p>• O Soros acontece apenas dentro do saldo do ciclo (risco travado)</p>
+                <p>• Exemplo: Banca R$1000, 10 tentativas → Risco R$100/tentativa</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Banca (R$)</Label>
+                  <Input type="number" value={sorosBanca} onChange={e => setSorosBanca(e.target.value)} className="bg-secondary" />
+                </div>
+                <div>
+                  <Label className="text-xs">Tentativas (mín. 10)</Label>
+                  <Input type="number" value={sorosTentativas} onChange={e => setSorosTentativas(e.target.value)} min={10} className="bg-secondary" />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs">Payout (%)</Label>
+                  <Input type="number" value={sorosPayoutInput} onChange={e => setSorosPayoutInput(e.target.value)} className="bg-secondary" />
+                </div>
+              </div>
+              {sorosErrors.length > 0 && (
+                <div className="text-xs text-destructive space-y-1">
+                  {sorosErrors.map((e, i) => <p key={i}>⚠️ {e}</p>)}
+                </div>
+              )}
+              {!sorosPayoutInput && (
+                <p className="text-xs text-accent">⚠️ Recomendado informar payout para cálculo real do Soros.</p>
+              )}
+              <Button onClick={handleSorosIniciar} className="w-full gradient-gold text-primary-foreground font-display gap-2">
+                <Play className="w-4 h-4" /> Iniciar Gerenciamento
+              </Button>
+            </div>
+          ) : null}
+        </TabsContent>
+
+        {/* Other 3 tabs */}
+        {(['conservador', 'intermediario', 'agressivo'] as ManagementMode[]).map(mode => (
           <TabsContent key={mode} value={mode}>
-            {isActive && s.mode === mode ? (
+            {isManagementActive && s.mode === mode ? (
               <ActiveDashboard engine={engine} info={MODE_INFO[mode]} entradaAtual={entradaAtual}
                 lossProgress={lossProgress} winProgress={winProgress} tradeProgress={tradeProgress} />
-            ) : !isActive ? (
+            ) : !isAnyActive ? (
               <SetupForm
                 mode={mode} info={MODE_INFO[mode]}
                 banca={banca} setBanca={setBanca}
@@ -149,7 +231,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   );
 }
 
-// Active Dashboard with all stats and controls
+// Active Dashboard for conservador/intermediario/agressivo
 function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress, tradeProgress }: any) {
   const s = engine.state;
 
@@ -181,7 +263,7 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
             <span>Stop Win ({s.stopWinPct}%)</span>
             <span>{winProgress.toFixed(0)}%</span>
           </div>
-          <Progress value={winProgress} className="h-2 [&>div]:bg-green-500" />
+          <Progress value={winProgress} className="h-2 [&>div]:bg-success" />
         </div>
         <div>
           <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
@@ -206,7 +288,7 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
 
       {/* Anti dia ruim indicator */}
       {s.antiDiaRuimAtivo && (
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-2 text-xs text-yellow-400 font-display font-bold">
+        <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 text-xs text-accent font-display font-bold">
           ⚠️ Anti Dia Ruim Ativo — Stake reduzido, 1 operação adicional
         </div>
       )}
@@ -225,7 +307,7 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
       {/* Message */}
       {s.mensagem && (
         <div className={`text-xs p-3 rounded-lg border ${
-          s.mensagem.includes('✅') || s.mensagem.includes('🎯') ? 'bg-green-500/10 border-green-500/30 win-text' :
+          s.mensagem.includes('✅') || s.mensagem.includes('🎯') ? 'bg-success/10 border-success/30 win-text' :
           s.mensagem.includes('❌') || s.mensagem.includes('🚫') ? 'bg-destructive/10 border-destructive/30 text-destructive' :
           'bg-primary/10 border-primary/30 text-primary'
         }`}>
@@ -236,7 +318,7 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
       {/* Action Buttons */}
       {!s.encerrado && !s.bloqueado && (
         <div className="flex gap-3">
-          <Button onClick={() => engine.registrarResultado('win')} className="flex-1 bg-green-600/20 text-green-400 hover:bg-green-600/30 gap-2 border border-green-600/30">
+          <Button onClick={() => engine.registrarResultado('win')} className="flex-1 bg-success/20 text-success hover:bg-success/30 gap-2 border border-success/30">
             <CheckCircle className="w-4 h-4" /> WIN
           </Button>
           <Button onClick={() => engine.registrarResultado('loss')} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 gap-2 border border-destructive/30">
@@ -269,7 +351,7 @@ function ActiveDashboard({ engine, info, entradaAtual, lossProgress, winProgress
                 <span className={`px-1 py-0.5 rounded text-[8px] font-bold uppercase ${
                   h.entryType === 'soros' ? 'bg-primary/20 text-primary' :
                   h.entryType === 'martingale' ? 'bg-destructive/20 text-destructive' :
-                  h.entryType === 'anti_dia_ruim' ? 'bg-yellow-500/20 text-yellow-400' :
+                  h.entryType === 'anti_dia_ruim' ? 'bg-accent/20 text-accent' :
                   'bg-secondary text-muted-foreground'
                 }`}>
                   {h.entryType === 'soros' ? `Soros N${h.sorosLevel}` : h.entryType === 'anti_dia_ruim' ? 'Anti Ruim' : h.entryType}

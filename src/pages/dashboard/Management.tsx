@@ -10,6 +10,9 @@ interface TradeEvent {
   pairName: string;
   payout: number;
   mode: string;
+  amount: number;
+  profit: number;
+  sorosLevel: number;
 }
 
 const Management = () => {
@@ -23,10 +26,6 @@ const Management = () => {
     if (!user) return;
 
     const today = new Date().toISOString().split('T')[0];
-    const amount = 0; // Amount comes from engine state, tracked locally
-    const profit = detail.resultado === 'win'
-      ? amount * (detail.payout / 100)
-      : -amount;
 
     // Save trade to database for ranking/history
     await supabase.from('trades').insert({
@@ -34,25 +33,32 @@ const Management = () => {
       pair_name: detail.pairName,
       payout: detail.payout,
       result: detail.resultado,
-      amount: 0,
-      profit: 0,
+      amount: detail.amount,
+      profit: detail.profit,
       management_mode: detail.mode,
       entry_type: 'normal',
-      soros_level: 0,
+      soros_level: detail.sorosLevel || 0,
       trade_date: today,
     });
 
-    // Update profile management mode
-    await supabase.from('profiles').update({
-      active_management_mode: detail.mode,
-    }).eq('user_id', user.id);
+    // Update profile balance and total_profit
+    const { data: profile } = await supabase.from('profiles').select('balance, total_profit').eq('user_id', user.id).single();
+    if (profile) {
+      const newBalance = +(Number(profile.balance) + detail.profit).toFixed(2);
+      const newTotalProfit = +(Number(profile.total_profit) + detail.profit).toFixed(2);
+      await supabase.from('profiles').update({
+        balance: newBalance,
+        total_profit: newTotalProfit,
+        active_management_mode: detail.mode,
+      }).eq('user_id', user.id);
+    }
 
     // Register streak activity
     await registerActivity();
 
     toast({
       title: detail.resultado === 'win' ? '✅ Win registrado!' : '❌ Loss registrado!',
-      description: `${detail.pairName} — ${detail.payout}%`,
+      description: `${detail.pairName} — ${detail.payout}% | Lucro: R$ ${detail.profit.toFixed(2)}`,
     });
   }, [user, registerActivity, toast]);
 

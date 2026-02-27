@@ -8,17 +8,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useManagementEngine, ManagementMode } from '@/hooks/useManagementEngine';
 import { useSorosEngine } from '@/hooks/useSorosEngine';
+import { useEntradaFixaEngine } from '@/hooks/useEntradaFixaEngine';
 import SorosGameUI from './SorosGameUI';
 import TradeConfirmDialog from '@/components/TradeConfirmDialog';
 import SorosTrophyDialog from '@/components/SorosTrophyDialog';
 import { getRankForCycles } from '@/lib/sorosRanks';
-import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp, AlertTriangle, DollarSign } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useStreak } from '@/hooks/useStreak';
 import { useToast } from '@/hooks/use-toast';
 
-type AllModes = ManagementMode | 'soros4x';
+type AllModes = ManagementMode | 'soros4x' | 'entrada_fixa';
 
 interface Props {
   fullscreen?: boolean;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 const MODE_INFO: Record<AllModes, { label: string; icon: any; desc: string; color: string; riskRange: string; stopLoss: string; stopWin: string }> = {
+  entrada_fixa: { label: 'Entrada Fixa', icon: DollarSign, desc: 'Valor fixo por operação', color: 'text-emerald-400', riskRange: 'Fixo', stopLoss: '2 losses seguidos', stopWin: '—' },
   soros4x: { label: 'Soros x4', icon: TrendingUp, desc: 'Risco fixo por tentativa', color: 'text-primary', riskRange: 'Banca/Tentativas', stopLoss: '—', stopWin: '—' },
   conservador: { label: 'Conservador', icon: Shield, desc: 'Proteção total + Anti Dia Ruim', color: 'text-blue-400', riskRange: '0.5% - 1%', stopLoss: '2%', stopWin: '1% - 2%' },
   intermediario: { label: 'Intermediário', icon: BarChart3, desc: 'Crescimento controlado', color: 'win-text', riskRange: '2%', stopLoss: '5%', stopWin: '3% - 5%' },
@@ -35,16 +37,17 @@ const MODE_INFO: Record<AllModes, { label: string; icon: any; desc: string; colo
 export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: Props) {
   const engine = useManagementEngine();
   const sorosEngine = useSorosEngine();
+  const entradaFixaEngine = useEntradaFixaEngine();
   const { user } = useAuth();
   const { registerActivity } = useStreak();
   const { toast } = useToast();
   const s = engine.state;
-  const [tab, setTab] = useState<AllModes>('soros4x');
+  const [tab, setTab] = useState<AllModes>('entrada_fixa');
 
   // Trade confirm dialog state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingResult, setPendingResult] = useState<'win' | 'loss'>('win');
-  const [confirmTarget, setConfirmTarget] = useState<'engine' | 'soros'>('engine');
+  const [confirmTarget, setConfirmTarget] = useState<'engine' | 'soros' | 'entrada_fixa'>('engine');
 
   // Trophy dialog state
   const [trophyOpen, setTrophyOpen] = useState(false);
@@ -105,6 +108,10 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [sorosAtivo, setSorosAtivo] = useState(false);
   const [sorosMax, setSorosMax] = useState('4');
   const [martingaleAtivo, setMartingaleAtivo] = useState(false);
+  // Form state for Entrada Fixa
+  const [efEntrada, setEfEntrada] = useState('50');
+  const [efMaxEntradas, setEfMaxEntradas] = useState('2');
+  const [efPayout, setEfPayout] = useState('80');
 
   // Form state for Soros x4 — banca comes from profile
   const sorosBanca = String(profileBalance);
@@ -113,7 +120,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
 
   const isManagementActive = s.ativo;
   const isSorosActive = sorosEngine.state.ativo;
-  const isAnyActive = isManagementActive || isSorosActive;
+  const isEntradaFixaActive = entradaFixaEngine.state.ativo;
+  const isAnyActive = isManagementActive || isSorosActive || isEntradaFixaActive;
 
   const handleTabChange = (mode: AllModes) => {
     if (isAnyActive) return;
@@ -156,13 +164,24 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const handleResetar = () => {
     engine.resetar();
     sorosEngine.resetar();
+    entradaFixaEngine.resetar();
   };
 
   const entradaAtual = engine.getEntradaAtual();
-  const activeMode: AllModes = isSorosActive ? 'soros4x' : isManagementActive ? s.mode : tab;
+  const activeMode: AllModes = isEntradaFixaActive ? 'entrada_fixa' : isSorosActive ? 'soros4x' : isManagementActive ? s.mode : tab;
   const info = MODE_INFO[activeMode];
 
-  const handleTradeRequest = (resultado: 'win' | 'loss', target: 'engine' | 'soros') => {
+  const handleEntradaFixaIniciar = () => {
+    if (Number(banca) <= 0 || Number(efEntrada) <= 0) return;
+    entradaFixaEngine.iniciar({
+      banca: Number(banca),
+      entradaFixa: Number(efEntrada),
+      maxEntradas: Number(efMaxEntradas),
+      payout: Number(efPayout),
+    });
+  };
+
+  const handleTradeRequest = (resultado: 'win' | 'loss', target: 'engine' | 'soros' | 'entrada_fixa') => {
     setPendingResult(resultado);
     setConfirmTarget(target);
     setConfirmOpen(true);
@@ -178,6 +197,10 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       entryAmount = engine.getEntradaAtual();
       profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
       engine.registrarResultado(pendingResult);
+    } else if (confirmTarget === 'entrada_fixa') {
+      entryAmount = entradaFixaEngine.state.entradaFixa;
+      profit = pendingResult === 'win' ? +(entryAmount * payoutDecimal).toFixed(2) : -entryAmount;
+      entradaFixaEngine.registrarResultado(pendingResult, payoutDecimal);
     } else {
       // Capture Soros entry and level BEFORE registering result
       const ss = sorosEngine.state;
@@ -250,11 +273,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const winProgress = stopWinVal > 0 && s.lucroSessao > 0 ? Math.min((s.lucroSessao / stopWinVal) * 100, 100) : 0;
   const tradeProgress = s.maxTrades > 0 ? (s.tradesDoDia / s.maxTrades) * 100 : 0;
 
-  const riskLevel = activeMode === 'conservador' ? 'low' : activeMode === 'intermediario' ? 'medium' : activeMode === 'agressivo' ? 'high' : 'medium';
+  const riskLevel = activeMode === 'entrada_fixa' ? 'low' : activeMode === 'conservador' ? 'low' : activeMode === 'intermediario' ? 'medium' : activeMode === 'agressivo' ? 'high' : 'medium';
   const riskColor = riskLevel === 'low' ? 'bg-blue-500' : riskLevel === 'medium' ? 'bg-primary' : 'bg-destructive';
   const riskLabel = riskLevel === 'low' ? 'Risco Baixo' : riskLevel === 'medium' ? 'Risco Controlado' : 'Risco Elevado';
 
-  const allModes: AllModes[] = ['soros4x', 'conservador', 'intermediario', 'agressivo'];
+  const allModes: AllModes[] = ['entrada_fixa', 'soros4x', 'conservador', 'intermediario', 'agressivo'];
 
   return (
     <div className={`space-y-4 ${fullscreen ? 'p-6' : ''}`}>
@@ -288,20 +311,65 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
 
       {/* Mode Tabs */}
       <Tabs value={activeMode} onValueChange={(v) => handleTabChange(v as AllModes)}>
-        <TabsList className="grid grid-cols-4 w-full bg-secondary">
+        <TabsList className="grid grid-cols-5 w-full bg-secondary">
           {allModes.map(mode => {
             const m = MODE_INFO[mode];
             const disabled = isAnyActive && activeMode !== mode;
+            const shortName = mode === 'entrada_fixa' ? 'Fixo' : mode === 'soros4x' ? 'Soros' : mode === 'conservador' ? 'Cons.' : mode === 'intermediario' ? 'Inter.' : 'Agr.';
             return (
               <TabsTrigger key={mode} value={mode} disabled={disabled}
-                className={`text-[10px] sm:text-xs gap-1 data-[state=active]:bg-primary/20 ${disabled ? 'opacity-30' : ''}`}>
+                className={`text-[9px] sm:text-xs gap-0.5 sm:gap-1 data-[state=active]:bg-primary/20 ${disabled ? 'opacity-30' : ''}`}>
                 <m.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                 <span className="hidden sm:inline">{m.label}</span>
-                <span className="sm:hidden">{mode === 'soros4x' ? 'Soros' : mode === 'conservador' ? 'Cons.' : mode === 'intermediario' ? 'Inter.' : 'Agr.'}</span>
+                <span className="sm:hidden">{shortName}</span>
               </TabsTrigger>
             );
           })}
         </TabsList>
+
+        {/* ENTRADA FIXA Tab */}
+        <TabsContent value="entrada_fixa">
+          {isEntradaFixaActive ? (
+            <EntradaFixaActiveDashboard
+              engine={entradaFixaEngine}
+              onTradeRequest={(r: 'win' | 'loss') => handleTradeRequest(r, 'entrada_fixa')}
+            />
+          ) : !isAnyActive ? (
+            <div className="space-y-4 pt-2">
+              <div className="text-sm text-emerald-400 font-display font-bold flex items-center gap-2">
+                <DollarSign className="w-4 h-4" /> Entrada Fixa — Valor Fixo por Operação
+              </div>
+              <div className="text-xs text-muted-foreground bg-secondary p-3 rounded-lg space-y-1">
+                <p>💰 <strong>Gerenciamento com entrada fixa por operação</strong></p>
+                <p>• Você define o valor fixo de cada entrada</p>
+                <p>• Tomou 2 LOSS seguidos? Dia encerrado automaticamente</p>
+                <p>• Máximo de entradas por dia configurável</p>
+                <p>• Não se apegue ao gráfico — disciplina é tudo!</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Banca (R$)</Label>
+                  <Input type="number" value={banca} readOnly className="bg-secondary opacity-70 cursor-not-allowed" />
+                </div>
+                <div>
+                  <Label className="text-xs">Entrada Fixa (R$)</Label>
+                  <Input type="number" value={efEntrada} onChange={e => setEfEntrada(e.target.value)} className="bg-secondary" min={1} />
+                </div>
+                <div>
+                  <Label className="text-xs">Máx. Entradas/Dia</Label>
+                  <Input type="number" value={efMaxEntradas} onChange={e => setEfMaxEntradas(e.target.value)} className="bg-secondary" min={1} />
+                </div>
+                <div>
+                  <Label className="text-xs">Payout (%)</Label>
+                  <Input type="number" value={efPayout} onChange={e => setEfPayout(e.target.value)} className="bg-secondary" min={1} />
+                </div>
+              </div>
+              <Button onClick={handleEntradaFixaIniciar} className="w-full gradient-gold text-primary-foreground font-display gap-2">
+                <Play className="w-4 h-4" /> Iniciar Gerenciamento
+              </Button>
+            </div>
+          ) : null}
+        </TabsContent>
 
         {/* SOROS x4 Tab */}
         <TabsContent value="soros4x">
@@ -653,6 +721,113 @@ function StatCard({ label, value, highlight, win, loss }: { label: string; value
     <div className="bg-secondary/50 rounded-lg p-2 text-center">
       <p className="text-[10px] text-muted-foreground">{label}</p>
       <p className={`text-xs font-display font-bold ${win ? 'win-text' : loss ? 'loss-text' : highlight ? 'text-primary' : 'text-foreground'}`}>{value}</p>
+    </div>
+  );
+}
+
+// Active Dashboard for Entrada Fixa module
+function EntradaFixaActiveDashboard({ engine, onTradeRequest }: { engine: ReturnType<typeof import('@/hooks/useEntradaFixaEngine').useEntradaFixaEngine>; onTradeRequest: (r: 'win' | 'loss') => void }) {
+  const s = engine.state;
+  const tradeProgress = s.maxEntradas > 0 ? (s.entradasRealizadas / s.maxEntradas) * 100 : 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <StatCard label="Banca Inicial" value={`R$ ${s.bancaInicial.toFixed(2)}`} />
+        <StatCard label="Banca Atual" value={`R$ ${s.bancaAtual.toFixed(2)}`} highlight />
+        <StatCard label="Entrada Fixa" value={`R$ ${s.entradaFixa.toFixed(2)}`} />
+        <StatCard label="Entradas" value={`${s.entradasRealizadas}/${s.maxEntradas}`} />
+        <StatCard label="Wins" value={String(s.winsTotal)} win />
+        <StatCard label="Losses" value={String(s.lossesTotal)} loss />
+        <StatCard label="Perdas Seguidas" value={String(s.perdaSequencial)} loss={s.perdaSequencial > 0} />
+        <StatCard label="Lucro Sessão" value={`R$ ${s.lucroSessao.toFixed(2)}`} highlight={s.lucroSessao >= 0} loss={s.lucroSessao < 0} />
+      </div>
+
+      <div>
+        <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+          <span>Entradas do Dia</span>
+          <span>{s.entradasRealizadas}/{s.maxEntradas}</span>
+        </div>
+        <Progress value={tradeProgress} className="h-2" />
+      </div>
+
+      {s.perdaSequencial >= 1 && !s.encerrado && (
+        <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 text-xs text-accent font-display font-bold">
+          ⚠️ {s.perdaSequencial} loss seguido — mais 1 e o dia encerra automaticamente!
+        </div>
+      )}
+
+      {s.mensagem && (
+        <div className={`text-xs p-3 rounded-lg border ${
+          s.mensagem.includes('✅') ? 'bg-success/10 border-success/30 win-text' :
+          s.mensagem.includes('❌') || s.mensagem.includes('🚫') || s.mensagem.includes('⏹️') ? 'bg-destructive/10 border-destructive/30 text-destructive' :
+          'bg-primary/10 border-primary/30 text-primary'
+        }`}>
+          {s.mensagem}
+        </div>
+      )}
+
+      {!s.encerrado && (
+        <div className="flex gap-3">
+          <Button onClick={() => onTradeRequest('win')} className="flex-1 bg-success/20 text-success hover:bg-success/30 gap-2 border border-success/30">
+            <CheckCircle className="w-4 h-4" /> WIN
+          </Button>
+          <Button onClick={() => onTradeRequest('loss')} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 gap-2 border border-destructive/30">
+            <XCircle className="w-4 h-4" /> LOSS
+          </Button>
+        </div>
+      )}
+
+      {s.encerrado && (
+        <div className="text-center py-4">
+          <p className="text-sm text-muted-foreground font-display">Sessão encerrada</p>
+          <Button onClick={engine.resetar} variant="outline" size="sm" className="mt-2 gap-1">
+            <RotateCcw className="w-3 h-3" /> Novo Ciclo
+          </Button>
+        </div>
+      )}
+
+      {s.historico.length > 0 && (
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="bg-secondary/50 p-2">
+            <h4 className="text-[10px] font-display text-muted-foreground font-bold">Histórico de Entradas</h4>
+          </div>
+          <div className="max-h-64 overflow-y-auto">
+            <table className="w-full text-[10px]">
+              <thead>
+                <tr className="border-b border-border bg-secondary/30">
+                  <th className="px-2 py-1.5 text-left text-muted-foreground font-medium">#</th>
+                  <th className="px-2 py-1.5 text-left text-muted-foreground font-medium">Entrada</th>
+                  <th className="px-2 py-1.5 text-center text-muted-foreground font-medium">Resultado</th>
+                  <th className="px-2 py-1.5 text-right text-muted-foreground font-medium">Lucro</th>
+                  <th className="px-2 py-1.5 text-right text-muted-foreground font-medium">Prejuízo</th>
+                  <th className="px-2 py-1.5 text-right text-muted-foreground font-medium">Banca</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...s.historico].reverse().map((h, i) => (
+                  <tr key={i} className="border-b border-border/30">
+                    <td className="px-2 py-1.5 text-foreground font-medium">{h.numero}</td>
+                    <td className="px-2 py-1.5 text-muted-foreground">R$ {h.entrada.toFixed(2)}</td>
+                    <td className={`px-2 py-1.5 text-center font-bold ${h.resultado === 'win' ? 'win-text' : 'loss-text'}`}>
+                      {h.resultado.toUpperCase()}
+                    </td>
+                    <td className="px-2 py-1.5 text-right win-text">{h.lucro > 0 ? `R$ ${h.lucro.toFixed(2)}` : ''}</td>
+                    <td className="px-2 py-1.5 text-right loss-text">{h.prejuizo > 0 ? `R$ ${h.prejuizo.toFixed(2)}` : ''}</td>
+                    <td className="px-2 py-1.5 text-right text-foreground font-medium">R$ {h.bancaAtual.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-secondary/50 p-2 flex justify-between text-[10px]">
+            <span className="text-muted-foreground">Resultado Final:</span>
+            <span className={`font-bold ${s.lucroSessao >= 0 ? 'win-text' : 'loss-text'}`}>
+              R$ {s.lucroSessao.toFixed(2)}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

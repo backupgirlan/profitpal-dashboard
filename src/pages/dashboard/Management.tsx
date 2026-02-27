@@ -51,6 +51,11 @@ const Management = () => {
         total_profit: newTotalProfit,
         active_management_mode: detail.mode,
       }).eq('user_id', user.id);
+
+      // Dispatch balance-updated AFTER DB write completes for instant sync
+      window.dispatchEvent(new CustomEvent('balance-updated', {
+        detail: { balance: newBalance, totalProfit: newTotalProfit }
+      }));
     }
 
     // Register streak activity

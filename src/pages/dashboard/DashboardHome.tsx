@@ -212,11 +212,11 @@ const DashboardHome = () => {
 
   useEffect(() => { loadData(); }, [user]);
 
-  // Refresh data when a trade is confirmed via management module
+  // Refresh data instantly when balance is updated after trade persistence
   useEffect(() => {
-    const handler = () => { setTimeout(loadData, 1000); };
-    window.addEventListener('trade-confirmed', handler);
-    return () => window.removeEventListener('trade-confirmed', handler);
+    const handler = () => { loadData(); };
+    window.addEventListener('balance-updated', handler);
+    return () => window.removeEventListener('balance-updated', handler);
   }, [user]);
 
   const deleteTrade = async (trade: Trade) => {

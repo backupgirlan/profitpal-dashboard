@@ -78,10 +78,17 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       if (data) setProfileBalance(Number(data.balance) || 0);
     };
     fetchBalance();
-    // Also refresh when a trade is confirmed
-    const handler = () => { setTimeout(fetchBalance, 1200); };
-    window.addEventListener('trade-confirmed', handler);
-    return () => window.removeEventListener('trade-confirmed', handler);
+    // Refresh instantly when balance is updated after DB write
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.balance !== undefined) {
+        setProfileBalance(Number(detail.balance));
+      } else {
+        fetchBalance();
+      }
+    };
+    window.addEventListener('balance-updated', handler);
+    return () => window.removeEventListener('balance-updated', handler);
   }, [user]);
 
   // Form state for 3 modules — banca comes from profile

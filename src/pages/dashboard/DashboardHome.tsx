@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
@@ -165,7 +165,7 @@ const DashboardHome = () => {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     if (!user) return;
 
     supabase.from('profiles').select('*').eq('user_id', user.id).single()
@@ -175,7 +175,6 @@ const DashboardHome = () => {
       .then(({ data }) => {
         if (!data) return;
         setAllTrades(data as Trade[]);
-        // Each candle = R$10. Convert each trade into multiple candles.
         const CANDLE_VALUE = 30;
         let cumPrice = 0;
         const candleData: { index: number; open: number; close: number; color: string; label: string }[] = [];
@@ -208,16 +207,16 @@ const DashboardHome = () => {
         const profit = data.reduce((s, t) => s + Number(t.profit), 0);
         setTodayStats({ wins, losses, profit });
       });
-  };
+  }, [user, today]);
 
-  useEffect(() => { loadData(); }, [user]);
+  useEffect(() => { loadData(); }, [loadData]);
 
   // Refresh data instantly when balance is updated after trade persistence
   useEffect(() => {
     const handler = () => { loadData(); };
     window.addEventListener('balance-updated', handler);
     return () => window.removeEventListener('balance-updated', handler);
-  }, [user]);
+  }, [loadData]);
 
   const deleteTrade = async (trade: Trade) => {
     if (!user) return;

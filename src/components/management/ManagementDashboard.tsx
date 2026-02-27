@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,8 @@ import { getRankForCycles } from '@/lib/sorosRanks';
 import { Shield, BarChart3, Zap, CheckCircle, XCircle, Play, RotateCcw, Maximize2, Minimize2, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useStreak } from '@/hooks/useStreak';
+import { useToast } from '@/hooks/use-toast';
 
 type AllModes = ManagementMode | 'soros4x';
 
@@ -34,6 +36,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const engine = useManagementEngine();
   const sorosEngine = useSorosEngine();
   const { user } = useAuth();
+  const { registerActivity } = useStreak();
+  const { toast } = useToast();
   const s = engine.state;
   const [tab, setTab] = useState<AllModes>('soros4x');
 
@@ -164,7 +168,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     setConfirmOpen(true);
   };
 
-  const handleTradeConfirm = (pairName: string, payout: number) => {
+  const handleTradeConfirm = useCallback(async (pairName: string, payout: number) => {
     const payoutDecimal = payout / 100;
     let entryAmount = 0;
     let profit = 0;
@@ -178,38 +182,66 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       // Capture Soros entry and level BEFORE registering result
       const ss = sorosEngine.state;
       sorosLevel = ss.nivelAtual;
-      // calcEntradaNivel: for conservador uses multipliers, otherwise full saldoCiclo
       if (ss.mode === 'conservador') {
         const mult = [0.60, 0.70, 0.80, 0.90];
         entryAmount = +(ss.saldoCiclo * mult[ss.nivelAtual - 1]).toFixed(2);
       } else {
         entryAmount = +ss.saldoCiclo.toFixed(2);
       }
-      // For win: profit is entry * payout
-      // For loss: loss is the riscoOperacional (the entire tentativa risk)
       if (pendingResult === 'win') {
         profit = +(entryAmount * payoutDecimal).toFixed(2);
       } else {
         profit = -ss.riscoOperacional;
       }
-      // Pass dialog payout to engine so saldoCiclo grows by actual payout
       sorosEngine.registrarResultado(pendingResult, payoutDecimal);
     }
     setConfirmOpen(false);
 
-    // Dispatch event with real values for DB persistence
-    window.dispatchEvent(new CustomEvent('trade-confirmed', {
-      detail: {
-        resultado: pendingResult,
-        pairName,
-        payout,
-        mode: activeMode,
-        amount: entryAmount,
-        profit,
-        sorosLevel,
-      }
-    }));
-  };
+    // Persist trade directly to DB (no event needed)
+    if (!user) return;
+    const today = new Date().toISOString().split('T')[0];
+
+    await supabase.from('trades').insert({
+      user_id: user.id,
+      pair_name: pairName,
+      payout: payout,
+      result: pendingResult,
+      amount: entryAmount,
+      profit,
+      management_mode: activeMode,
+      entry_type: 'normal',
+      soros_level: sorosLevel || 0,
+      trade_date: today,
+    });
+
+    // Update profile balance and total_profit
+    const { data: profileData } = await supabase.from('profiles').select('balance, total_profit').eq('user_id', user.id).single();
+    if (profileData) {
+      const newBalance = +(Number(profileData.balance) + profit).toFixed(2);
+      const newTotalProfit = +(Number(profileData.total_profit) + profit).toFixed(2);
+      await supabase.from('profiles').update({
+        balance: newBalance,
+        total_profit: newTotalProfit,
+        active_management_mode: activeMode,
+      }).eq('user_id', user.id);
+
+      // Update local balance immediately
+      setProfileBalance(newBalance);
+
+      // Notify other components (DashboardHome) to refresh
+      window.dispatchEvent(new CustomEvent('balance-updated', {
+        detail: { balance: newBalance, totalProfit: newTotalProfit }
+      }));
+    }
+
+    // Register streak activity
+    await registerActivity();
+
+    toast({
+      title: pendingResult === 'win' ? '✅ Win registrado!' : '❌ Loss registrado!',
+      description: `${pairName} — ${payout}% | Lucro: R$ ${profit.toFixed(2)}`,
+    });
+  }, [user, pendingResult, confirmTarget, engine, sorosEngine, activeMode, registerActivity, toast]);
 
   // Progress calculations
   const stopLossVal = s.bancaInicial * (s.stopLossPct / 100);

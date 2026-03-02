@@ -54,11 +54,11 @@ const Landing = () => {
       {/* Content */}
       <div className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-end pb-16 px-4">
         <div className="mb-8 text-center">
-          <h1 className="font-display text-3xl sm:text-5xl font-black text-glow-strong tracking-wide text-primary mb-3">
-            TECHNICAL GIRLAN
+          <h1 className="font-display text-2xl sm:text-4xl font-black text-glow-strong tracking-wide text-primary mb-2">
+            OPERAÇÕES AO VIVO TODOS OS DIAS
           </h1>
-          <p className="text-foreground/80 text-base sm:text-lg max-w-md mx-auto mb-8">
-            Operações ao vivo todos os dias. Entre para o time.
+          <p className="text-lg sm:text-2xl font-semibold text-foreground mb-8">
+            🔥 Entre para o time e opere com a gente!
           </p>
 
           <button

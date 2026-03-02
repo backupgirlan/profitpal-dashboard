@@ -51,6 +51,22 @@ const Landing = () => {
         </button>
       </nav>
 
+      {/* Live schedule - bottom left */}
+      <div className="absolute z-20 bottom-6 left-4 sm:left-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[220px]">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+          </span>
+          <span className="font-display text-xs font-bold uppercase tracking-wider text-primary">Live no YouTube</span>
+        </div>
+        <div className="space-y-0.5 text-xs text-foreground/80">
+          <p>🗓️ Seg a Sex — <span className="font-semibold text-foreground">20h</span></p>
+          <p>🗓️ Sábado — <span className="font-semibold text-foreground">19h</span></p>
+          <p>🗓️ Domingo — <span className="font-semibold text-foreground">10h</span></p>
+        </div>
+      </div>
+
       {/* Content */}
       <div className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-end pb-16 px-4">
         <div className="mb-8 text-center">

@@ -1,35 +1,21 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-interface CandleData {
-  index: number;
-  open: number;
-  close: number;
-  color: string;
-  label: string;
-}
+interface CandleData { index: number; open: number; close: number; color: string; label: string; }
 
 const CandlestickChart = ({ candles }: { candles: CandleData[] }) => {
   if (candles.length === 0) return null;
-
   const allValues = candles.flatMap(c => [c.open, c.close]);
   const minVal = Math.min(...allValues);
   const maxVal = Math.max(...allValues);
   const range = maxVal - minVal || 10;
-
-  const padding = 30;
-  const candleWidth = 12;
-  const gap = 6;
+  const padding = 30; const candleWidth = 12; const gap = 6;
   const chartWidth = Math.max(candles.length * (candleWidth + gap) + padding * 2, 300);
-  const chartHeight = 280;
-  const plotHeight = chartHeight - padding * 2;
-
-  const priceToY = (price: number) => {
-    return padding + plotHeight - ((price - minVal) / range) * plotHeight;
-  };
-
+  const chartHeight = 280; const plotHeight = chartHeight - padding * 2;
+  const priceToY = (price: number) => padding + plotHeight - ((price - minVal) / range) * plotHeight;
   const gridLines = 5;
   const gridValues = Array.from({ length: gridLines }, (_, i) => minVal + (range / (gridLines - 1)) * i);
 
@@ -47,10 +33,8 @@ const CandlestickChart = ({ candles }: { candles: CandleData[] }) => {
         )}
         {candles.map((c, i) => {
           const x = padding + i * (candleWidth + gap);
-          const yOpen = priceToY(c.open);
-          const yClose = priceToY(c.close);
-          const yTop = Math.min(yOpen, yClose);
-          const yBottom = Math.max(yOpen, yClose);
+          const yOpen = priceToY(c.open); const yClose = priceToY(c.close);
+          const yTop = Math.min(yOpen, yClose); const yBottom = Math.max(yOpen, yClose);
           const bodyHeight = Math.max(yBottom - yTop, 2);
           const fillColor = c.color === 'green' ? 'hsl(142, 76%, 36%)' : 'hsl(0, 84%, 60%)';
           const wickColor = c.color === 'green' ? 'hsl(142, 76%, 46%)' : 'hsl(0, 84%, 70%)';
@@ -69,6 +53,7 @@ const CandlestickChart = ({ candles }: { candles: CandleData[] }) => {
 
 const Evolution = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [chartData, setChartData] = useState<CandleData[]>([]);
 
   useEffect(() => {
@@ -87,13 +72,7 @@ const Evolution = () => {
           for (let i = 0; i < numCandles; i++) {
             const open = cumPrice;
             cumPrice += direction * CANDLE_VALUE;
-            candleData.push({
-              index: candleData.length,
-              open,
-              close: cumPrice,
-              color,
-              label: `${t.pair_name} (${t.trade_date})`,
-            });
+            candleData.push({ index: candleData.length, open, close: cumPrice, color, label: `${t.pair_name} (${t.trade_date})` });
           }
         });
         setChartData(candleData);
@@ -104,32 +83,21 @@ const Evolution = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold text-primary text-glow flex items-center gap-2">
-          <TrendingUp className="w-6 h-6" /> Evolução
+          <TrendingUp className="w-6 h-6" /> {t('evolution.title')}
         </h1>
-        <p className="text-muted-foreground">Acompanhe seu progresso ao longo do tempo</p>
+        <p className="text-muted-foreground">{t('evolution.subtitle')}</p>
       </div>
-
       <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-display text-sm font-bold text-foreground mb-4">Evolução — Candles (R$30 cada)</h3>
+        <h3 className="font-display text-sm font-bold text-foreground mb-4">{t('evolution.chartTitle')}</h3>
         <div className="h-72">
-          {chartData.length > 0 ? (
-            <CandlestickChart candles={chartData} />
-          ) : (
-            <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-              Registre operações para ver sua evolução
-            </div>
+          {chartData.length > 0 ? <CandlestickChart candles={chartData} /> : (
+            <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('evolution.registerTrades')}</div>
           )}
         </div>
         <div className="flex items-center justify-center gap-6 mt-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(142, 76%, 36%)' }} /> Win (Verde)
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> Loss (Vermelho)
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> Cada candle = R$30
-          </span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(142, 76%, 36%)' }} /> {t('evolution.winGreen')}</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> {t('evolution.lossRed')}</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-0.5" style={{ backgroundColor: 'hsl(0, 0%, 30%)' }} /> {t('evolution.eachCandle')}</span>
         </div>
       </div>
     </div>

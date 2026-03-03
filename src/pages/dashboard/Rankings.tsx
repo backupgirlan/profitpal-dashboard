@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Trophy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTranslation } from 'react-i18next';
 
 type RankingMode = 'all' | 'conservador' | 'intermediario' | 'agressivo' | 'soros4x';
 
 const Rankings = () => {
+  const { t } = useTranslation();
   const [rankings, setRankings] = useState<any[]>([]);
   const [mode, setMode] = useState<RankingMode>('all');
 
   useEffect(() => {
     let query = supabase.from('profit_rankings').select('*').order('total_profit', { ascending: false }).limit(20);
-    if (mode !== 'all') {
-      query = query.eq('management_mode', mode);
-    }
+    if (mode !== 'all') query = query.eq('management_mode', mode);
     query.then(({ data }) => { if (data) setRankings(data); });
   }, [mode]);
 
@@ -28,18 +28,18 @@ const Rankings = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold text-primary text-glow flex items-center gap-2">
-          <Trophy className="w-6 h-6" /> Rankings
+          <Trophy className="w-6 h-6" /> {t('rankings.title')}
         </h1>
-        <p className="text-muted-foreground">Os melhores traders por módulo de gerenciamento</p>
+        <p className="text-muted-foreground">{t('rankings.subtitle')}</p>
       </div>
 
       <Tabs value={mode} onValueChange={(v) => setMode(v as RankingMode)}>
         <TabsList className="grid grid-cols-5 w-full bg-secondary">
-          <TabsTrigger value="all" className="text-xs">Todos</TabsTrigger>
+          <TabsTrigger value="all" className="text-xs">{t('rankings.all')}</TabsTrigger>
           <TabsTrigger value="soros4x" className="text-xs">Soros x4</TabsTrigger>
-          <TabsTrigger value="conservador" className="text-xs">Conservador</TabsTrigger>
-          <TabsTrigger value="intermediario" className="text-xs">Intermediário</TabsTrigger>
-          <TabsTrigger value="agressivo" className="text-xs">Agressivo</TabsTrigger>
+          <TabsTrigger value="conservador" className="text-xs">{t('rankings.conservative')}</TabsTrigger>
+          <TabsTrigger value="intermediario" className="text-xs">{t('rankings.intermediate')}</TabsTrigger>
+          <TabsTrigger value="agressivo" className="text-xs">{t('rankings.aggressive')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value={mode}>
@@ -48,12 +48,12 @@ const Rankings = () => {
               <thead>
                 <tr className="border-b border-border bg-secondary">
                   <th className="text-left p-3 text-muted-foreground">#</th>
-                  <th className="text-left p-3 text-muted-foreground">Trader</th>
-                  <th className="text-center p-3 text-muted-foreground">Módulo</th>
+                  <th className="text-left p-3 text-muted-foreground">{t('rankings.trader')}</th>
+                  <th className="text-center p-3 text-muted-foreground">{t('rankings.module')}</th>
                   <th className="text-center p-3 text-muted-foreground">Wins</th>
                   <th className="text-center p-3 text-muted-foreground">Losses</th>
-                  <th className="text-center p-3 text-muted-foreground">Taxa</th>
-                  <th className="text-right p-3 text-muted-foreground">Lucro</th>
+                  <th className="text-center p-3 text-muted-foreground">{t('rankings.rate')}</th>
+                  <th className="text-right p-3 text-muted-foreground">{t('rankings.profit')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,14 +68,12 @@ const Rankings = () => {
                       <td className="p-3 text-center win-text font-bold">{r.wins}</td>
                       <td className="p-3 text-center loss-text font-bold">{r.losses}</td>
                       <td className="p-3 text-center text-primary">{rate}%</td>
-                      <td className={`p-3 text-right font-bold font-display ${Number(r.total_profit) >= 0 ? 'win-text' : 'loss-text'}`}>
-                        R$ {Number(r.total_profit).toFixed(2)}
-                      </td>
+                      <td className={`p-3 text-right font-bold font-display ${Number(r.total_profit) >= 0 ? 'win-text' : 'loss-text'}`}>R$ {Number(r.total_profit).toFixed(2)}</td>
                     </tr>
                   );
                 })}
                 {rankings.length === 0 && (
-                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Nenhum dado ainda</td></tr>
+                  <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">{t('rankings.noData')}</td></tr>
                 )}
               </tbody>
             </table>

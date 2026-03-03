@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Brain, Quote } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Psychology = () => {
+  const { t } = useTranslation();
   const [contents, setContents] = useState<any[]>([]);
 
   useEffect(() => {
@@ -14,16 +16,15 @@ const Psychology = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-display font-bold text-primary text-glow flex items-center gap-2">
-          <Brain className="w-6 h-6" /> Psicologia do Trader
+          <Brain className="w-6 h-6" /> {t('psychology.title')}
         </h1>
-        <p className="text-muted-foreground">Fortaleça sua mentalidade para operar com consistência</p>
+        <p className="text-muted-foreground">{t('psychology.subtitle')}</p>
       </div>
-
       {contents.length === 0 ? (
         <div className="bg-card border border-border rounded-lg p-8 text-center">
           <Brain className="w-12 h-12 text-primary mx-auto mb-4 opacity-50" />
-          <p className="text-muted-foreground">Conteúdo em breve...</p>
-          <p className="text-sm text-muted-foreground mt-1">O administrador irá adicionar textos motivacionais aqui.</p>
+          <p className="text-muted-foreground">{t('psychology.comingSoon')}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('psychology.adminWillAdd')}</p>
         </div>
       ) : (
         <div className="grid gap-4">

@@ -1,18 +1,21 @@
 import { Youtube, Send, LogIn, BarChart3, GraduationCap, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import heroBg from "@/assets/hero-bg-new.jpg";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleBrokerClick = () => {
     window.open("https://broker-qx.pro/sign-up/?lid=2011722", "_blank", "noopener,noreferrer");
   };
 
   const navItems = [
-    { icon: BarChart3, label: "Gerenciamento" },
-    { icon: GraduationCap, label: "Aulas" },
-    { icon: Brain, label: "Controle Emocional" },
+    { icon: BarChart3, label: t('nav.management') },
+    { icon: GraduationCap, label: t('nav.classes') },
+    { icon: Brain, label: t('nav.emotionalControl') },
   ];
 
   return (
@@ -42,13 +45,16 @@ const Landing = () => {
           ))}
         </div>
 
-        <button
-          onClick={() => navigate("/login")}
-          className="flex items-center gap-2 rounded-lg px-5 py-2.5 font-display text-xs sm:text-sm font-bold uppercase tracking-wider text-primary-foreground gradient-gold box-glow transition-all hover:scale-105 hover:shadow-[0_0_25px_hsla(45,100%,50%,0.4)]"
-        >
-          <LogIn className="h-4 w-4" />
-          Entrar
-        </button>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <button
+            onClick={() => navigate("/login")}
+            className="flex items-center gap-2 rounded-lg px-5 py-2.5 font-display text-xs sm:text-sm font-bold uppercase tracking-wider text-primary-foreground gradient-gold box-glow transition-all hover:scale-105 hover:shadow-[0_0_25px_hsla(45,100%,50%,0.4)]"
+          >
+            <LogIn className="h-4 w-4" />
+            {t('nav.enter')}
+          </button>
+        </div>
       </nav>
 
       {/* Live schedule - bottom left */}
@@ -58,12 +64,12 @@ const Landing = () => {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
           </span>
-          <span className="font-display text-xs font-bold uppercase tracking-wider text-primary">Live no YouTube</span>
+          <span className="font-display text-xs font-bold uppercase tracking-wider text-primary">{t('landing.liveOnYoutube')}</span>
         </div>
         <div className="space-y-0.5 text-xs text-foreground/80">
-          <p>🗓️ Seg a Sex — <span className="font-semibold text-foreground">20h</span></p>
-          <p>🗓️ Sábado — <span className="font-semibold text-foreground">19h</span></p>
-          <p>🗓️ Domingo — <span className="font-semibold text-foreground">10h</span></p>
+          <p>{t('landing.monFri')} <span className="font-semibold text-foreground">20h</span></p>
+          <p>{t('landing.saturday')} <span className="font-semibold text-foreground">19h</span></p>
+          <p>{t('landing.sunday')} <span className="font-semibold text-foreground">10h</span></p>
         </div>
       </div>
 
@@ -71,17 +77,17 @@ const Landing = () => {
       <div className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-end pb-16 px-4">
         <div className="mb-8 text-center">
           <h1 className="font-display text-2xl sm:text-4xl font-black text-glow-strong tracking-wide text-primary mb-2">
-            OPERAÇÕES AO VIVO TODOS OS DIAS
+            {t('landing.liveTitle')}
           </h1>
           <p className="text-lg sm:text-2xl font-semibold text-foreground mb-8">
-            🔥 Entre para o time e opere com a gente!
+            {t('landing.joinTeam')}
           </p>
 
           <button
             onClick={handleBrokerClick}
             className="group relative cursor-pointer rounded-xl px-8 py-4 sm:px-12 sm:py-5 font-display text-sm sm:text-lg font-bold uppercase tracking-widest text-primary-foreground gradient-gold box-glow-strong transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_hsla(45,100%,50%,0.5)] active:scale-95 mb-10"
           >
-            <span className="relative z-10">🚀 Crie sua conta e opere comigo</span>
+            <span className="relative z-10">{t('landing.createAccount')}</span>
           </button>
         </div>
 

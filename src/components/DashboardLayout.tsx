@@ -11,6 +11,7 @@ import {
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -155,7 +156,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <p className="text-xs text-foreground mt-1 truncate font-medium">{displayName || user?.email}</p>
           <div className="mt-2 flex items-center justify-between">
             <StreakDisplay />
-            <LanguageSwitcher />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
 

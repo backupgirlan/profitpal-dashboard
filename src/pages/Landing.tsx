@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import heroBg from "@/assets/hero-bg-new.jpg";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -45,7 +46,8 @@ const Landing = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           <LanguageSwitcher />
           <button
             onClick={() => navigate("/login")}
@@ -58,7 +60,7 @@ const Landing = () => {
       </nav>
 
       {/* Live schedule - bottom left */}
-      <div className="absolute z-20 bottom-6 left-4 sm:left-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[220px]">
+      <div className="absolute z-20 bottom-[140px] sm:bottom-6 left-4 sm:left-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[220px]">
         <div className="flex items-center gap-2 mb-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>

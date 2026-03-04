@@ -100,6 +100,21 @@
     "configuring": "We are setting up our page",
     "configuringDesc": "Soon you will have access to all tools. Stay tuned for updates!"
   },
+  "home": {
+    "balance": "Balance",
+    "profit": "Profit",
+    "quickTrade": "Register Trade",
+    "pair": "Pair",
+    "entryValue": "Amount ($)",
+    "invalidAmount": "Invalid amount or greater than balance.",
+    "evolution": "Account Evolution",
+    "noTrades": "Register trades to see evolution",
+    "patent": "Trader Patent",
+    "nextRank": "Next",
+    "maxRank": "🏆 Maximum rank achieved!",
+    "trophies": "Profit Trophies",
+    "unlocked": "Unlocked"
+  },
   "calculator": {
     "title": "Trader Calculator",
     "subtitle": "Calculate Soros, Martingale, entries and profits",

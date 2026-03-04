@@ -100,6 +100,21 @@
     "configuring": "Estamos configurando nossa página",
     "configuringDesc": "Em breve você terá acesso a todas as ferramentas. Aguarde as novidades!"
   },
+  "home": {
+    "balance": "Banca",
+    "profit": "Lucro",
+    "quickTrade": "Registrar Operação",
+    "pair": "Par",
+    "entryValue": "Valor (R$)",
+    "invalidAmount": "Valor inválido ou maior que a banca.",
+    "evolution": "Evolução da Conta",
+    "noTrades": "Registre operações para ver a evolução",
+    "patent": "Patente do Trader",
+    "nextRank": "Próximo",
+    "maxRank": "🏆 Patente máxima atingida!",
+    "trophies": "Troféus de Lucro",
+    "unlocked": "Desbloqueado"
+  },
   "calculator": {
     "title": "Calculadora do Trader",
     "subtitle": "Calcule Soros, Martingale, entradas e lucros",

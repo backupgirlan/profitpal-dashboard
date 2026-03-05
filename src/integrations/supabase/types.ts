@@ -172,6 +172,33 @@ export type Database = {
         }
         Relationships: []
       }
+      live_scores: {
+        Row: {
+          day_of_week: number
+          id: string
+          losses: number
+          updated_at: string
+          week_start: string
+          wins: number
+        }
+        Insert: {
+          day_of_week: number
+          id?: string
+          losses?: number
+          updated_at?: string
+          week_start?: string
+          wins?: number
+        }
+        Update: {
+          day_of_week?: number
+          id?: string
+          losses?: number
+          updated_at?: string
+          week_start?: string
+          wins?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_management_mode: string | null

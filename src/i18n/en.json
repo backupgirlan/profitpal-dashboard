@@ -13,7 +13,8 @@
     "liveOnYoutube": "Live on YouTube",
     "monFri": "🗓️ Mon to Fri —",
     "saturday": "🗓️ Saturday —",
-    "sunday": "🗓️ Sunday —"
+    "sunday": "🗓️ Sunday —",
+    "weeklyScore": "Weekly Score"
   },
   "login": {
     "title": "Login",
@@ -113,7 +114,11 @@
     "nextRank": "Next",
     "maxRank": "🏆 Maximum rank achieved!",
     "trophies": "Profit Trophies",
-    "unlocked": "Unlocked"
+    "unlocked": "Unlocked",
+    "deposit": "Deposit",
+    "depositPlaceholder": "Deposit amount ($)",
+    "depositBtn": "Deposit",
+    "depositSuccess": "Deposit registered!"
   },
   "calculator": {
     "title": "Trader Calculator",
@@ -267,7 +272,11 @@
     "courseVideoAdded": "Course video added!",
     "categoryCreated": "Category created!",
     "noCategory": "No categories created",
-    "noVideoInCat": "No videos"
+    "noVideoInCat": "No videos",
+    "liveScoresTab": "Live Score",
+    "liveScoresTitle": "Weekly Live Scoreboard",
+    "liveScoresDesc": "Update live results for each day. Resets every Monday.",
+    "scoreUpdated": "Score updated!"
   },
   "adminMessage": {
     "understood": "Got it"

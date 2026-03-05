@@ -1,13 +1,34 @@
-import { Youtube, Send, LogIn, BarChart3, GraduationCap, Brain } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Youtube, Send, LogIn, BarChart3, GraduationCap, Brain, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import heroBg from "@/assets/hero-bg-new.jpg";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ThemeToggle from "@/components/ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
+
+const DAY_LABELS_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const DAY_LABELS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+interface LiveScore { day_of_week: number; wins: number; losses: number; }
 
 const Landing = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [scores, setScores] = useState<LiveScore[]>([]);
+  const isEn = i18n.language === 'en';
+  const dayLabels = isEn ? DAY_LABELS_EN : DAY_LABELS_PT;
+
+  useEffect(() => {
+    const getMonday = () => {
+      const now = new Date();
+      const day = now.getDay();
+      const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+      return new Date(now.setDate(diff)).toISOString().split('T')[0];
+    };
+    supabase.from('live_scores').select('day_of_week, wins, losses').eq('week_start', getMonday())
+      .then(({ data }) => { if (data) setScores(data as LiveScore[]); });
+  }, []);
 
   const handleBrokerClick = () => {
     window.open("https://broker-qx.pro/sign-up/?lid=2011722", "_blank", "noopener,noreferrer");
@@ -72,6 +93,32 @@ const Landing = () => {
           <p>{t('landing.monFri')} <span className="font-semibold text-foreground">20h</span></p>
           <p>{t('landing.saturday')} <span className="font-semibold text-foreground">19h</span></p>
           <p>{t('landing.sunday')} <span className="font-semibold text-foreground">10h</span></p>
+        </div>
+      </div>
+
+      {/* Weekly Scoreboard */}
+      <div className="absolute z-20 bottom-[140px] sm:bottom-6 right-4 sm:right-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[260px]">
+        <h3 className="font-display text-xs font-bold uppercase tracking-wider text-primary mb-2">
+          {t('landing.weeklyScore')}
+        </h3>
+        <div className="space-y-1">
+          {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => {
+            const score = scores.find(s => s.day_of_week === dayIdx);
+            return (
+              <div key={dayIdx} className="flex items-center justify-between gap-3 text-xs">
+                <span className="text-foreground/80 font-medium w-8">{dayLabels[dayIdx]}</span>
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center gap-1 text-success font-bold">
+                    <CheckCircle className="w-3 h-3" /> {score?.wins ?? 0}
+                  </span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className="flex items-center gap-1 text-destructive font-bold">
+                    <XCircle className="w-3 h-3" /> {score?.losses ?? 0}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

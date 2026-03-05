@@ -80,8 +80,36 @@ const Landing = () => {
         </div>
       </nav>
 
-      {/* Live schedule - bottom left */}
-      <div className="absolute z-20 bottom-[140px] sm:bottom-6 left-4 sm:left-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[220px]">
+      {/* Weekly Scoreboard - top left on desktop */}
+      <div className="hidden sm:block absolute z-20 top-20 left-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[260px]">
+        <h3 className="font-display text-xs font-bold uppercase tracking-wider text-primary mb-2">
+          {t('landing.weeklyScore')}
+        </h3>
+        <div className="space-y-1">
+          {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => {
+            const score = scores.find(s => s.day_of_week === dayIdx);
+            const hasWins = (score?.wins ?? 0) > 0;
+            const hasLosses = (score?.losses ?? 0) > 0;
+            return (
+              <div key={dayIdx} className="flex items-center justify-between gap-3 text-xs">
+                <span className="text-foreground/80 font-medium w-8">{dayLabels[dayIdx]}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`flex items-center gap-1 font-bold ${hasWins ? 'animate-pulse-win' : ''}`} style={{ color: 'hsl(142, 76%, 36%)' }}>
+                    <CheckCircle className="w-3 h-3" /> {score?.wins ?? 0}
+                  </span>
+                  <span className="text-muted-foreground">/</span>
+                  <span className={`flex items-center gap-1 font-bold ${hasLosses ? 'animate-pulse-loss' : ''}`} style={{ color: 'hsl(0, 72%, 51%)' }}>
+                    <XCircle className="w-3 h-3" /> {score?.losses ?? 0}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Live schedule - bottom left desktop only */}
+      <div className="hidden sm:block absolute z-20 bottom-6 left-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[220px]">
         <div className="flex items-center gap-2 mb-2">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
@@ -96,34 +124,8 @@ const Landing = () => {
         </div>
       </div>
 
-      {/* Weekly Scoreboard */}
-      <div className="absolute z-20 bottom-[140px] sm:bottom-6 right-4 sm:right-8 backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3 max-w-[260px]">
-        <h3 className="font-display text-xs font-bold uppercase tracking-wider text-primary mb-2">
-          {t('landing.weeklyScore')}
-        </h3>
-        <div className="space-y-1">
-          {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => {
-            const score = scores.find(s => s.day_of_week === dayIdx);
-            return (
-              <div key={dayIdx} className="flex items-center justify-between gap-3 text-xs">
-                <span className="text-foreground/80 font-medium w-8">{dayLabels[dayIdx]}</span>
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1 text-success font-bold">
-                    <CheckCircle className="w-3 h-3" /> {score?.wins ?? 0}
-                  </span>
-                  <span className="text-muted-foreground">/</span>
-                  <span className="flex items-center gap-1 text-destructive font-bold">
-                    <XCircle className="w-3 h-3" /> {score?.losses ?? 0}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Content */}
-      <div className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-end pb-16 px-4">
+      <div className="relative z-10 flex min-h-[calc(100vh-72px)] flex-col items-center justify-end pb-6 sm:pb-16 px-4">
         <div className="mb-8 text-center">
           <h1 className="font-display text-2xl sm:text-4xl font-black text-glow-strong tracking-wide text-primary mb-2">
             {t('landing.liveTitle')}
@@ -134,13 +136,13 @@ const Landing = () => {
 
           <button
             onClick={handleBrokerClick}
-            className="group relative cursor-pointer rounded-xl px-8 py-4 sm:px-12 sm:py-5 font-display text-sm sm:text-lg font-bold uppercase tracking-widest text-primary-foreground gradient-gold box-glow-strong transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_hsla(45,100%,50%,0.5)] active:scale-95 mb-10"
+            className="group relative cursor-pointer rounded-xl px-8 py-4 sm:px-12 sm:py-5 font-display text-sm sm:text-lg font-bold uppercase tracking-widest text-primary-foreground gradient-gold box-glow-strong transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_hsla(45,100%,50%,0.5)] active:scale-95 mb-6"
           >
             <span className="relative z-10">{t('landing.createAccount')}</span>
           </button>
         </div>
 
-        <div className="flex gap-5">
+        <div className="flex gap-5 mb-4">
           <a
             href="https://www.youtube.com/@TechnicalGirlan"
             target="_blank"
@@ -159,6 +161,44 @@ const Landing = () => {
             <Send className="h-5 w-5" />
             Telegram
           </a>
+        </div>
+
+        {/* Mobile: Live schedule + Scoreboard below buttons */}
+        <div className="sm:hidden flex flex-col gap-3 w-full max-w-xs">
+          <div className="backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-destructive"></span>
+              </span>
+              <span className="font-display text-xs font-bold uppercase tracking-wider text-primary">{t('landing.liveOnYoutube')}</span>
+            </div>
+            <div className="flex justify-between text-xs text-foreground/80">
+              <p>{t('landing.monFri')} <span className="font-semibold text-foreground">20h</span></p>
+              <p>{t('landing.saturday')} <span className="font-semibold text-foreground">19h</span></p>
+              <p>{t('landing.sunday')} <span className="font-semibold text-foreground">10h</span></p>
+            </div>
+          </div>
+
+          <div className="backdrop-blur-md bg-background/40 border border-border/30 rounded-lg px-4 py-3">
+            <h3 className="font-display text-xs font-bold uppercase tracking-wider text-primary mb-2">
+              {t('landing.weeklyScore')}
+            </h3>
+            <div className="grid grid-cols-7 gap-1 text-center text-[10px]">
+              {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => {
+                const score = scores.find(s => s.day_of_week === dayIdx);
+                const hasWins = (score?.wins ?? 0) > 0;
+                const hasLosses = (score?.losses ?? 0) > 0;
+                return (
+                  <div key={dayIdx} className="flex flex-col items-center gap-0.5">
+                    <span className="text-foreground/60 font-medium">{dayLabels[dayIdx]}</span>
+                    <span className={`font-bold ${hasWins ? 'animate-pulse-win' : ''}`} style={{ color: 'hsl(142, 76%, 36%)' }}>{score?.wins ?? 0}</span>
+                    <span className={`font-bold ${hasLosses ? 'animate-pulse-loss' : ''}`} style={{ color: 'hsl(0, 72%, 51%)' }}>{score?.losses ?? 0}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -13,7 +13,8 @@
     "liveOnYoutube": "Live no YouTube",
     "monFri": "🗓️ Seg a Sex —",
     "saturday": "🗓️ Sábado —",
-    "sunday": "🗓️ Domingo —"
+    "sunday": "🗓️ Domingo —",
+    "weeklyScore": "Placar da Semana"
   },
   "login": {
     "title": "Entrar",
@@ -113,7 +114,11 @@
     "nextRank": "Próximo",
     "maxRank": "🏆 Patente máxima atingida!",
     "trophies": "Troféus de Lucro",
-    "unlocked": "Desbloqueado"
+    "unlocked": "Desbloqueado",
+    "deposit": "Depósito",
+    "depositPlaceholder": "Valor do depósito (R$)",
+    "depositBtn": "Depositar",
+    "depositSuccess": "Depósito registrado!"
   },
   "calculator": {
     "title": "Calculadora do Trader",
@@ -267,7 +272,11 @@
     "courseVideoAdded": "Vídeo do curso adicionado!",
     "categoryCreated": "Categoria criada!",
     "noCategory": "Nenhuma categoria criada",
-    "noVideoInCat": "Nenhum vídeo"
+    "noVideoInCat": "Nenhum vídeo",
+    "liveScoresTab": "Placar Live",
+    "liveScoresTitle": "Placar da Live Semanal",
+    "liveScoresDesc": "Atualize os resultados da live de cada dia. Zera toda segunda-feira.",
+    "scoreUpdated": "Placar atualizado!"
   },
   "adminMessage": {
     "understood": "Entendido"

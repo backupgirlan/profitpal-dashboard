@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight } from 'lucide-react';
+import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight, PiggyBank, Edit2 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, PROFIT_TROPHIES } from '@/lib/traderRanks';
 
 interface CandleData { index: number; open: number; close: number; color: string; }
@@ -65,6 +65,12 @@ const DashboardHome = () => {
   const [payout, setPayout] = useState('80');
   const [amount, setAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Balance edit & deposit
+  const [editingBalance, setEditingBalance] = useState(false);
+  const [balanceInput, setBalanceInput] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
+  const [depositing, setDepositing] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -160,10 +166,28 @@ const DashboardHome = () => {
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground font-medium">{t('home.balance')}</span>
+              <button onClick={() => { setEditingBalance(true); setBalanceInput(balance.toFixed(2)); }} className="ml-auto text-muted-foreground hover:text-primary">
+                <Edit2 className="w-3 h-3" />
+              </button>
             </div>
-            <p className="text-lg sm:text-xl font-display font-bold text-foreground">
-              R$ {balance.toFixed(2)}
-            </p>
+            {editingBalance ? (
+              <div className="flex items-center gap-1">
+                <span className="text-sm font-bold text-foreground">R$</span>
+                <Input type="number" value={balanceInput} onChange={e => setBalanceInput(e.target.value)} className="h-7 bg-secondary text-sm w-24" />
+                <Button size="sm" className="h-7 text-xs px-2" onClick={async () => {
+                  const val = Number(balanceInput);
+                  if (isNaN(val) || val < 0) return;
+                  await supabase.from('profiles').update({ balance: val }).eq('user_id', user!.id);
+                  setBalance(val); setEditingBalance(false);
+                  window.dispatchEvent(new Event('balance-updated'));
+                }}>OK</Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={() => setEditingBalance(false)}>✕</Button>
+              </div>
+            ) : (
+              <p className="text-lg sm:text-xl font-display font-bold text-foreground">
+                R$ {balance.toFixed(2)}
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -201,6 +225,34 @@ const DashboardHome = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Deposit */}
+      <Card className="border-border">
+        <CardContent className="p-4 sm:p-6">
+          <h3 className="font-display text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+            <PiggyBank className="w-4 h-4 text-primary" /> {t('home.deposit')}
+          </h3>
+          <div className="flex gap-3">
+            <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositPlaceholder')} className="bg-secondary" />
+            <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0" onClick={async () => {
+              const val = Number(depositAmount);
+              if (!val || val <= 0 || !user) return;
+              setDepositing(true);
+              const newBalance = +(balance + val).toFixed(2);
+              await Promise.all([
+                supabase.from('deposits').insert({ user_id: user.id, amount: val }),
+                supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id),
+              ]);
+              setBalance(newBalance); setDepositAmount('');
+              toast.success(`💰 ${t('home.depositSuccess')} R$ ${val.toFixed(2)}`);
+              window.dispatchEvent(new Event('balance-updated'));
+              setDepositing(false);
+            }}>
+              {t('home.depositBtn')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Quick Trade Form */}
       <Card className="border-border">

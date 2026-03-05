@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Search, CheckCircle, XCircle, Plus, Trash2, Youtube, MessageSquare, GraduationCap } from 'lucide-react';
+import { Shield, Search, CheckCircle, XCircle, Plus, Trash2, Youtube, MessageSquare, GraduationCap, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface UserProfile { id: string; user_id: string; display_name: string | null; is_vip: boolean; created_at: string | null; }
@@ -32,15 +32,47 @@ const AdminPanel = () => {
   const [newCourseVideoTitle, setNewCourseVideoTitle] = useState('');
   const [newCourseVideoUrl, setNewCourseVideoUrl] = useState('');
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [liveScores, setLiveScores] = useState<Record<number, { wins: number; losses: number; id?: string }>>({});
+  const [savingScore, setSavingScore] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' }).then(({ data }) => {
       setIsAdmin(!!data);
-      if (data) { loadProfiles(); loadAdvices(); loadVideos(); loadCourseData(); }
+      if (data) { loadProfiles(); loadAdvices(); loadVideos(); loadCourseData(); loadLiveScores(); }
       else setLoading(false);
     });
   }, [user]);
+
+  const getMonday = () => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(now.setDate(diff)).toISOString().split('T')[0];
+  };
+
+  const loadLiveScores = async () => {
+    const weekStart = getMonday();
+    const { data } = await supabase.from('live_scores').select('*').eq('week_start', weekStart);
+    const map: Record<number, { wins: number; losses: number; id?: string }> = {};
+    for (let i = 0; i <= 6; i++) map[i] = { wins: 0, losses: 0 };
+    if (data) data.forEach((s: any) => { map[s.day_of_week] = { wins: s.wins, losses: s.losses, id: s.id }; });
+    setLiveScores(map);
+  };
+
+  const updateScore = async (dayIdx: number, field: 'wins' | 'losses', delta: number) => {
+    setSavingScore(dayIdx);
+    const current = liveScores[dayIdx] || { wins: 0, losses: 0 };
+    const newVal = Math.max(0, (current[field] || 0) + delta);
+    const weekStart = getMonday();
+    if (current.id) {
+      await supabase.from('live_scores').update({ [field]: newVal, updated_at: new Date().toISOString() }).eq('id', current.id);
+    } else {
+      await supabase.from('live_scores').insert({ day_of_week: dayIdx, [field]: newVal, week_start: weekStart });
+    }
+    await loadLiveScores();
+    setSavingScore(null);
+  };
 
   const loadProfiles = async () => { setLoading(true); const { data } = await supabase.from('profiles').select('id, user_id, display_name, is_vip, created_at').order('created_at', { ascending: false }); if (data) setProfiles(data as UserProfile[]); setLoading(false); };
   const loadAdvices = async () => { const { data } = await supabase.from('admin_advice').select('*').order('created_at', { ascending: false }); if (data) setAdvices(data); };
@@ -88,6 +120,7 @@ const AdminPanel = () => {
           <TabsTrigger value="advice">{t('admin.advice')}</TabsTrigger>
           <TabsTrigger value="videos">{t('admin.videos')}</TabsTrigger>
           <TabsTrigger value="courses">{t('admin.coursesTab')}</TabsTrigger>
+          <TabsTrigger value="livescores">{t('admin.liveScoresTab')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -202,6 +235,39 @@ const AdminPanel = () => {
               );
             })}
             {courseCategories.length === 0 && <p className="text-center text-muted-foreground text-sm py-4">{t('admin.noCategory')}</p>}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="livescores" className="space-y-4">
+          <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-primary" /> {t('admin.liveScoresTitle')}
+            </h3>
+            <p className="text-xs text-muted-foreground">{t('admin.liveScoresDesc')}</p>
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5, 6, 0].map((dayIdx) => {
+                const dayLabels = i18n.language === 'en' ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+                const score = liveScores[dayIdx] || { wins: 0, losses: 0 };
+                const isSaving = savingScore === dayIdx;
+                return (
+                  <div key={dayIdx} className="flex items-center gap-3 p-2 rounded-lg bg-secondary/50">
+                    <span className="font-display text-sm font-bold text-foreground w-10">{dayLabels[dayIdx]}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">W:</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-destructive" disabled={isSaving} onClick={() => updateScore(dayIdx, 'wins', -1)}>-</Button>
+                      <span className="text-sm font-bold text-success w-6 text-center">{score.wins}</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-success" disabled={isSaving} onClick={() => updateScore(dayIdx, 'wins', 1)}>+</Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">L:</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-success" disabled={isSaving} onClick={() => updateScore(dayIdx, 'losses', -1)}>-</Button>
+                      <span className="text-sm font-bold text-destructive w-6 text-center">{score.losses}</span>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-destructive" disabled={isSaving} onClick={() => updateScore(dayIdx, 'losses', 1)}>+</Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </TabsContent>
       </Tabs>

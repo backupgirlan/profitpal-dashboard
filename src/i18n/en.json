@@ -14,7 +14,9 @@
     "monFri": "🗓️ Mon to Fri —",
     "saturday": "🗓️ Saturday —",
     "sunday": "🗓️ Sunday —",
-    "weeklyScore": "Weekly Live Scoreboard"
+    "weeklyScore": "Weekly Live Scoreboard",
+    "monthlyOps": "Monthly Operations",
+    "pastMonths": "View past months"
   },
   "login": {
     "title": "Login",
@@ -58,6 +60,7 @@
     "advice": "Advice",
     "videos": "Videos",
     "courses": "Course",
+    "report": "Report",
     "rewards": "Rewards",
     "admin": "Admin",
     "installApp": "Install App",
@@ -288,5 +291,16 @@
   },
   "common": {
     "error": "Error"
+  },
+  "report": {
+    "title": "Trade Report",
+    "subtitle": "Complete history of all your trades",
+    "totalTrades": "Total Trades",
+    "totalProfit": "Total Profit",
+    "noTrades": "No trades registered",
+    "date": "Date",
+    "amount": "Amount",
+    "result": "Result",
+    "mode": "Mode"
   }
 }

@@ -199,6 +199,33 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_scores: {
+        Row: {
+          created_at: string
+          id: string
+          losses: number
+          month_start: string
+          updated_at: string
+          wins: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          losses?: number
+          month_start: string
+          updated_at?: string
+          wins?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          losses?: number
+          month_start?: string
+          updated_at?: string
+          wins?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active_management_mode: string | null
@@ -423,6 +450,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      reset_weekly_scores: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

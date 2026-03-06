@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone, Trash2, GraduationCap
+  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone, Trash2, GraduationCap, FileText
 } from 'lucide-react';
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
@@ -45,6 +45,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/dashboard/advice', label: t('sidebar.advice'), icon: MessageSquare },
     { path: '/dashboard/videos', label: t('sidebar.videos'), icon: Youtube },
     { path: '/dashboard/courses', label: t('sidebar.courses'), icon: GraduationCap },
+    { path: '/dashboard/report', label: t('sidebar.report'), icon: FileText },
     { path: '/dashboard/rewards', label: t('sidebar.rewards'), icon: Gift },
   ];
 

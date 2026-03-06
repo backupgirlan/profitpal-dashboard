@@ -14,7 +14,9 @@
     "monFri": "🗓️ Seg a Sex —",
     "saturday": "🗓️ Sábado —",
     "sunday": "🗓️ Domingo —",
-    "weeklyScore": "Placar das Lives da Semana"
+    "weeklyScore": "Placar das Lives da Semana",
+    "monthlyOps": "Operações do Mês",
+    "pastMonths": "Ver meses anteriores"
   },
   "login": {
     "title": "Entrar",
@@ -58,6 +60,7 @@
     "advice": "Conselhos",
     "videos": "Vídeos",
     "courses": "Curso",
+    "report": "Relatório",
     "rewards": "Brindes",
     "admin": "Admin",
     "installApp": "Instalar App",
@@ -288,5 +291,16 @@
   },
   "common": {
     "error": "Erro"
+  },
+  "report": {
+    "title": "Relatório de Operações",
+    "subtitle": "Histórico completo de todas as suas operações",
+    "totalTrades": "Total de Operações",
+    "totalProfit": "Lucro Total",
+    "noTrades": "Nenhuma operação registrada",
+    "date": "Data",
+    "amount": "Valor",
+    "result": "Resultado",
+    "mode": "Modo"
   }
 }

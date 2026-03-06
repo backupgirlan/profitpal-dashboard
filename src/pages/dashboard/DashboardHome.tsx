@@ -65,6 +65,8 @@ const DashboardHome = () => {
   const [payout, setPayout] = useState('80');
   const [amount, setAmount] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [savedPairs, setSavedPairs] = useState<string[]>([]);
+  const [showPairSuggestions, setShowPairSuggestions] = useState(false);
 
   // Balance edit & deposit
   const [editingBalance, setEditingBalance] = useState(false);
@@ -107,6 +109,22 @@ const DashboardHome = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Load saved pairs from trades
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('trades').select('pair_name').eq('user_id', user.id)
+      .then(({ data }) => {
+        if (data) {
+          const unique = [...new Set(data.map(d => d.pair_name))].sort();
+          setSavedPairs(unique);
+        }
+      });
+  }, [user]);
+
+  const filteredPairs = pair.length > 0
+    ? savedPairs.filter(p => p.toLowerCase().startsWith(pair.toLowerCase()))
+    : [];
+
   // Listen for balance updates from management
   useEffect(() => {
     const handler = () => loadData();
@@ -146,6 +164,7 @@ const DashboardHome = () => {
       setTotalProfit(newTotalProfit);
       if (result === 'win') setWins(w => w + 1); else setLosses(l => l + 1);
       toast.success(result === 'win' ? `✅ WIN +R$ ${(amtNum * payNum).toFixed(2)}` : `❌ LOSS -R$ ${amtNum.toFixed(2)}`);
+      if (!savedPairs.includes(pair.trim())) setSavedPairs(prev => [...prev, pair.trim()].sort());
       setPair(''); setAmount('');
       window.dispatchEvent(new Event('balance-updated'));
       loadData(); // refresh chart
@@ -259,9 +278,31 @@ const DashboardHome = () => {
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-primary mb-4">{t('home.quickTrade')}</h3>
           <div className="grid grid-cols-3 gap-3 mb-4">
-            <div>
+            <div className="relative">
               <Label className="text-xs">{t('home.pair')}</Label>
-              <Input value={pair} onChange={e => setPair(e.target.value)} placeholder="EUR/USD" className="bg-secondary" />
+              <Input
+                value={pair}
+                onChange={e => { setPair(e.target.value); setShowPairSuggestions(true); }}
+                onFocus={() => setShowPairSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 150)}
+                placeholder="EUR/USD"
+                className="bg-secondary"
+                autoComplete="off"
+              />
+              {showPairSuggestions && filteredPairs.length > 0 && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg max-h-32 overflow-y-auto">
+                  {filteredPairs.map(p => (
+                    <button
+                      key={p}
+                      type="button"
+                      className="w-full text-left px-3 py-1.5 text-xs hover:bg-secondary transition-colors text-foreground"
+                      onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <Label className="text-xs">Payout (%)</Label>

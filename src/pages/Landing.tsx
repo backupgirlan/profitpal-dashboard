@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Youtube, Send, LogIn, BarChart3, GraduationCap, Brain, CheckCircle, XCircle } from "lucide-react";
+import { Youtube, Send, LogIn, BarChart3, GraduationCap, Brain, CheckCircle, XCircle, ChevronDown, ChevronUp, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import heroBg from "@/assets/hero-bg-new.jpg";
@@ -9,15 +9,21 @@ import { supabase } from "@/integrations/supabase/client";
 
 const DAY_LABELS_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const DAY_LABELS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_LABELS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+const MONTH_LABELS_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 interface LiveScore { day_of_week: number; wins: number; losses: number; }
+interface MonthlyScore { month_start: string; wins: number; losses: number; }
 
 const Landing = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const [scores, setScores] = useState<LiveScore[]>([]);
+  const [monthlyScores, setMonthlyScores] = useState<MonthlyScore[]>([]);
+  const [showPastMonths, setShowPastMonths] = useState(false);
   const isEn = i18n.language === 'en';
   const dayLabels = isEn ? DAY_LABELS_EN : DAY_LABELS_PT;
+  const monthLabels = isEn ? MONTH_LABELS_EN : MONTH_LABELS_PT;
 
   useEffect(() => {
     const getMonday = () => {
@@ -28,6 +34,8 @@ const Landing = () => {
     };
     supabase.from('live_scores').select('day_of_week, wins, losses').eq('week_start', getMonday())
       .then(({ data }) => { if (data) setScores(data as LiveScore[]); });
+    supabase.from('monthly_scores').select('*').order('month_start', { ascending: false })
+      .then(({ data }) => { if (data) setMonthlyScores(data as MonthlyScore[]); });
   }, []);
 
   const handleBrokerClick = () => {
@@ -106,6 +114,60 @@ const Landing = () => {
             );
           })}
         </div>
+
+        {/* Monthly summary - desktop */}
+        {(() => {
+          const currentMonth = monthlyScores.length > 0 ? monthlyScores[0] : null;
+          // Also aggregate current week into current month display
+          const weekWins = scores.reduce((a, s) => a + s.wins, 0);
+          const weekLosses = scores.reduce((a, s) => a + s.losses, 0);
+          const currentMonthStart = new Date().toISOString().slice(0, 7);
+          const matchingMonth = monthlyScores.find(m => m.month_start.startsWith(currentMonthStart));
+          const totalMonthWins = (matchingMonth?.wins || 0) + weekWins;
+          const totalMonthLosses = (matchingMonth?.losses || 0) + weekLosses;
+          const pastMonths = monthlyScores.filter(m => !m.month_start.startsWith(currentMonthStart));
+
+          return (
+            <div className="mt-3 pt-3 border-t border-border/30">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] uppercase tracking-wider text-primary font-bold flex items-center gap-1">
+                  <Calendar className="w-3 h-3" /> {t('landing.monthlyOps')}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="font-bold" style={{ color: 'hsl(142, 76%, 36%)' }}>
+                  <CheckCircle className="w-3 h-3 inline mr-0.5" />{totalMonthWins}
+                </span>
+                <span className="text-muted-foreground">x</span>
+                <span className="font-bold" style={{ color: 'hsl(0, 72%, 51%)' }}>
+                  <XCircle className="w-3 h-3 inline mr-0.5" />{totalMonthLosses}
+                </span>
+              </div>
+              {pastMonths.length > 0 && (
+                <button
+                  onClick={() => setShowPastMonths(!showPastMonths)}
+                  className="mt-1 text-[10px] text-primary/80 hover:text-primary flex items-center gap-0.5 transition-colors"
+                >
+                  {showPastMonths ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {t('landing.pastMonths')}
+                </button>
+              )}
+              {showPastMonths && pastMonths.map(m => {
+                const d = new Date(m.month_start);
+                return (
+                  <div key={m.month_start} className="flex items-center justify-between text-[10px] mt-1 text-foreground/70">
+                    <span>{monthLabels[d.getMonth()]} {d.getFullYear()}</span>
+                    <div className="flex items-center gap-1">
+                      <span style={{ color: 'hsl(142, 76%, 36%)' }} className="font-bold">{m.wins}</span>
+                      <span className="text-muted-foreground">x</span>
+                      <span style={{ color: 'hsl(0, 72%, 51%)' }} className="font-bold">{m.losses}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Live schedule - bottom left desktop only */}
@@ -198,6 +260,54 @@ const Landing = () => {
                 );
               })}
             </div>
+
+            {/* Monthly summary - mobile */}
+            {(() => {
+              const weekWins = scores.reduce((a, s) => a + s.wins, 0);
+              const weekLosses = scores.reduce((a, s) => a + s.losses, 0);
+              const currentMonthStart = new Date().toISOString().slice(0, 7);
+              const matchingMonth = monthlyScores.find(m => m.month_start.startsWith(currentMonthStart));
+              const totalMonthWins = (matchingMonth?.wins || 0) + weekWins;
+              const totalMonthLosses = (matchingMonth?.losses || 0) + weekLosses;
+              const pastMonths = monthlyScores.filter(m => !m.month_start.startsWith(currentMonthStart));
+
+              return (
+                <div className="mt-2 pt-2 border-t border-border/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-wider text-primary font-bold flex items-center gap-1">
+                      <Calendar className="w-3 h-3" /> {t('landing.monthlyOps')}
+                    </span>
+                    <div className="flex items-center gap-1 text-[10px]">
+                      <span className="font-bold" style={{ color: 'hsl(142, 76%, 36%)' }}>{totalMonthWins}</span>
+                      <span className="text-muted-foreground">x</span>
+                      <span className="font-bold" style={{ color: 'hsl(0, 72%, 51%)' }}>{totalMonthLosses}</span>
+                    </div>
+                  </div>
+                  {pastMonths.length > 0 && (
+                    <button
+                      onClick={() => setShowPastMonths(!showPastMonths)}
+                      className="mt-1 text-[10px] text-primary/80 hover:text-primary flex items-center gap-0.5"
+                    >
+                      {showPastMonths ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      {t('landing.pastMonths')}
+                    </button>
+                  )}
+                  {showPastMonths && pastMonths.map(m => {
+                    const d = new Date(m.month_start);
+                    return (
+                      <div key={m.month_start} className="flex items-center justify-between text-[10px] mt-0.5 text-foreground/70">
+                        <span>{monthLabels[d.getMonth()]} {d.getFullYear()}</span>
+                        <div className="flex items-center gap-1">
+                          <span style={{ color: 'hsl(142, 76%, 36%)' }} className="font-bold">{m.wins}</span>
+                          <span className="text-muted-foreground">x</span>
+                          <span style={{ color: 'hsl(0, 72%, 51%)' }} className="font-bold">{m.losses}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>

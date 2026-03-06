@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight, PiggyBank, Edit2 } from 'lucide-react';
-import { getRankForProfit, getNextRankForProfit, PROFIT_TROPHIES } from '@/lib/traderRanks';
+import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight, PiggyBank, Edit2, Download } from 'lucide-react';
+import { getRankForProfit, getNextRankForProfit, PROFIT_TROPHIES, TRADER_RANKS } from '@/lib/traderRanks';
+import { usePatentStoryDownload } from '@/components/PatentStoryGenerator';
 
 interface CandleData { index: number; open: number; close: number; color: string; }
 
@@ -59,6 +60,8 @@ const DashboardHome = () => {
   const [wins, setWins] = useState(0);
   const [losses, setLosses] = useState(0);
   const [chartData, setChartData] = useState<CandleData[]>([]);
+  const [displayName, setDisplayName] = useState('Trader');
+  const [daysTrading, setDaysTrading] = useState(0);
 
   // Trade form
   const [pair, setPair] = useState('');
@@ -74,15 +77,23 @@ const DashboardHome = () => {
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
 
+  const { downloadStory } = usePatentStoryDownload();
+
   const loadData = useCallback(async () => {
     if (!user) return;
     const [profileRes, tradesRes] = await Promise.all([
-      supabase.from('profiles').select('balance, total_profit').eq('user_id', user.id).single(),
+      supabase.from('profiles').select('balance, total_profit, display_name, created_at').eq('user_id', user.id).single(),
       supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
     ]);
     if (profileRes.data) {
       setBalance(Number(profileRes.data.balance) || 0);
       setTotalProfit(Number(profileRes.data.total_profit) || 0);
+      setDisplayName(profileRes.data.display_name || 'Trader');
+      if (profileRes.data.created_at) {
+        const created = new Date(profileRes.data.created_at);
+        const now = new Date();
+        setDaysTrading(Math.max(1, Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24))));
+      }
     }
     if (tradesRes.data) {
       let w = 0, l = 0;
@@ -350,13 +361,14 @@ const DashboardHome = () => {
         </CardContent>
       </Card>
 
-      {/* Patent System */}
+       {/* Patent System */}
       <Card className="border-border">
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" /> {t('home.patent')}
           </h3>
-          <div className="flex items-center gap-4 mb-3">
+          {/* Current rank */}
+          <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: rank.color + '22', border: `2px solid ${rank.color}` }}>
               {rank.emoji}
             </div>
@@ -377,9 +389,47 @@ const DashboardHome = () => {
               {!nextRank && <p className="text-xs text-primary font-bold">{t('home.maxRank')}</p>}
             </div>
           </div>
+
+          {/* All ranks grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 mt-4">
+            {TRADER_RANKS.filter(r => r.minProfit > 0).map((r) => {
+              const unlocked = totalProfit >= r.minProfit;
+              return (
+                <button
+                  key={r.minProfit}
+                  onClick={() => {
+                    if (unlocked) {
+                      downloadStory({ rank: r, totalProfit, displayName, daysTrading, isEn });
+                    }
+                  }}
+                  disabled={!unlocked}
+                  className={`group relative rounded-lg border p-3 text-center transition-all ${unlocked
+                    ? 'border-primary/50 bg-primary/5 hover:bg-primary/10 cursor-pointer hover:scale-105'
+                    : 'border-border bg-secondary/30 opacity-40 cursor-not-allowed'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{r.emoji}</div>
+                  <p className="font-display text-[10px] font-bold text-foreground leading-tight" style={unlocked ? { color: r.color } : {}}>
+                    {isEn ? r.nameEn : r.name}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">R$ {r.minProfit.toLocaleString()}</p>
+                  {unlocked && (
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      <Download className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <span className="text-[9px] win-text font-bold">✓</span>
+                    </div>
+                  )}
+                  {!unlocked && (
+                    <div className="mt-1">
+                      <span className="text-[9px] text-muted-foreground">🔒</span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </CardContent>
       </Card>
-
       {/* Trophies */}
       <Card className="border-border">
         <CardContent className="p-4 sm:p-6">

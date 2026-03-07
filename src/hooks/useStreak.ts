@@ -42,6 +42,7 @@ export function useStreak() {
   const [streak, setStreak] = useState<StreakData | null>(null);
   const [loading, setLoading] = useState(true);
   const [atRisk, setAtRisk] = useState(false);
+  const [milestoneReached, setMilestoneReached] = useState<number | null>(null);
 
   const loadStreak = useCallback(async () => {
     if (!user) return;
@@ -53,13 +54,13 @@ export function useStreak() {
 
     if (data) {
       setStreak(data as StreakData);
-      checkAndUpdateStreak(data as StreakData);
+      await checkAndUpdateStreak(data as StreakData);
     } else {
-      // Create initial streak record
+      // Create initial streak record and count first login
       const initial: StreakData = {
-        streak_atual: 0,
-        maior_streak: 0,
-        ultimo_dia_ativo: null,
+        streak_atual: 1,
+        maior_streak: 1,
+        ultimo_dia_ativo: new Date().toISOString().split('T')[0],
         streak_freeze_disponivel: 0,
         total_freezes: 0,
       };
@@ -82,29 +83,61 @@ export function useStreak() {
       const diffDays = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
 
       if (diffDays === 1) {
-        // Consecutive - streak maintained by login, but needs trade to confirm
-        return;
+        // Consecutive day - auto increment streak on login
+        const newStreak = data.streak_atual + 1;
+        const newMaior = Math.max(newStreak, data.maior_streak);
+        const newFreezes = newStreak > 0 && newStreak % 14 === 0
+          ? data.streak_freeze_disponivel + 1
+          : data.streak_freeze_disponivel;
+        const totalFreezes = newFreezes > data.streak_freeze_disponivel
+          ? data.total_freezes + 1
+          : data.total_freezes;
+        const updated = {
+          streak_atual: newStreak,
+          maior_streak: newMaior,
+          ultimo_dia_ativo: today,
+          streak_freeze_disponivel: newFreezes,
+          total_freezes: totalFreezes,
+        };
+        await supabase.from('streaks').update(updated).eq('user_id', user.id);
+        setStreak(prev => prev ? { ...prev, ...updated } as StreakData : prev);
+        // Check milestones
+        if ([5, 10, 15, 30].includes(newStreak)) {
+          setMilestoneReached(newStreak);
+        }
       } else if (diffDays === 2) {
         // Missed yesterday
         if (data.streak_freeze_disponivel > 0) {
-          // Use freeze
+          const newStreak = data.streak_atual + 1;
+          const newMaior = Math.max(newStreak, data.maior_streak);
           const updated = {
             streak_freeze_disponivel: data.streak_freeze_disponivel - 1,
+            streak_atual: newStreak,
+            maior_streak: newMaior,
+            ultimo_dia_ativo: today,
           };
           await supabase.from('streaks').update(updated).eq('user_id', user.id);
-          setStreak(prev => prev ? { ...prev, ...updated } : prev);
+          setStreak(prev => prev ? { ...prev, ...updated } as StreakData : prev);
+          if ([5, 10, 15, 30].includes(newStreak)) {
+            setMilestoneReached(newStreak);
+          }
         } else {
-          // Reset streak
-          const updated = { streak_atual: 0 };
+          // Reset streak, start from 1 (today's login)
+          const updated = { streak_atual: 1, ultimo_dia_ativo: today };
           await supabase.from('streaks').update(updated).eq('user_id', user.id);
-          setStreak(prev => prev ? { ...prev, ...updated } : prev);
+          setStreak(prev => prev ? { ...prev, ...updated } as StreakData : prev);
         }
       } else if (diffDays > 2) {
-        // Multiple days missed - reset
-        const updated = { streak_atual: 0 };
+        // Multiple days missed - reset, start from 1
+        const updated = { streak_atual: 1, ultimo_dia_ativo: today };
         await supabase.from('streaks').update(updated).eq('user_id', user.id);
-        setStreak(prev => prev ? { ...prev, ...updated } : prev);
+        setStreak(prev => prev ? { ...prev, ...updated } as StreakData : prev);
       }
+    } else {
+      // No previous activity - first login
+      const updated = { streak_atual: 1, ultimo_dia_ativo: today, maior_streak: Math.max(1, data.maior_streak) };
+      await supabase.from('streaks').update(updated).eq('user_id', user.id);
+      setStreak(prev => prev ? { ...prev, ...updated } as StreakData : prev);
     }
   };
 
@@ -147,5 +180,5 @@ export function useStreak() {
 
   useEffect(() => { loadStreak(); }, [loadStreak]);
 
-  return { streak, loading, atRisk, registerActivity, refresh: loadStreak };
+  return { streak, loading, atRisk, milestoneReached, setMilestoneReached, registerActivity, refresh: loadStreak };
 }

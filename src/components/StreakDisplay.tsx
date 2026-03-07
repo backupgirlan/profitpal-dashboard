@@ -3,9 +3,10 @@ import { Progress } from '@/components/ui/progress';
 import { useStreak, getNextMilestone, getMilestoneProgress, getUnlockedMilestones } from '@/hooks/useStreak';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useTranslation } from 'react-i18next';
+import StreakMilestonePopup from '@/components/StreakMilestonePopup';
 
 export default function StreakDisplay() {
-  const { streak, loading, atRisk } = useStreak();
+  const { streak, loading, atRisk, milestoneReached, setMilestoneReached } = useStreak();
   const { t } = useTranslation();
 
   if (loading || !streak) return null;
@@ -13,6 +14,7 @@ export default function StreakDisplay() {
   const next = getNextMilestone(streak.streak_atual);
   const progress = getMilestoneProgress(streak.streak_atual);
   const unlocked = getUnlockedMilestones(streak.streak_atual);
+  const isBurning = streak.streak_atual >= 5;
 
   return (
     <div className="space-y-2">
@@ -20,8 +22,9 @@ export default function StreakDisplay() {
         <Tooltip>
           <TooltipTrigger asChild>
             <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-display font-bold ${streak.streak_atual > 0 ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'}`}>
-              <Flame className="w-3.5 h-3.5" />
+              <Flame className={`w-3.5 h-3.5 ${isBurning ? 'animate-pulse text-orange-500' : ''}`} />
               {streak.streak_atual} {t('streak.days')}
+              {isBurning && <span className="text-[10px] animate-pulse">🔥</span>}
             </div>
           </TooltipTrigger>
           <TooltipContent className="bg-card border-border max-w-xs p-3 space-y-2">
@@ -52,6 +55,14 @@ export default function StreakDisplay() {
         <div className="text-[10px] text-destructive bg-destructive/10 border border-destructive/30 rounded px-2 py-1">
           {t('streak.atRisk', { count: streak.streak_atual })}
         </div>
+      )}
+
+      {milestoneReached && (
+        <StreakMilestonePopup
+          open={!!milestoneReached}
+          onOpenChange={(open) => { if (!open) setMilestoneReached(null); }}
+          streakDays={milestoneReached}
+        />
       )}
     </div>
   );

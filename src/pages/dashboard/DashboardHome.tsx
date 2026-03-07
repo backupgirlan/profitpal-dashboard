@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight, PiggyBank, Edit2, Download } from 'lucide-react';
+import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight, PiggyBank, Edit2, Pencil, X } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, PROFIT_TROPHIES, TRADER_RANKS } from '@/lib/traderRanks';
-import { usePatentStoryDownload } from '@/components/PatentStoryGenerator';
+import PatentPreviewDialog from '@/components/PatentPreviewDialog';
+import FieldHelp from '@/components/FieldHelp';
 
 interface CandleData { index: number; open: number; close: number; color: string; }
 
@@ -70,6 +71,8 @@ const DashboardHome = () => {
   const [submitting, setSubmitting] = useState(false);
   const [savedPairs, setSavedPairs] = useState<string[]>([]);
   const [showPairSuggestions, setShowPairSuggestions] = useState(false);
+  const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
+  const [editingPairValue, setEditingPairValue] = useState('');
 
   // Balance edit & deposit
   const [editingBalance, setEditingBalance] = useState(false);
@@ -77,7 +80,9 @@ const DashboardHome = () => {
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
 
-  const { downloadStory } = usePatentStoryDownload();
+  // Patent dialog
+  const [patentDialogOpen, setPatentDialogOpen] = useState(false);
+  const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -99,8 +104,6 @@ const DashboardHome = () => {
       let w = 0, l = 0;
       tradesRes.data.forEach(t => { if (t.result === 'win') w++; else l++; });
       setWins(w); setLosses(l);
-
-      // Build candles
       const CANDLE_VALUE = 30;
       let cumPrice = 0;
       const cd: CandleData[] = [];
@@ -136,7 +139,6 @@ const DashboardHome = () => {
     ? savedPairs.filter(p => p.toLowerCase().startsWith(pair.toLowerCase()))
     : [];
 
-  // Listen for balance updates from management
   useEffect(() => {
     const handler = () => loadData();
     window.addEventListener('balance-updated', handler);
@@ -146,6 +148,17 @@ const DashboardHome = () => {
   const totalTrades = wins + losses;
   const winRate = totalTrades > 0 ? ((wins / totalTrades) * 100).toFixed(1) : '0.0';
   const lossRate = totalTrades > 0 ? ((losses / totalTrades) * 100).toFixed(1) : '0.0';
+
+  const handleEditPair = async (oldName: string, newName: string) => {
+    if (!user || !newName.trim() || newName === oldName) {
+      setEditingPairIndex(null);
+      return;
+    }
+    await supabase.from('trades').update({ pair_name: newName.trim() }).eq('user_id', user.id).eq('pair_name', oldName);
+    setSavedPairs(prev => prev.map(p => p === oldName ? newName.trim() : p).sort());
+    setEditingPairIndex(null);
+    toast.success(isEn ? 'Pair updated!' : 'Par atualizado!');
+  };
 
   const handleTrade = async (result: 'win' | 'loss') => {
     if (!pair.trim() || !amount || !user) return;
@@ -178,7 +191,7 @@ const DashboardHome = () => {
       if (!savedPairs.includes(pair.trim())) setSavedPairs(prev => [...prev, pair.trim()].sort());
       setPair(''); setAmount('');
       window.dispatchEvent(new Event('balance-updated'));
-      loadData(); // refresh chart
+      loadData();
     }
     setSubmitting(false);
   };
@@ -196,6 +209,7 @@ const DashboardHome = () => {
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground font-medium">{t('home.balance')}</span>
+              <FieldHelp text={isEn ? 'Your current trading balance. Edit by clicking the pencil icon.' : 'Sua banca atual para operações. Edite clicando no ícone de lápis.'} />
               <button onClick={() => { setEditingBalance(true); setBalanceInput(balance.toFixed(2)); }} className="ml-auto text-muted-foreground hover:text-primary">
                 <Edit2 className="w-3 h-3" />
               </button>
@@ -226,6 +240,7 @@ const DashboardHome = () => {
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground font-medium">{t('home.profit')}</span>
+              <FieldHelp text={isEn ? 'Total accumulated profit from all your trades.' : 'Lucro total acumulado de todas as suas operações.'} />
             </div>
             <p className={`text-lg sm:text-xl font-display font-bold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>
               R$ {totalProfit.toFixed(2)}
@@ -238,6 +253,7 @@ const DashboardHome = () => {
             <div className="flex items-center gap-2 mb-1">
               <CheckCircle className="w-4 h-4 win-text" />
               <span className="text-xs text-muted-foreground font-medium">Win %</span>
+              <FieldHelp text={isEn ? 'Percentage of winning trades out of total trades.' : 'Porcentagem de operações vencedoras do total.'} />
             </div>
             <p className="text-lg sm:text-xl font-display font-bold win-text">{winRate}%</p>
             <p className="text-xs text-muted-foreground">{wins} wins</p>
@@ -249,6 +265,7 @@ const DashboardHome = () => {
             <div className="flex items-center gap-2 mb-1">
               <XCircle className="w-4 h-4 loss-text" />
               <span className="text-xs text-muted-foreground font-medium">Loss %</span>
+              <FieldHelp text={isEn ? 'Percentage of losing trades out of total trades.' : 'Porcentagem de operações perdedoras do total.'} />
             </div>
             <p className="text-lg sm:text-xl font-display font-bold loss-text">{lossRate}%</p>
             <p className="text-xs text-muted-foreground">{losses} losses</p>
@@ -261,6 +278,7 @@ const DashboardHome = () => {
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <PiggyBank className="w-4 h-4 text-primary" /> {t('home.deposit')}
+            <FieldHelp text={isEn ? 'Add funds to your trading balance. This is for tracking purposes.' : 'Adicione fundos à sua banca de operações. Isso é para controle.'} />
           </h3>
           <div className="flex gap-3">
             <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositPlaceholder')} className="bg-secondary" />
@@ -287,40 +305,80 @@ const DashboardHome = () => {
       {/* Quick Trade Form */}
       <Card className="border-border">
         <CardContent className="p-4 sm:p-6">
-          <h3 className="font-display text-sm font-bold text-primary mb-4">{t('home.quickTrade')}</h3>
+          <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2">
+            {t('home.quickTrade')}
+            <FieldHelp text={isEn ? 'Register your trade results here. Select the pair, payout, amount, and whether it was a WIN or LOSS.' : 'Registre suas operações aqui. Selecione o par, payout, valor e se foi WIN ou LOSS.'} />
+          </h3>
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="relative">
-              <Label className="text-xs">{t('home.pair')}</Label>
+              <Label className="text-xs flex items-center gap-1">
+                {t('home.pair')}
+                <FieldHelp text={isEn ? 'Currency pair or asset you traded. Start typing and saved pairs will appear.' : 'Par de moeda ou ativo que você operou. Comece a digitar e os pares salvos aparecem.'} />
+              </Label>
               <Input
                 value={pair}
                 onChange={e => { setPair(e.target.value); setShowPairSuggestions(true); }}
                 onFocus={() => setShowPairSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 150)}
+                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 200)}
                 placeholder="EUR/USD"
                 className="bg-secondary"
                 autoComplete="off"
               />
               {showPairSuggestions && filteredPairs.length > 0 && (
-                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg max-h-32 overflow-y-auto">
-                  {filteredPairs.map(p => (
-                    <button
-                      key={p}
-                      type="button"
-                      className="w-full text-left px-3 py-1.5 text-xs hover:bg-secondary transition-colors text-foreground"
-                      onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}
-                    >
-                      {p}
-                    </button>
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+                  {filteredPairs.map((p, idx) => (
+                    <div key={p} className="flex items-center hover:bg-secondary transition-colors">
+                      {editingPairIndex === idx ? (
+                        <div className="flex items-center gap-1 w-full px-2 py-1">
+                          <Input
+                            autoFocus
+                            value={editingPairValue}
+                            onChange={e => setEditingPairValue(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') handleEditPair(p, editingPairValue); if (e.key === 'Escape') setEditingPairIndex(null); }}
+                            className="h-6 text-xs bg-secondary"
+                          />
+                          <button type="button" onMouseDown={() => handleEditPair(p, editingPairValue)} className="text-primary hover:text-primary/80">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                          </button>
+                          <button type="button" onMouseDown={() => setEditingPairIndex(null)} className="text-muted-foreground hover:text-foreground">
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="flex-1 text-left px-3 py-1.5 text-xs text-foreground"
+                            onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}
+                          >
+                            {p}
+                          </button>
+                          <button
+                            type="button"
+                            className="px-2 text-muted-foreground hover:text-primary"
+                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setEditingPairIndex(idx); setEditingPairValue(p); }}
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
             </div>
             <div>
-              <Label className="text-xs">Payout (%)</Label>
+              <Label className="text-xs flex items-center gap-1">
+                Payout (%)
+                <FieldHelp text={isEn ? 'The broker payout percentage for this trade.' : 'A porcentagem de payout da corretora para esta operação.'} />
+              </Label>
               <Input type="number" value={payout} onChange={e => setPayout(e.target.value)} placeholder="80" className="bg-secondary" />
             </div>
             <div>
-              <Label className="text-xs">{t('home.entryValue')}</Label>
+              <Label className="text-xs flex items-center gap-1">
+                {t('home.entryValue')}
+                <FieldHelp text={isEn ? 'The amount of money you invested in this trade.' : 'O valor em dinheiro que você investiu nesta operação.'} />
+              </Label>
               <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="10.00" className="bg-secondary" />
             </div>
           </div>
@@ -348,6 +406,7 @@ const DashboardHome = () => {
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" /> {t('home.evolution')}
+            <FieldHelp text={isEn ? 'Visual chart showing your trading performance over time as candlesticks.' : 'Gráfico visual mostrando sua performance de trading ao longo do tempo em candles.'} />
           </h3>
           <div className="h-48">
             {chartData.length > 0 ? <MiniCandlestickChart candles={chartData} /> : (
@@ -361,11 +420,12 @@ const DashboardHome = () => {
         </CardContent>
       </Card>
 
-       {/* Patent System */}
+      {/* Patent System */}
       <Card className="border-border">
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" /> {t('home.patent')}
+            <FieldHelp text={isEn ? 'Your trader rank based on total profit. Click on unlocked patents to generate an Instagram Story image!' : 'Sua patente de trader baseada no lucro total. Clique nas patentes desbloqueadas para gerar uma imagem de Story do Instagram!'} />
           </h3>
           {/* Current rank */}
           <div className="flex items-center gap-4 mb-4">
@@ -399,7 +459,8 @@ const DashboardHome = () => {
                   key={r.minProfit}
                   onClick={() => {
                     if (unlocked) {
-                      downloadStory({ rank: r, totalProfit, displayName, daysTrading, isEn });
+                      setSelectedPatentRank(r);
+                      setPatentDialogOpen(true);
                     }
                   }}
                   disabled={!unlocked}
@@ -415,8 +476,7 @@ const DashboardHome = () => {
                   <p className="text-[10px] text-muted-foreground">R$ {r.minProfit.toLocaleString()}</p>
                   {unlocked && (
                     <div className="flex items-center justify-center gap-1 mt-1">
-                      <Download className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <span className="text-[9px] win-text font-bold">✓</span>
+                      <span className="text-[9px] win-text font-bold">✓ Story</span>
                     </div>
                   )}
                   {!unlocked && (
@@ -430,11 +490,13 @@ const DashboardHome = () => {
           </div>
         </CardContent>
       </Card>
+
       {/* Trophies */}
       <Card className="border-border">
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2">
             <Trophy className="w-4 h-4 text-primary" /> {t('home.trophies')}
+            <FieldHelp text={isEn ? 'Profit milestones you achieve as you grow as a trader.' : 'Marcos de lucro que você conquista conforme evolui como trader.'} />
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {PROFIT_TROPHIES.map((trophy) => {
@@ -456,6 +518,17 @@ const DashboardHome = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Patent Preview Dialog */}
+      <PatentPreviewDialog
+        open={patentDialogOpen}
+        onOpenChange={setPatentDialogOpen}
+        rank={selectedPatentRank}
+        totalProfit={totalProfit}
+        displayName={displayName}
+        daysTrading={daysTrading}
+        isEn={isEn}
+      />
     </div>
   );
 };

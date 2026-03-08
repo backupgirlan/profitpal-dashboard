@@ -21,6 +21,71 @@ const MONTH_LABELS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Jun
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 
+const FloatingStatsToggle = () => {
+  const [withManagement, setWithManagement] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => setWithManagement(prev => !prev), 3500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const stats = withManagement
+    ? [
+        { value: "2x0", label: "Modelo", color: "text-primary" },
+        { value: "5%", label: "Quebram", color: "text-success" },
+        { value: "100", label: "Score", color: "text-primary" },
+      ]
+    : [
+        { value: "???", label: "Sem plano", color: "text-destructive" },
+        { value: "95%", label: "Quebram", color: "text-destructive" },
+        { value: "12", label: "Score", color: "text-destructive" },
+      ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.6, duration: 0.8 }}
+      className="mt-16 max-w-md mx-auto"
+    >
+      <motion.div
+        animate={{ opacity: [0.5, 1] }}
+        transition={{ duration: 0.4 }}
+        className="mb-3 text-center"
+      >
+        <span className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-display uppercase tracking-widest border transition-all duration-500 ${
+          withManagement
+            ? 'text-success border-success/30 bg-success/10'
+            : 'text-destructive border-destructive/30 bg-destructive/10'
+        }`}>
+          {withManagement ? (
+            <><CheckCircle className="w-3 h-3" /> Com Gerenciamento</>
+          ) : (
+            <><XCircle className="w-3 h-3" /> Sem Gerenciamento</>
+          )}
+        </span>
+      </motion.div>
+
+      <div className="grid grid-cols-3 gap-4">
+        {stats.map((s, i) => (
+          <motion.div
+            key={`${withManagement}-${i}`}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.1 }}
+            className={`bg-card/80 backdrop-blur border rounded-xl p-4 text-center transition-colors duration-500 ${
+              withManagement ? 'border-border/50' : 'border-destructive/30'
+            }`}
+          >
+            <p className={`text-2xl font-display font-black ${s.color} transition-colors duration-500`}>{s.value}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{s.label}</p>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
 const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();

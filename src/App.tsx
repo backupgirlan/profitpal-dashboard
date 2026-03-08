@@ -25,6 +25,7 @@ import MentalProtectionPage from "./pages/dashboard/MentalProtection";
 import BreathingPage from "./pages/dashboard/Breathing";
 import EmotionalDiary from "./pages/dashboard/EmotionalDiary";
 import SettingsPage from "./pages/dashboard/SettingsPage";
+import SuperVipPage from "./pages/dashboard/SuperVip";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const AppRoutes = () => (
     <Route path="/dashboard/mental" element={<DashboardRoute><MentalProtectionPage /></DashboardRoute>} />
     <Route path="/dashboard/breathing" element={<DashboardRoute><BreathingPage /></DashboardRoute>} />
     <Route path="/dashboard/diary" element={<DashboardRoute><EmotionalDiary /></DashboardRoute>} />
+    <Route path="/dashboard/super-vip" element={<DashboardRoute><SuperVipPage /></DashboardRoute>} />
     <Route path="/dashboard/settings" element={<DashboardRoute><SettingsPage /></DashboardRoute>} />
     <Route path="/dashboard/admin" element={<ProtectedRoute><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />

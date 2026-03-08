@@ -65,10 +65,14 @@ const DashboardHome = () => {
   const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
   const [editingPairValue, setEditingPairValue] = useState('');
 
-  // Deposit inline on Banca card
+  // Deposit / Edit balance inline on Banca card
   const [showDepositInput, setShowDepositInput] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
+  const [editBalanceMode, setEditBalanceMode] = useState(false);
+  const [editBalanceValue, setEditBalanceValue] = useState('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
@@ -244,6 +248,45 @@ const DashboardHome = () => {
     toast.success(`💰 Depósito de R$ ${val.toFixed(2)} realizado!`);
     window.dispatchEvent(new Event('balance-updated'));
     setDepositing(false);
+  };
+
+  const handleEditBalance = async () => {
+    const val = Number(editBalanceValue);
+    if (isNaN(val) || val < 0 || !user) return;
+    const newBalance = +val.toFixed(2);
+    await supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id);
+    setBalance(newBalance);
+    setEditBalanceMode(false);
+    setEditBalanceValue('');
+    setShowDepositInput(false);
+    toast.success('✅ Banca atualizada!');
+    window.dispatchEvent(new Event('balance-updated'));
+  };
+
+  const handleResetAccount = async () => {
+    if (!user) return;
+    setResetLoading(true);
+    try {
+      await supabase.from('trades').delete().eq('user_id', user.id);
+      await supabase.from('deposits').delete().eq('user_id', user.id);
+      await supabase.from('profiles').update({
+        balance: 0, total_profit: 0, stop_loss: 0, stop_win: 0,
+        entry_percentage: 2, soros_enabled: false, soros_level: 0, active_management_mode: null,
+      }).eq('user_id', user.id);
+      await supabase.from('streaks').update({
+        streak_atual: 0, maior_streak: 0, streak_freeze_disponivel: 0, total_freezes: 0, ultimo_dia_ativo: null,
+      }).eq('user_id', user.id);
+      localStorage.removeItem('management_engine_state');
+      localStorage.removeItem('soros_management_state');
+      toast.success('🔄 Conta resetada com sucesso!');
+      setShowResetConfirm(false);
+      setShowDepositInput(false);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const handleTrade = async (result: 'win' | 'loss') => {

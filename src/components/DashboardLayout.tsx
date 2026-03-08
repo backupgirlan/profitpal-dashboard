@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
-  Home, BarChart3, Trophy, Brain, LogOut,
+  Home, BarChart3, Brain, LogOut,
   Menu, X, TrendingUp, ClipboardList, Shield, Youtube, KeyRound, Smartphone, Trash2,
-  GraduationCap, FileText, Wind, Target, BookOpen, Award, Settings, ChevronLeft
+  GraduationCap, FileText, Wind, BookOpen, Award, Settings, ChevronLeft, ChevronRight,
+  Dot
 } from 'lucide-react';
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
@@ -19,6 +20,40 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+
+const NAV_SECTIONS = [
+  {
+    title: 'Principal',
+    items: [
+      { path: '/dashboard', label: 'Dashboard', icon: Home },
+      { path: '/dashboard/management', label: 'Registrar Operação', icon: ClipboardList },
+      { path: '/dashboard/report', label: 'Relatórios', icon: FileText },
+    ],
+  },
+  {
+    title: 'Mentalidade',
+    items: [
+      { path: '/dashboard/psychology', label: 'Psicologia', icon: Brain },
+      { path: '/dashboard/breathing', label: 'Respiração', icon: Wind },
+      { path: '/dashboard/mental', label: 'Modo Disciplina', icon: Shield },
+      { path: '/dashboard/diary', label: 'Diário Emocional', icon: BookOpen },
+    ],
+  },
+  {
+    title: 'Progressão',
+    items: [
+      { path: '/dashboard/rankings', label: 'Conquistas', icon: Award },
+      { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
+    ],
+  },
+  {
+    title: 'Aprendizado',
+    items: [
+      { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
+      { path: '/dashboard/courses', label: 'Cursos', icon: GraduationCap },
+    ],
+  },
+];
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { signOut, user } = useAuth();
@@ -37,20 +72,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
 
-  const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/dashboard/management', label: 'Registrar Operação', icon: ClipboardList },
-    { path: '/dashboard/report', label: 'Relatórios', icon: FileText },
-    { path: '/dashboard/psychology', label: 'Psicologia do Trader', icon: Brain },
-    { path: '/dashboard/breathing', label: 'Respiração do Trader', icon: Wind },
-    { path: '/dashboard/mental', label: 'Modo Disciplina', icon: Shield },
-    { path: '/dashboard/diary', label: 'Diário Emocional', icon: BookOpen },
-    { path: '/dashboard/rankings', label: 'Conquistas e Patentes', icon: Award },
-    { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
-    { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
-    { path: '/dashboard/courses', label: 'Cursos', icon: GraduationCap },
-    { path: '/dashboard/settings', label: 'Configurações', icon: Settings },
-  ];
+  const allNavItems = NAV_SECTIONS.flatMap(s => s.items);
 
   const handleChangePassword = async () => {
     if (newPassword.length < 6) {
@@ -107,118 +129,199 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  const sidebarWidth = sidebarCollapsed ? 'w-[68px]' : 'w-64';
+  const sidebarWidth = sidebarCollapsed ? 'w-[72px]' : 'w-[260px]';
 
   return (
     <div className="min-h-screen bg-background flex">
       {/* Mobile toggle */}
-      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-4 left-4 z-50 lg:hidden bg-card border border-border rounded-lg p-2 text-primary shadow-lg">
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed top-4 left-4 z-50 lg:hidden bg-card border border-border rounded-xl p-2.5 text-primary shadow-lg backdrop-blur-sm"
+      >
         {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      {/* Sidebar */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-40 ${sidebarWidth} bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        {/* Brand */}
-        <div className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center justify-between">
-            {!sidebarCollapsed && (
-              <h2 className="font-display text-sm font-bold text-primary tracking-wider">
-                TECHNICAL GIRLAN
-              </h2>
-            )}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ChevronLeft className={`w-4 h-4 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
-            </button>
-          </div>
-          {!sidebarCollapsed && (
-            <div className="mt-3">
-              <p className="text-xs text-muted-foreground truncate">{displayName || user?.email}</p>
-              <div className="mt-2 flex items-center justify-between">
-                <StreakDisplay />
-                <div className="flex items-center gap-1">
-                  <ThemeToggle />
-                  <LanguageSwitcher />
-                </div>
+      {/* ═══════ Sidebar ═══════ */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-40 ${sidebarWidth} bg-sidebar flex flex-col transition-all duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        
+        {/* Brand Header */}
+        <div className="h-16 px-4 flex items-center justify-between border-b border-sidebar-border">
+          {!sidebarCollapsed ? (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-xs">TG</span>
+              </div>
+              <div>
+                <h2 className="font-display text-xs font-bold text-foreground tracking-wider leading-none">
+                  TECHNICAL
+                </h2>
+                <span className="text-[10px] text-primary font-semibold tracking-widest">GIRLAN</span>
               </div>
             </div>
+          ) : (
+            <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center mx-auto">
+              <span className="text-primary-foreground font-bold text-xs">TG</span>
+            </div>
           )}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex items-center justify-center w-6 h-6 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {sidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+          </button>
         </div>
 
+        {/* User Info */}
+        {!sidebarCollapsed && (
+          <div className="px-4 py-3 border-b border-sidebar-border">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm shrink-0">
+                {(displayName || 'T')[0].toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-foreground truncate">{displayName || 'Trader'}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between">
+              <StreakDisplay />
+              <div className="flex items-center gap-0.5">
+                <ThemeToggle />
+                <LanguageSwitcher />
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
+        <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
+          {NAV_SECTIONS.map((section) => (
+            <div key={section.title}>
+              {!sidebarCollapsed && (
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] px-3 mb-1.5">
+                  {section.title}
+                </p>
+              )}
+              {sidebarCollapsed && <Separator className="my-1.5 bg-sidebar-border" />}
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setSidebarOpen(false)}
+                      title={sidebarCollapsed ? item.label : undefined}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group relative ${
+                        isActive
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70'
+                      } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
+                    >
+                      {isActive && (
+                        <motion.div
+                          layoutId="sidebar-active"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
+                          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                        />
+                      )}
+                      <item.icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                      {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {/* Settings */}
+          <div>
+            {!sidebarCollapsed && (
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] px-3 mb-1.5">
+                Sistema
+              </p>
+            )}
+            {sidebarCollapsed && <Separator className="my-1.5 bg-sidebar-border" />}
+            <div className="space-y-0.5">
               <Link
-                key={item.path}
-                to={item.path}
+                to="/dashboard/settings"
                 onClick={() => setSidebarOpen(false)}
-                title={sidebarCollapsed ? item.label : undefined}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent'
+                title={sidebarCollapsed ? 'Configurações' : undefined}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group relative ${
+                  location.pathname === '/dashboard/settings'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70'
                 } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
               >
-                <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                {location.pathname === '/dashboard/settings' && (
+                  <motion.div
+                    layoutId="sidebar-active"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
+                    transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <Settings className={`w-[18px] h-[18px] shrink-0 ${location.pathname === '/dashboard/settings' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                {!sidebarCollapsed && <span>Configurações</span>}
               </Link>
-            );
-          })}
-          {isAdmin && (
-            <>
-              <Separator className="my-2 bg-sidebar-border" />
-              <Link
-                to="/dashboard/admin"
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
-                  location.pathname === '/dashboard/admin'
-                    ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent'
-                } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
-              >
-                <Shield className="w-4 h-4 shrink-0" />
-                {!sidebarCollapsed && <span>Admin</span>}
-              </Link>
-            </>
-          )}
+
+              {isAdmin && (
+                <Link
+                  to="/dashboard/admin"
+                  onClick={() => setSidebarOpen(false)}
+                  title={sidebarCollapsed ? 'Admin' : undefined}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group relative ${
+                    location.pathname === '/dashboard/admin'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70'
+                  } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
+                >
+                  {location.pathname === '/dashboard/admin' && (
+                    <motion.div
+                      layoutId="sidebar-active"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary"
+                      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                  )}
+                  <Shield className={`w-[18px] h-[18px] shrink-0 ${location.pathname === '/dashboard/admin' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                  {!sidebarCollapsed && <span>Admin</span>}
+                </Link>
+              )}
+            </div>
+          </div>
         </nav>
 
-        {/* Bottom actions */}
-        <div className="p-2 border-t border-sidebar-border space-y-0.5">
+        {/* Bottom Actions */}
+        <div className="p-3 border-t border-sidebar-border">
           {!sidebarCollapsed ? (
-            <>
-              <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
-                <Button variant="ghost" onClick={() => setInstallOpen(true)} className="w-full justify-start gap-3 text-primary hover:bg-primary/10 text-xs h-8">
-                  <Smartphone className="w-4 h-4" /> {t('sidebar.installApp')}
-                </Button>
-              </motion.div>
-              <Button variant="ghost" onClick={() => setShowPasswordDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground text-xs h-8">
+            <div className="space-y-0.5">
+              <Button variant="ghost" onClick={() => setInstallOpen(true)} className="w-full justify-start gap-3 text-primary hover:bg-primary/10 text-xs h-9 rounded-lg font-medium">
+                <Smartphone className="w-4 h-4" /> {t('sidebar.installApp')}
+              </Button>
+              <Button variant="ghost" onClick={() => setShowPasswordDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground text-xs h-9 rounded-lg">
                 <KeyRound className="w-4 h-4" /> {t('sidebar.changePassword')}
               </Button>
-              <Button variant="ghost" onClick={() => setShowResetDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive text-xs h-8">
+              <Separator className="!my-1.5 bg-sidebar-border" />
+              <Button variant="ghost" onClick={() => setShowResetDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive text-xs h-9 rounded-lg">
                 <Trash2 className="w-4 h-4" /> {t('sidebar.resetAccount')}
               </Button>
-              <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive text-xs h-8">
+              <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive text-xs h-9 rounded-lg">
                 <LogOut className="w-4 h-4" /> {t('sidebar.logout')}
               </Button>
-            </>
+            </div>
           ) : (
-            <>
-              <Button variant="ghost" size="icon" onClick={() => setInstallOpen(true)} className="w-full text-primary hover:bg-primary/10 h-8" title={t('sidebar.installApp')}>
+            <div className="space-y-1 flex flex-col items-center">
+              <Button variant="ghost" size="icon" onClick={() => setInstallOpen(true)} className="text-primary hover:bg-primary/10 h-9 w-9 rounded-lg" title={t('sidebar.installApp')}>
                 <Smartphone className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleSignOut} className="w-full text-muted-foreground hover:text-destructive h-8" title={t('sidebar.logout')}>
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive h-9 w-9 rounded-lg" title={t('sidebar.logout')}>
                 <LogOut className="w-4 h-4" />
               </Button>
-            </>
+            </div>
           )}
         </div>
       </aside>
 
+      {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 z-30 bg-background/60 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* Dialogs */}
@@ -275,14 +378,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
 
-      {/* Topbar + Main */}
+      {/* ═══════ Topbar + Main ═══════ */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Topbar */}
         <header className="sticky top-0 z-20 h-14 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="lg:hidden w-8" />
-            <h1 className="font-display text-xs font-bold text-foreground tracking-wide hidden sm:block">
-              {navItems.find(n => n.path === location.pathname)?.label || 'Dashboard'}
+            <h1 className="font-display text-xs font-bold text-foreground tracking-wide hidden sm:block uppercase">
+              {allNavItems.find(n => n.path === location.pathname)?.label || 'Dashboard'}
             </h1>
           </div>
           <div className="flex items-center gap-3">

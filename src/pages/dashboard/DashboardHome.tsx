@@ -467,7 +467,7 @@ const DashboardHome = () => {
               </span>
             </div>
 
-            {/* Inline deposit area */}
+            {/* Inline actions area */}
             <AnimatePresence>
               {showDepositInput && (
                 <motion.div
@@ -476,23 +476,88 @@ const DashboardHome = () => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="flex gap-3 mt-4 pt-4 border-t border-border">
-                    <Input
-                      type="number"
-                      value={depositAmount}
-                      onChange={e => setDepositAmount(e.target.value)}
-                      placeholder="Valor do depósito"
-                      className="bg-secondary/50 h-11 text-base flex-1"
-                      autoFocus
-                    />
-                    <Button
-                      disabled={!depositAmount || depositing}
-                      className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
-                      onClick={handleDeposit}
-                    >
-                      <PiggyBank className="w-4 h-4 mr-2" />
-                      Depositar
-                    </Button>
+                  <div className="mt-4 pt-4 border-t border-border space-y-3">
+                    {/* Edit Balance */}
+                    {editBalanceMode ? (
+                      <div className="flex gap-3">
+                        <Input
+                          type="number"
+                          value={editBalanceValue}
+                          onChange={e => setEditBalanceValue(e.target.value)}
+                          placeholder="Novo valor da banca"
+                          className="bg-secondary/50 h-11 text-base flex-1"
+                          autoFocus
+                        />
+                        <Button
+                          disabled={!editBalanceValue && editBalanceValue !== '0'}
+                          className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
+                          onClick={handleEditBalance}
+                        >
+                          Salvar
+                        </Button>
+                        <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-3">
+                        <Input
+                          type="number"
+                          value={depositAmount}
+                          onChange={e => setDepositAmount(e.target.value)}
+                          placeholder="Valor do depósito"
+                          className="bg-secondary/50 h-11 text-base flex-1"
+                          autoFocus
+                        />
+                        <Button
+                          disabled={!depositAmount || depositing}
+                          className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
+                          onClick={handleDeposit}
+                        >
+                          <PiggyBank className="w-4 h-4 mr-2" />
+                          Depositar
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2">
+                      {!editBalanceMode && (
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary"
+                          onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Editar Banca
+                        </Button>
+                      )}
+                      {!showResetConfirm ? (
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive"
+                          onClick={() => setShowResetConfirm(true)}
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          Resetar Dados
+                        </Button>
+                      ) : (
+                        <div className="flex-1 flex gap-2">
+                          <Button
+                            variant="destructive"
+                            className="flex-1 h-9 text-xs gap-2"
+                            onClick={handleResetAccount}
+                            disabled={resetLoading}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
+                          </Button>
+                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>
+                            Cancelar
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               )}

@@ -257,6 +257,7 @@ const HorusIA = () => {
       setLoadingMsg('');
     }
   };
+  runChartAnalysisRef.current = runChartAnalysis;
 
   if (isSuperVip === null) return null;
   if (!isSuperVip && !isAdmin) return <SuperVipGate />;

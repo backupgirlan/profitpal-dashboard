@@ -52,8 +52,6 @@ const AppRoutes = () => (
     <Route path="/dashboard/rankings" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Rankings /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/evolution" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Evolution /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/psychology" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Psychology /></VipGate></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/advice" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Advice /></VipGate></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/rewards" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Rewards /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/videos" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Videos /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/courses" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Courses /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/report" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><TradeReport /></VipGate></DashboardLayout></ProtectedRoute>} />

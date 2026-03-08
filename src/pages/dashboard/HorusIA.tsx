@@ -450,6 +450,7 @@ const HorusIA = () => {
               <div className="bg-primary/5 border border-primary/10 rounded-lg p-3 space-y-1">
                 <p className="text-xs font-display text-primary flex items-center gap-1.5"><AlertTriangle className="w-3 h-3" /> Dicas para melhor leitura</p>
                 <ul className="text-[11px] text-muted-foreground space-y-0.5 ml-4 list-disc">
+                  <li><strong className="text-primary">⏱ Envie o print nos últimos 30 segundos do candle</strong> para maior precisão da leitura</li>
                   <li>Inclua a <strong>régua de preço</strong> (lateral) e <strong>régua de tempo</strong> (inferior)</li>
                   <li>Confirme que o timeframe ({selectedTimeframe}) está visível no canto do gráfico</li>
                   <li>Use prints com boa resolução e contraste nítido entre candles e fundo</li>

@@ -181,8 +181,6 @@ const Landing = () => {
         </div>
         <div className="space-y-0.5 text-xs text-foreground/80">
           <p>{t('landing.monFri')} <span className="font-semibold text-foreground">20h</span></p>
-          <p>{t('landing.saturday')} <span className="font-semibold text-foreground">19h</span></p>
-          <p>{t('landing.sunday')} <span className="font-semibold text-foreground">10h</span></p>
         </div>
       </div>
 
@@ -237,8 +235,6 @@ const Landing = () => {
             </div>
             <div className="flex justify-between text-xs text-foreground/80">
               <p>{t('landing.monFri')} <span className="font-semibold text-foreground">20h</span></p>
-              <p>{t('landing.saturday')} <span className="font-semibold text-foreground">19h</span></p>
-              <p>{t('landing.sunday')} <span className="font-semibold text-foreground">10h</span></p>
             </div>
           </div>
 

@@ -46,7 +46,7 @@ const AppRoutes = () => (
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
     <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><DashboardHome /></VipGate></DashboardLayout></ProtectedRoute>} />
-    <Route path="/dashboard/calculator" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><TraderCalculator /></VipGate></DashboardLayout></ProtectedRoute>} />
+    {/* Calculator removed */}
     <Route path="/dashboard/management" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Management /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/rankings" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Rankings /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/evolution" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Evolution /></VipGate></DashboardLayout></ProtectedRoute>} />

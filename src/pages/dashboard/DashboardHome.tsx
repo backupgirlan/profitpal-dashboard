@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
   Pencil, X, Target, ClipboardList, Activity, Calendar, Quote,
-  ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown
+  ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
+  Trash2, RotateCcw
 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';

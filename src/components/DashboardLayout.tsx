@@ -41,12 +41,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/dashboard', label: 'Dashboard', icon: Home },
     { path: '/dashboard/management', label: 'Registrar Operação', icon: ClipboardList },
     { path: '/dashboard/report', label: 'Relatórios', icon: FileText },
-    { path: '/dashboard/psychology', label: 'Psicologia', icon: Brain },
+    { path: '/dashboard/psychology', label: 'Psicologia do Trader', icon: Brain },
+    { path: '/dashboard/breathing', label: 'Respiração do Trader', icon: Wind },
     { path: '/dashboard/mental', label: 'Modo Disciplina', icon: Shield },
+    { path: '/dashboard/diary', label: 'Diário Emocional', icon: BookOpen },
+    { path: '/dashboard/rankings', label: 'Conquistas e Patentes', icon: Award },
     { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
-    { path: '/dashboard/rankings', label: 'Conquistas', icon: Award },
     { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
     { path: '/dashboard/courses', label: 'Cursos', icon: GraduationCap },
+    { path: '/dashboard/settings', label: 'Configurações', icon: Settings },
   ];
 
   const handleChangePassword = async () => {

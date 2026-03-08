@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import {
-  Eye, Key, CreditCard, Shield, Brain, BarChart3, Users, Settings, Save,
+  Eye, Key, CreditCard, Shield, Brain, BarChart3, Users, Settings, Save, TrendingUp,
   Lock, Unlock, FileText, Activity, Star, Zap, AlertTriangle, CheckCircle, XCircle
 } from 'lucide-react';
 

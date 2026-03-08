@@ -385,7 +385,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50">
+      <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50 safe-area-top">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-8 py-3">
           <span className="font-display text-sm sm:text-lg font-bold text-primary text-glow tracking-wider">
             TECHNICAL GIRLAN

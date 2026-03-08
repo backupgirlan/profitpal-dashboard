@@ -5,8 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
-import { BookOpen, Save, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { BookOpen, Save, Calendar, Loader2, Eye, AlertTriangle, Lightbulb } from 'lucide-react';
 
 const EMOTIONAL_OPTIONS = [
   { key: 'calmo', label: '😌 Calmo', color: 'border-success/50 bg-success/10 text-success' },
@@ -14,6 +14,13 @@ const EMOTIONAL_OPTIONS = [
   { key: 'ansioso', label: '😰 Ansioso', color: 'border-destructive/50 bg-destructive/10 text-destructive' },
   { key: 'impulsivo', label: '⚡ Impulsivo', color: 'border-destructive/50 bg-destructive/10 text-destructive' },
 ];
+
+interface HorusFeedback {
+  mensagem: string;
+  alerta: string | null;
+  dica: string;
+  emoji: string;
+}
 
 export default function EmotionalDiary() {
   const { user } = useAuth();
@@ -23,12 +30,13 @@ export default function EmotionalDiary() {
   const [saving, setSaving] = useState(false);
   const [entries, setEntries] = useState<any[]>([]);
   const [todayEntry, setTodayEntry] = useState<any>(null);
+  const [horusFeedback, setHorusFeedback] = useState<HorusFeedback | null>(null);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
 
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (!user) return;
-    // Load today's entry
     supabase.from('trader_diary').select('*').eq('user_id', user.id).eq('entry_date', today).maybeSingle()
       .then(({ data }) => {
         if (data) {
@@ -38,10 +46,35 @@ export default function EmotionalDiary() {
           setLessons(data.lessons || '');
         }
       });
-    // Load recent entries
     supabase.from('trader_diary').select('*').eq('user_id', user.id).order('entry_date', { ascending: false }).limit(7)
       .then(({ data }) => { if (data) setEntries(data); });
   }, [user, today]);
+
+  const fetchHorusFeedback = async (emotion: string, mistakesText: string, lessonsText: string) => {
+    setLoadingFeedback(true);
+    setHorusFeedback(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await supabase.functions.invoke('horus-diary-feedback', {
+        body: {
+          emotional_state: emotion,
+          mistakes: mistakesText,
+          lessons: lessonsText,
+        },
+      });
+
+      if (res.error) {
+        console.error('Horus feedback error:', res.error);
+        toast.error('Não foi possível obter o feedback da Horus IA');
+      } else {
+        setHorusFeedback(res.data as HorusFeedback);
+      }
+    } catch (err) {
+      console.error('Horus feedback error:', err);
+    } finally {
+      setLoadingFeedback(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user || !selectedEmotion) return;
@@ -62,11 +95,15 @@ export default function EmotionalDiary() {
     
     toast.success('Diário salvo com sucesso!');
     setSaving(false);
-    // Reload
+
+    // Reload entries
     const { data } = await supabase.from('trader_diary').select('*').eq('user_id', user.id).order('entry_date', { ascending: false }).limit(7);
     if (data) setEntries(data);
     const { data: te } = await supabase.from('trader_diary').select('*').eq('user_id', user.id).eq('entry_date', today).maybeSingle();
     if (te) setTodayEntry(te);
+
+    // Fetch Horus feedback
+    fetchHorusFeedback(selectedEmotion, mistakes, lessons);
   };
 
   return (
@@ -133,13 +170,73 @@ export default function EmotionalDiary() {
 
           <Button
             onClick={handleSave}
-            disabled={!selectedEmotion || saving}
+            disabled={!selectedEmotion || saving || loadingFeedback}
             className="gradient-gold text-primary-foreground font-display gap-2 mt-6 w-full"
           >
-            <Save className="w-4 h-4" /> {todayEntry ? 'Atualizar Registro' : 'Salvar Registro'}
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {todayEntry ? 'Atualizar Registro' : 'Salvar Registro'}
           </Button>
         </CardContent>
       </Card>
+
+      {/* Horus IA Feedback */}
+      <AnimatePresence>
+        {loadingFeedback && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <Card className="border-accent/30 bg-accent/5">
+              <CardContent className="p-6 flex items-center gap-4">
+                <Loader2 className="w-6 h-6 text-accent animate-spin flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Horus IA analisando seu registro...</p>
+                  <p className="text-xs text-muted-foreground">Cruzando dados emocionais com sua performance</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {horusFeedback && !loadingFeedback && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <Card className="border-accent/40 bg-gradient-to-br from-accent/10 to-accent/5">
+              <CardContent className="p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{horusFeedback.emoji}</span>
+                  <div>
+                    <h3 className="font-display text-xs font-bold text-accent uppercase tracking-wider flex items-center gap-2">
+                      <Eye className="w-3.5 h-3.5" />
+                      Feedback da Horus IA
+                    </h3>
+                  </div>
+                </div>
+
+                <p className="text-sm text-foreground leading-relaxed">
+                  {horusFeedback.mensagem}
+                </p>
+
+                {horusFeedback.alerta && (
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                    <p className="text-xs text-destructive font-medium">{horusFeedback.alerta}</p>
+                  </div>
+                )}
+
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-success/10 border border-success/20">
+                  <Lightbulb className="w-4 h-4 text-success flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-success font-medium">{horusFeedback.dica}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Recent entries */}
       <Card className="border-border/50 bg-card/80">

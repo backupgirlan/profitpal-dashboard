@@ -91,16 +91,27 @@ serve(async (req) => {
     const promptMap: Record<string, string> = {};
     prompts?.forEach((p: any) => { promptMap[p.prompt_key] = p.prompt_value; });
 
-    const imagePrompt = promptMap["image_analysis"] || `Você é a Horus IA, especialista em leitura de gráficos de opções binárias.
-Analise este print de gráfico no timeframe ${timeframe}.
+    const candleMinutes = timeframe === "M5" ? 5 : 15;
+    const imagePrompt = promptMap["image_analysis"] || `Você é a Horus IA, analista probabilístico de gráficos de opções binárias no timeframe ${timeframe}.
 
-REGRAS:
+REGRA CRÍTICA DE TEMPO (AXIS):
+- ANTES de gerar qualquer resultado, localize o relógio/régua de tempo no printscreen.
+- Se o horário visível no gráfico for, por exemplo, 14:35, sua "entrada_estimada" NUNCA pode ser anterior a 14:35.
+- Cada candle dura ${candleMinutes} minutos. Projete a entrada para o PRÓXIMO fechamento de candle disponível no futuro imediato.
+- Exemplo: gráfico mostra 14:35 em M5 → entrada mínima = 14:40, saída = 14:45.
+
+REGRAS DE LEITURA VISUAL:
+- Localize a régua lateral (preço) e a régua inferior (tempo) para calibrar sua análise.
+- Confirme o timeframe lendo o texto "${timeframe}" no gráfico. Se não for ${timeframe}, reduza a confiança.
+- Diferencie candles de alta/baixa pelo contraste de cores, considerando temas escuros com cores neon.
+- Se a imagem estiver borrada, cortada ou sem réguas visíveis, retorne confiança abaixo de 40.
+
+REGRAS DE RESPOSTA:
 - Responda SEMPRE usando a tool chart_analysis
 - cenario: "compra" ou "venda"
-- entrada_estimada: horário estimado de entrada (formato HH:MM)
+- entrada_estimada: horário estimado de entrada (formato HH:MM) — SEMPRE no futuro em relação ao gráfico
 - saida_estimada: horário estimado de saída (formato HH:MM)
 - confianca: número de 0 a 100
-- Se a imagem não for clara, retorne confiança baixa
 - Análise probabilística apenas, sem garantias`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -121,7 +132,7 @@ REGRAS:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analise este gráfico ${timeframe}. Responda usando a tool chart_analysis.` },
+              { type: "text", text: `Analise este gráfico ${timeframe}. Leia o horário visível no gráfico e projete a entrada para o PRÓXIMO candle futuro. Responda usando a tool chart_analysis.` },
               { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Image}` } },
             ],
           },

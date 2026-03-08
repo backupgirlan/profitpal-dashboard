@@ -42,7 +42,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [savedPairs, setSavedPairs] = useState<string[]>([]);
   const [showPairSuggestions, setShowPairSuggestions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
+  const [showFollowedPlan, setShowFollowedPlan] = useState(false);
+  const [lastTradeId, setLastTradeId] = useState<string | null>(null);
   // Setup form
   const [setupPercentual, setSetupPercentual] = useState('5');
 
@@ -121,7 +122,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
 
     // Save to DB
     const today = new Date().toISOString().split('T')[0];
-    await supabase.from('trades').insert({
+    const { data: insertedTrade } = await supabase.from('trades').insert({
       user_id: user.id,
       pair_name: pair.trim().toUpperCase(),
       payout,
@@ -131,7 +132,10 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       management_mode: state.model,
       entry_type: 'normal',
       trade_date: today,
-    });
+      observation: observation.trim() || null,
+    }).select('id').single();
+
+    if (insertedTrade) setLastTradeId(insertedTrade.id);
 
     // Update profile balance
     const { data: profileData } = await supabase.from('profiles').select('balance, total_profit').eq('user_id', user.id).single();
@@ -162,6 +166,20 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     setObservation('');
     setAmountInput(String(mgmt.getEntradaAtual()));
     setSubmitting(false);
+    setShowFollowedPlan(true);
+  };
+
+  const handleFollowedPlan = async (followed: boolean) => {
+    if (lastTradeId) {
+      await supabase.from('trades').update({ followed_plan: followed }).eq('id', lastTradeId);
+    }
+    if (!followed && user) {
+      await supabase.from('profiles').update({
+        consecutive_losses: (stats as any)?.consecutiveLosses || 0,
+      }).eq('user_id', user.id);
+    }
+    setShowFollowedPlan(false);
+    setLastTradeId(null);
   };
 
   const handleNovoCiclo = () => {

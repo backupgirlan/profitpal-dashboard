@@ -11,6 +11,7 @@ import { useManagement2x, ManagementModel } from '@/hooks/useManagement2x';
 import { useAuth } from '@/hooks/useAuth';
 import { useStreak } from '@/hooks/useStreak';
 import { supabase } from '@/integrations/supabase/client';
+import { DEFAULT_PAIRS } from '@/lib/defaultPairs';
 import { useToast } from '@/hooks/use-toast';
 import FieldHelp from '@/components/FieldHelp';
 import {
@@ -65,7 +66,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     if (!user) return;
     supabase.from('trades').select('pair_name').eq('user_id', user.id)
       .then(({ data }) => {
-        if (data) setSavedPairs([...new Set(data.map(d => d.pair_name))].sort());
+        if (data) {
+          const userPairs = [...new Set(data.map(d => d.pair_name))];
+          const merged = [...new Set([...DEFAULT_PAIRS, ...userPairs])].sort();
+          setSavedPairs(merged);
+        }
       });
   }, [user]);
 
@@ -84,7 +89,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   }, [state.entradaRecomendada, state.ativo]);
 
   const filteredPairs = pair.length > 0
-    ? savedPairs.filter(p => p.toLowerCase().startsWith(pair.toLowerCase()))
+    ? savedPairs.filter(p => p.toLowerCase().includes(pair.toLowerCase()))
     : savedPairs;
 
   const handleIniciar = (model: ManagementModel) => {

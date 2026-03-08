@@ -1,0 +1,26 @@
+export const DEFAULT_PAIRS = [
+  // Majors
+  'EUR/USD', 'GBP/USD', 'USD/JPY', 'USD/CHF', 'USD/CAD', 'AUD/USD', 'NZD/USD',
+  // EUR crosses
+  'EUR/GBP', 'EUR/JPY', 'EUR/CHF', 'EUR/CAD', 'EUR/AUD', 'EUR/NZD',
+  // GBP crosses
+  'GBP/JPY', 'GBP/CHF', 'GBP/CAD', 'GBP/AUD', 'GBP/NZD',
+  // AUD crosses
+  'AUD/JPY', 'AUD/CAD', 'AUD/CHF', 'AUD/NZD',
+  // NZD crosses
+  'NZD/JPY', 'NZD/CAD', 'NZD/CHF',
+  // CAD/CHF crosses
+  'CAD/JPY', 'CAD/CHF', 'CHF/JPY',
+  // Exotics
+  'USD/BRL', 'USD/INR', 'USD/PKR', 'USD/BDT', 'USD/EGP', 'USD/MXN', 'USD/TRY', 'USD/ZAR', 'USD/ARS',
+  'EUR/TRY', 'EUR/ZAR', 'GBP/ZAR', 'AUD/SGD', 'USD/SGD', 'USD/THB', 'USD/IDR', 'USD/PHP',
+  'USD/COP', 'USD/CLP', 'USD/PEN', 'USD/DZD', 'USD/NGN', 'USD/KZT',
+  'USD/QAR', 'USD/SAR', 'USD/AED', 'USD/KWD', 'USD/OMR', 'USD/BHD',
+  // OTC
+  'EUR/USD OTC', 'GBP/USD OTC', 'USD/JPY OTC', 'USD/CHF OTC', 'USD/CAD OTC', 'AUD/USD OTC', 'NZD/USD OTC',
+  'EUR/GBP OTC', 'EUR/JPY OTC', 'EUR/CHF OTC', 'EUR/CAD OTC', 'EUR/AUD OTC', 'EUR/NZD OTC',
+  'GBP/JPY OTC', 'GBP/CHF OTC', 'GBP/CAD OTC', 'GBP/AUD OTC', 'GBP/NZD OTC',
+  'AUD/JPY OTC', 'AUD/CAD OTC', 'AUD/CHF OTC', 'AUD/NZD OTC',
+  'NZD/JPY OTC', 'NZD/CAD OTC', 'NZD/CHF OTC',
+  'CAD/JPY OTC', 'CAD/CHF OTC', 'CHF/JPY OTC',
+];

@@ -42,7 +42,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const [savedPairs, setSavedPairs] = useState<string[]>([]);
   const [showPairSuggestions, setShowPairSuggestions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
+  const [showFollowedPlan, setShowFollowedPlan] = useState(false);
+  const [lastTradeId, setLastTradeId] = useState<string | null>(null);
   // Setup form
   const [setupPercentual, setSetupPercentual] = useState('5');
 
@@ -121,7 +122,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
 
     // Save to DB
     const today = new Date().toISOString().split('T')[0];
-    await supabase.from('trades').insert({
+    const { data: insertedTrade } = await supabase.from('trades').insert({
       user_id: user.id,
       pair_name: pair.trim().toUpperCase(),
       payout,
@@ -131,7 +132,10 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       management_mode: state.model,
       entry_type: 'normal',
       trade_date: today,
-    });
+      observation: observation.trim() || null,
+    }).select('id').single();
+
+    if (insertedTrade) setLastTradeId(insertedTrade.id);
 
     // Update profile balance
     const { data: profileData } = await supabase.from('profiles').select('balance, total_profit').eq('user_id', user.id).single();
@@ -162,6 +166,20 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     setObservation('');
     setAmountInput(String(mgmt.getEntradaAtual()));
     setSubmitting(false);
+    setShowFollowedPlan(true);
+  };
+
+  const handleFollowedPlan = async (followed: boolean) => {
+    if (lastTradeId) {
+      await supabase.from('trades').update({ followed_plan: followed }).eq('id', lastTradeId);
+    }
+    if (!followed && user) {
+      await supabase.from('profiles').update({
+        consecutive_losses: 0,
+      }).eq('user_id', user.id);
+    }
+    setShowFollowedPlan(false);
+    setLastTradeId(null);
   };
 
   const handleNovoCiclo = () => {
@@ -571,6 +589,26 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
             ) : (
               <p>Este modelo foi desenvolvido para quem deseja mais flexibilidade sem perder o controle da banca. No gerenciamento 2x1, o objetivo é alcançar 2 wins, aceitando no máximo 1 loss durante o ciclo. Caso aconteça um segundo loss, o ciclo será encerrado. Informe sua banca, utilize o valor recomendado por operação e registre cada entrada corretamente. Esse modelo é indicado para quem busca equilíbrio entre segurança e tolerância operacional.</p>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Followed Plan Dialog */}
+      <Dialog open={showFollowedPlan} onOpenChange={setShowFollowedPlan}>
+        <DialogContent className="bg-card border-primary/30 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-primary text-center">
+              Você seguiu seu plano nessa operação?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground text-center">Isso cria consciência de disciplina e alimenta seu Score de Disciplina.</p>
+          <div className="flex gap-3">
+            <Button onClick={() => handleFollowedPlan(true)} className="flex-1 bg-success/20 text-success hover:bg-success/30 border border-success/30 font-display gap-2">
+              <CheckCircle className="w-4 h-4" /> Sim
+            </Button>
+            <Button onClick={() => handleFollowedPlan(false)} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 border border-destructive/30 font-display gap-2">
+              <XCircle className="w-4 h-4" /> Não
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

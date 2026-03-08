@@ -199,8 +199,12 @@ const HorusIA = () => {
 
   useEffect(() => {
     document.addEventListener('paste', handlePaste);
-    return () => document.removeEventListener('paste', handlePaste);
-  }, [handlePaste]);
+    document.addEventListener('keydown', handleKeyDownAnalysis);
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+      document.removeEventListener('keydown', handleKeyDownAnalysis);
+    };
+  }, [handlePaste, handleKeyDownAnalysis]);
 
   // AXIS: Validação de sincronização temporal
   const validarHorarioEntrada = (horarioSugerido: string): boolean => {

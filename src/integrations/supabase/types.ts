@@ -172,6 +172,42 @@ export type Database = {
         }
         Relationships: []
       }
+      emotional_checkins: {
+        Row: {
+          created_at: string
+          emotional_state: string
+          had_argument: boolean
+          id: string
+          is_risky: boolean
+          proceeded: boolean
+          recovering_loss: boolean
+          slept_well: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emotional_state?: string
+          had_argument?: boolean
+          id?: string
+          is_risky?: boolean
+          proceeded?: boolean
+          recovering_loss?: boolean
+          slept_well?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emotional_state?: string
+          had_argument?: boolean
+          id?: string
+          is_risky?: boolean
+          proceeded?: boolean
+          recovering_loss?: boolean
+          slept_well?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       live_scores: {
         Row: {
           day_of_week: number
@@ -230,15 +266,20 @@ export type Database = {
         Row: {
           active_management_mode: string | null
           balance: number | null
+          consecutive_losses: number | null
           created_at: string | null
+          discipline_score: number | null
           display_name: string | null
           entry_percentage: number | null
+          forced_pause_until: string | null
           id: string
           is_vip: boolean
           last_login_date: string | null
           soros_enabled: boolean | null
           soros_level: number | null
+          stop_daily: number | null
           stop_loss: number | null
+          stop_weekly: number | null
           stop_win: number | null
           streak_days: number | null
           total_profit: number | null
@@ -248,15 +289,20 @@ export type Database = {
         Insert: {
           active_management_mode?: string | null
           balance?: number | null
+          consecutive_losses?: number | null
           created_at?: string | null
+          discipline_score?: number | null
           display_name?: string | null
           entry_percentage?: number | null
+          forced_pause_until?: string | null
           id?: string
           is_vip?: boolean
           last_login_date?: string | null
           soros_enabled?: boolean | null
           soros_level?: number | null
+          stop_daily?: number | null
           stop_loss?: number | null
+          stop_weekly?: number | null
           stop_win?: number | null
           streak_days?: number | null
           total_profit?: number | null
@@ -266,15 +312,20 @@ export type Database = {
         Update: {
           active_management_mode?: string | null
           balance?: number | null
+          consecutive_losses?: number | null
           created_at?: string | null
+          discipline_score?: number | null
           display_name?: string | null
           entry_percentage?: number | null
+          forced_pause_until?: string | null
           id?: string
           is_vip?: boolean
           last_login_date?: string | null
           soros_enabled?: boolean | null
           soros_level?: number | null
+          stop_daily?: number | null
           stop_loss?: number | null
+          stop_weekly?: number | null
           stop_win?: number | null
           streak_days?: number | null
           total_profit?: number | null
@@ -343,13 +394,48 @@ export type Database = {
         }
         Relationships: []
       }
+      trader_diary: {
+        Row: {
+          created_at: string
+          emotional_state: string | null
+          entry_date: string
+          followed_plan: boolean | null
+          id: string
+          lessons: string | null
+          mistakes: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emotional_state?: string | null
+          entry_date?: string
+          followed_plan?: boolean | null
+          id?: string
+          lessons?: string | null
+          mistakes?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emotional_state?: string | null
+          entry_date?: string
+          followed_plan?: boolean | null
+          id?: string
+          lessons?: string | null
+          mistakes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       trades: {
         Row: {
           amount: number | null
           created_at: string | null
           entry_type: string | null
+          followed_plan: boolean | null
           id: string
           management_mode: string | null
+          observation: string | null
           pair_name: string
           payout: number
           profit: number | null
@@ -362,8 +448,10 @@ export type Database = {
           amount?: number | null
           created_at?: string | null
           entry_type?: string | null
+          followed_plan?: boolean | null
           id?: string
           management_mode?: string | null
+          observation?: string | null
           pair_name: string
           payout: number
           profit?: number | null
@@ -376,8 +464,10 @@ export type Database = {
           amount?: number | null
           created_at?: string | null
           entry_type?: string | null
+          followed_plan?: boolean | null
           id?: string
           management_mode?: string | null
+          observation?: string | null
           pair_name?: string
           payout?: number
           profit?: number | null

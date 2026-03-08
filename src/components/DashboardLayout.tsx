@@ -191,7 +191,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 {(displayName || 'T')[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground truncate">{displayName || 'Trader'}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-foreground truncate">{displayName || 'Trader'}</p>
+                  {userLevel === 'super_vip' ? (
+                    <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md gradient-gold text-[9px] font-display font-bold text-primary-foreground leading-none">⭐ SUPER VIP</span>
+                  ) : userLevel === 'vip' ? (
+                    <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md bg-primary/15 border border-primary/30 text-[9px] font-display font-bold text-primary leading-none">VIP</span>
+                  ) : (
+                    <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md bg-muted text-[9px] font-display font-bold text-muted-foreground leading-none">FREE</span>
+                  )}
+                </div>
                 <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>

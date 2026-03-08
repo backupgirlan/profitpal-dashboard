@@ -2,24 +2,22 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
-  Pencil, X, Target, ClipboardList, Activity, Flame, TrendingDown, Calendar,
-  ArrowUpRight, ArrowDownRight, BarChart3, Quote
+  Pencil, X, Target, ClipboardList, Activity, Calendar, Quote,
+  ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown
 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
-import FieldHelp from '@/components/FieldHelp';
 import { useManagement2x } from '@/hooks/useManagement2x';
 import { motion } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 const MOTIVATIONAL_QUOTES = [
   "Trader profissional protege o capital.",
@@ -32,22 +30,14 @@ const MOTIVATIONAL_QUOTES = [
   "O mercado sempre estará aqui amanhã.",
 ];
 
-const StatCard = ({ icon: Icon, label, value, subValue, color = 'text-foreground', iconColor = 'text-primary' }: {
-  icon: any; label: string; value: string; subValue?: string; color?: string; iconColor?: string;
-}) => (
-  <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/20 transition-all duration-300">
-    <CardContent className="p-4">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
-        <div className={`w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center ${iconColor}`}>
-          <Icon className="w-4 h-4" />
-        </div>
-      </div>
-      <p className={`text-xl font-display font-bold ${color}`}>{value}</p>
-      {subValue && <p className="text-xs text-muted-foreground mt-1">{subValue}</p>}
-    </CardContent>
-  </Card>
-);
+const CHART_COLORS = {
+  gold: 'hsl(48, 96%, 53%)',
+  green: 'hsl(142, 71%, 45%)',
+  red: 'hsl(0, 84%, 60%)',
+  muted: 'hsl(218, 11%, 65%)',
+  cardBg: 'hsl(222, 47%, 11%)',
+  border: 'hsl(217, 33%, 17%)',
+};
 
 const DashboardHome = () => {
   const { t, i18n } = useTranslation();
@@ -62,8 +52,8 @@ const DashboardHome = () => {
   const [displayName, setDisplayName] = useState('Trader');
   const [daysTrading, setDaysTrading] = useState(0);
   const [evolutionData, setEvolutionData] = useState<{ day: string; balance: number }[]>([]);
+  const [consistencyData, setConsistencyData] = useState<{ day: string; profit: number }[]>([]);
 
-  // Trade form
   const [pair, setPair] = useState('');
   const [payout, setPayout] = useState('80');
   const [amount, setAmount] = useState('');
@@ -73,36 +63,37 @@ const DashboardHome = () => {
   const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
   const [editingPairValue, setEditingPairValue] = useState('');
 
-  // Deposit
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
 
-  // Patent dialog
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
 
-  // Emotional status
   const [emotionalState, setEmotionalState] = useState<string | null>(null);
 
-  // Today stats
   const [todayProfit, setTodayProfit] = useState(0);
   const [weekProfit, setWeekProfit] = useState(0);
   const [monthProfit, setMonthProfit] = useState(0);
   const [winStreak, setWinStreak] = useState(0);
   const [lossStreak, setLossStreak] = useState(0);
+  const [maxDrawdown, setMaxDrawdown] = useState(0);
+  const [positiveDays, setPositiveDays] = useState(0);
+  const [negativeDays, setNegativeDays] = useState(0);
+  const [disciplineRate, setDisciplineRate] = useState(100);
 
   const quoteIndex = useMemo(() => Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length), []);
 
   const loadData = useCallback(async () => {
     if (!user) return;
     const [profileRes, tradesRes] = await Promise.all([
-      supabase.from('profiles').select('balance, total_profit, display_name, created_at').eq('user_id', user.id).single(),
+      supabase.from('profiles').select('balance, total_profit, display_name, created_at, discipline_score').eq('user_id', user.id).single(),
       supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
     ]);
     if (profileRes.data) {
       setBalance(Number(profileRes.data.balance) || 0);
       setTotalProfit(Number(profileRes.data.total_profit) || 0);
       setDisplayName(profileRes.data.display_name || 'Trader');
+      setDisciplineRate(Number(profileRes.data.discipline_score) || 100);
       if (profileRes.data.created_at) {
         const created = new Date(profileRes.data.created_at);
         setDaysTrading(Math.max(1, Math.floor((Date.now() - created.getTime()) / 86400000)));
@@ -114,16 +105,14 @@ const DashboardHome = () => {
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
       const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
 
-      // Calculate streaks
       let currentWinStreak = 0, currentLossStreak = 0;
-      
-      // Evolution data
-      let cumBalance = 0;
+      let cumBalance = 0, peak = 0, mdd = 0;
       const evoMap: Record<string, number> = {};
+      const dailyProfitMap: Record<string, number> = {};
       
       tradesRes.data.forEach(trade => {
         const profit = Number(trade.profit);
-        if (trade.result === 'win') { w++; } else { l++; }
+        if (trade.result === 'win') w++; else l++;
         
         const tradeDate = trade.trade_date || today;
         if (tradeDate >= today) todayP += profit;
@@ -131,10 +120,14 @@ const DashboardHome = () => {
         if (tradeDate >= monthAgo) monthP += profit;
 
         cumBalance += profit;
+        if (cumBalance > peak) peak = cumBalance;
+        const dd = peak - cumBalance;
+        if (dd > mdd) mdd = dd;
+
         evoMap[tradeDate] = cumBalance;
+        dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
       });
 
-      // Calculate current streaks from recent trades
       for (let i = tradesRes.data.length - 1; i >= 0; i--) {
         if (tradesRes.data[i].result === 'win') {
           if (currentLossStreak > 0) break;
@@ -145,16 +138,20 @@ const DashboardHome = () => {
         }
       }
 
+      let posDays = 0, negDays = 0;
+      Object.values(dailyProfitMap).forEach(p => { if (p > 0) posDays++; else if (p < 0) negDays++; });
+
       setWins(w); setLosses(l);
       setTodayProfit(todayP); setWeekProfit(weekP); setMonthProfit(monthP);
       setWinStreak(currentWinStreak); setLossStreak(currentLossStreak);
+      setMaxDrawdown(mdd);
+      setPositiveDays(posDays); setNegativeDays(negDays);
 
-      // Build evolution chart data
       const evoEntries = Object.entries(evoMap).sort((a, b) => a[0].localeCompare(b[0]));
-      setEvolutionData(evoEntries.map(([day, balance]) => ({
-        day: day.slice(5), // MM-DD
-        balance
-      })));
+      setEvolutionData(evoEntries.map(([day, balance]) => ({ day: day.slice(5), balance })));
+
+      const consistencyEntries = Object.entries(dailyProfitMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
+      setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
     }
   }, [user]);
 
@@ -238,13 +235,23 @@ const DashboardHome = () => {
     { key: 'impulsivo', label: '⚡ Impulsivo', safe: false },
   ];
 
+  const consistencyLevel = disciplineRate >= 90 ? 'Trader Consistente' : disciplineRate >= 70 ? 'Consistência Alta' : disciplineRate >= 50 ? 'Consistência Média' : 'Consistência Baixa';
+  const consistencyColor = disciplineRate >= 90 ? 'text-success' : disciplineRate >= 70 ? 'text-primary' : disciplineRate >= 50 ? 'text-primary' : 'text-destructive';
+
+  const pieData = [
+    { name: 'WIN', value: wins, color: CHART_COLORS.green },
+    { name: 'LOSS', value: losses, color: CHART_COLORS.red },
+  ];
+
+  const formatCurrency = (v: number) => `R$ ${v.toFixed(2)}`;
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Motivational Quote */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10"
+        initial={{ opacity: 0, y: -4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-3 px-5 py-3 rounded-xl bg-primary/5 border border-primary/10"
       >
         <Quote className="w-4 h-4 text-primary shrink-0" />
         <p className="text-sm text-muted-foreground italic">"{MOTIVATIONAL_QUOTES[quoteIndex]}"</p>
@@ -252,135 +259,213 @@ const DashboardHome = () => {
 
       {/* Management Summary */}
       {mgmtActive && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="p-4">
+        <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm">
+          <CardContent className="p-5">
             <h3 className="font-display text-xs font-bold text-primary mb-3 flex items-center gap-2 uppercase tracking-wider">
               <ClipboardList className="w-4 h-4" /> Gerenciamento em Andamento
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-              <div>
-                <p className="text-muted-foreground">Modelo</p>
-                <p className="font-display font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Banca</p>
-                <p className="font-display font-bold text-foreground">R$ {mgmtState.banca.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Entrada</p>
-                <p className="font-display font-bold text-primary">R$ {mgmtState.entradaRecomendada.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Placar</p>
-                <p className="font-display font-bold">
-                  <span className="win-text">{mgmtState.cicloWins}W</span>
-                  <span className="text-muted-foreground"> / </span>
-                  <span className="loss-text">{mgmtState.cicloLosses}L</span>
-                </p>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div><p className="text-muted-foreground text-xs">Modelo</p><p className="font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p></div>
+              <div><p className="text-muted-foreground text-xs">Banca</p><p className="font-bold text-foreground">R$ {mgmtState.banca.toFixed(2)}</p></div>
+              <div><p className="text-muted-foreground text-xs">Entrada</p><p className="font-bold text-primary">R$ {mgmtState.entradaRecomendada.toFixed(2)}</p></div>
+              <div><p className="text-muted-foreground text-xs">Placar</p><p className="font-bold"><span className="win-text">{mgmtState.cicloWins}W</span> / <span className="loss-text">{mgmtState.cicloLosses}L</span></p></div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Main Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={Wallet} label="Banca Atual" value={`R$ ${balance.toFixed(2)}`} iconColor="text-primary" />
-        <StatCard
-          icon={TrendingUp}
-          label="Lucro do Dia"
-          value={`R$ ${todayProfit.toFixed(2)}`}
-          color={todayProfit >= 0 ? 'win-text' : 'loss-text'}
-          iconColor={todayProfit >= 0 ? 'text-success' : 'text-destructive'}
-        />
-        <StatCard
-          icon={Calendar}
-          label="Lucro da Semana"
-          value={`R$ ${weekProfit.toFixed(2)}`}
-          color={weekProfit >= 0 ? 'win-text' : 'loss-text'}
-          iconColor={weekProfit >= 0 ? 'text-success' : 'text-destructive'}
-        />
-        <StatCard
-          icon={BarChart3}
-          label="Lucro do Mês"
-          value={`R$ ${monthProfit.toFixed(2)}`}
-          color={monthProfit >= 0 ? 'win-text' : 'loss-text'}
-          iconColor={monthProfit >= 0 ? 'text-success' : 'text-destructive'}
-        />
-      </div>
-
-      {/* Win Rate + Streaks */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Win Rate</p>
-            <p className="text-2xl font-display font-bold text-primary">{winRate}%</p>
-            <p className="text-xs text-muted-foreground">{totalTrades} operações</p>
+      {/* ═══════ BANCA ATUAL — Hero Card ═══════ */}
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}>
+        <Card className="border-primary/20 bg-card box-glow-strong relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <CardContent className="p-6 sm:p-8 relative">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Banca Atual</span>
+              <Wallet className="w-5 h-5 text-primary" />
+            </div>
+            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">
+              R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </p>
+            <div className="flex items-center gap-2 mt-3">
+              {totalProfit >= 0 ? <ArrowUpRight className="w-4 h-4 text-success" /> : <ArrowDownRight className="w-4 h-4 text-destructive" />}
+              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>
+                {totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total
+              </span>
+            </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <ArrowUpRight className="w-3 h-3 text-success" />
+      </motion.div>
+
+      {/* ═══════ Stat Cards Grid ═══════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: TrendingUp, label: 'Lucro do Dia', value: formatCurrency(todayProfit), positive: todayProfit >= 0 },
+          { icon: Calendar, label: 'Lucro da Semana', value: formatCurrency(weekProfit), positive: weekProfit >= 0 },
+          { icon: BarChart3, label: 'Lucro do Mês', value: formatCurrency(monthProfit), positive: monthProfit >= 0 },
+          { icon: TrendingDown, label: 'Máx. Drawdown', value: formatCurrency(maxDrawdown), positive: false, alwaysRed: true },
+        ].map((s, i) => (
+          <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+            <Card className="border-border bg-card hover:border-primary/15 transition-all duration-300 group">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{s.label}</span>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.alwaysRed ? 'bg-destructive/10 text-destructive' : s.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    <s.icon className="w-4 h-4" />
+                  </div>
+                </div>
+                <p className={`text-2xl font-bold ${s.alwaysRed ? 'loss-text' : s.positive ? 'win-text' : 'loss-text'}`}>{s.value}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* ═══════ Win Rate + Streaks + Meta ═══════ */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Win Rate</p>
+            <p className="text-3xl font-bold text-primary">{winRate}%</p>
+            <p className="text-xs text-muted-foreground mt-1">{totalTrades} operações</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 text-center">
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              <ArrowUpRight className="w-3.5 h-3.5 text-success" />
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Wins</p>
             </div>
-            <p className="text-2xl font-display font-bold win-text">{winStreak}</p>
+            <p className="text-3xl font-bold win-text">{winStreak}</p>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <ArrowDownRight className="w-3 h-3 text-destructive" />
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 text-center">
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Losses</p>
             </div>
-            <p className="text-2xl font-display font-bold loss-text">{lossStreak}</p>
+            <p className="text-3xl font-bold loss-text">{lossStreak}</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Meta Diária</p>
+            <p className="text-3xl font-bold text-primary">{todayProfit >= 0 ? '✓' : '—'}</p>
+            <p className="text-xs text-muted-foreground mt-1">{todayProfit >= 0 ? 'No alvo' : 'Abaixo'}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Evolution Chart */}
-      <Card className="border-border/50 bg-card/80">
-        <CardContent className="p-4 sm:p-6">
-          <h3 className="font-display text-xs font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
-            <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
-          </h3>
-          <div className="h-56">
-            {evolutionData.length > 1 ? (
+      {/* ═══════ Charts Row ═══════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Evolution */}
+        <Card className="border-border bg-card lg:col-span-2">
+          <CardContent className="p-5 sm:p-6">
+            <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
+              <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
+            </h3>
+            <div className="h-60">
+              {evolutionData.length > 1 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={evolutionData}>
+                    <defs>
+                      <linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={CHART_COLORS.gold} stopOpacity={0.25} />
+                        <stop offset="95%" stopColor={CHART_COLORS.gold} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} labelStyle={{ color: '#F9FAFB' }} />
+                    <Area type="monotone" dataKey="balance" stroke={CHART_COLORS.gold} strokeWidth={2.5} fill="url(#balanceGrad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('home.noTrades')}</div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* WIN x LOSS Pie */}
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 sm:p-6">
+            <h3 className="font-display text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Distribuição</h3>
+            <div className="h-48">
+              {totalTrades > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value" strokeWidth={0}>
+                      {pieData.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Sem dados</div>
+              )}
+            </div>
+            <div className="flex justify-center gap-6 mt-2 text-xs">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-success" /> WIN: {wins}</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-destructive" /> LOSS: {losses}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ═══════ Consistency Chart ═══════ */}
+      <Card className="border-border bg-card">
+        <CardContent className="p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
+              <Target className="w-4 h-4 text-primary" /> Consistência
+            </h3>
+            <span className={`text-xs font-bold ${consistencyColor}`}>{consistencyLevel}</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+            <div className="text-center">
+              <p className="text-2xl font-bold win-text">{positiveDays}</p>
+              <p className="text-xs text-muted-foreground">Dias Positivos</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold loss-text">{negativeDays}</p>
+              <p className="text-xs text-muted-foreground">Dias Negativos</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-primary">{disciplineRate}%</p>
+              <p className="text-xs text-muted-foreground">Disciplina</p>
+            </div>
+            <div className="text-center">
+              <p className="text-2xl font-bold text-foreground">{daysTrading}</p>
+              <p className="text-xs text-muted-foreground">Dias Operando</p>
+            </div>
+          </div>
+          <Progress value={disciplineRate} className="h-2 mb-4" />
+          <div className="h-44">
+            {consistencyData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={evolutionData}>
-                  <defs>
-                    <linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(45, 100%, 50%)" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(45, 100%, 50%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'hsl(215, 10%, 50%)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 10%, 50%)' }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(220, 18%, 7%)',
-                      border: '1px solid hsl(220, 15%, 16%)',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                    }}
-                    labelStyle={{ color: 'hsl(210, 15%, 88%)' }}
-                  />
-                  <Area type="monotone" dataKey="balance" stroke="hsl(45, 100%, 50%)" strokeWidth={2} fill="url(#balanceGradient)" />
-                </AreaChart>
+                <BarChart data={consistencyData}>
+                  <XAxis dataKey="day" tick={{ fontSize: 10, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '12px' }} />
+                  <Bar dataKey="profit" radius={[4, 4, 0, 0]}>
+                    {consistencyData.map((entry, idx) => (
+                      <Cell key={idx} fill={entry.profit >= 0 ? CHART_COLORS.green : CHART_COLORS.red} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
-                {t('home.noTrades')}
-              </div>
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Sem dados suficientes</div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* Emotional Status */}
-      <Card className="border-border/50 bg-card/80">
-        <CardContent className="p-4 sm:p-6">
-          <h3 className="font-display text-xs font-bold text-foreground mb-3 uppercase tracking-wider">
+      {/* ═══════ Emotional Status ═══════ */}
+      <Card className="border-border bg-card">
+        <CardContent className="p-5 sm:p-6">
+          <h3 className="font-display text-sm font-bold text-foreground mb-2 uppercase tracking-wider">
             Estado Emocional Antes de Operar
           </h3>
           <p className="text-sm text-muted-foreground mb-4">Como você está se sentindo agora?</p>
@@ -389,7 +474,7 @@ const DashboardHome = () => {
               <button
                 key={opt.key}
                 onClick={() => setEmotionalState(emotionalState === opt.key ? null : opt.key)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
+                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
                   emotionalState === opt.key
                     ? opt.safe
                       ? 'border-success/50 bg-success/10 text-success'
@@ -405,29 +490,29 @@ const DashboardHome = () => {
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 rounded-lg bg-destructive/10 border border-destructive/30"
+              className="mt-4 p-4 rounded-xl bg-destructive/10 border border-destructive/25 flex items-start gap-3"
             >
-              <p className="text-sm font-bold text-destructive flex items-center gap-2">
-                ⚠️ ATENÇÃO
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Operar com emocional alterado aumenta drasticamente as chances de perda. Considere pausar e voltar ao mercado mais tarde.
-              </p>
+              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-destructive">ATENÇÃO</p>
+                <p className="text-xs text-muted-foreground mt-1">Operar com emocional alterado aumenta drasticamente o risco. Considere pausar e voltar mais tarde.</p>
+              </div>
             </motion.div>
           )}
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* ═══════ Deposit + Quick Trade ═══════ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Deposit */}
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 sm:p-6">
-            <h3 className="font-display text-xs font-bold text-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 sm:p-6">
+            <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
               <PiggyBank className="w-4 h-4 text-primary" /> {t('home.deposit')}
             </h3>
             <div className="flex gap-3">
-              <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositPlaceholder')} className="bg-secondary/50" />
-              <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0" onClick={async () => {
+              <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositPlaceholder')} className="bg-secondary/50 h-12 text-base" />
+              <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0 h-12 px-6 font-semibold" onClick={async () => {
                 const val = Number(depositAmount);
                 if (!val || val <= 0 || !user) return;
                 setDepositing(true);
@@ -448,38 +533,38 @@ const DashboardHome = () => {
         </Card>
 
         {/* Quick Trade */}
-        <Card className="border-border/50 bg-card/80">
-          <CardContent className="p-4 sm:p-6">
-            <h3 className="font-display text-xs font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
-              {t('home.quickTrade')}
+        <Card className="border-border bg-card">
+          <CardContent className="p-5 sm:p-6">
+            <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
+              <Zap className="w-4 h-4" /> {t('home.quickTrade')}
             </h3>
             <div className="grid grid-cols-3 gap-3 mb-4">
               <div className="relative">
-                <Label className="text-xs">{t('home.pair')}</Label>
+                <Label className="text-xs text-muted-foreground">{t('home.pair')}</Label>
                 <Input
                   value={pair}
                   onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
                   onFocus={() => setShowPairSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowPairSuggestions(false), 300)}
                   placeholder="EUR/USD"
-                  className="bg-secondary/50 uppercase"
+                  className="bg-secondary/50 uppercase h-11"
                   autoComplete="off"
                 />
                 {showPairSuggestions && filteredPairs.length > 0 && (
-                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl max-h-40 overflow-y-auto">
                     {filteredPairs.map((p, idx) => (
                       <div key={p} className="flex items-center hover:bg-secondary transition-colors">
                         {editingPairIndex === idx ? (
                           <div className="flex items-center gap-1 w-full px-2 py-1" onClick={e => e.stopPropagation()}>
                             <Input autoFocus value={editingPairValue} onChange={e => setEditingPairValue(e.target.value.toUpperCase())}
                               onKeyDown={e => { if (e.key === 'Enter') handleEditPair(p, editingPairValue); if (e.key === 'Escape') setEditingPairIndex(null); }}
-                              className="h-6 text-xs bg-secondary uppercase" onBlur={e => e.stopPropagation()} />
+                              className="h-7 text-xs bg-secondary uppercase" onBlur={e => e.stopPropagation()} />
                             <button type="button" onMouseDown={e => { e.preventDefault(); handleEditPair(p, editingPairValue); }} className="text-primary"><CheckCircle className="w-3.5 h-3.5" /></button>
                             <button type="button" onMouseDown={e => { e.preventDefault(); setEditingPairIndex(null); }} className="text-muted-foreground"><X className="w-3.5 h-3.5" /></button>
                           </div>
                         ) : (
                           <>
-                            <button type="button" className="flex-1 text-left px-3 py-1.5 text-xs text-foreground" onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}>{p}</button>
+                            <button type="button" className="flex-1 text-left px-3 py-2 text-sm text-foreground" onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}>{p}</button>
                             <button type="button" className="px-2 text-muted-foreground hover:text-primary" onMouseDown={e => { e.preventDefault(); setEditingPairIndex(idx); setEditingPairValue(p); }}>
                               <Pencil className="w-3 h-3" />
                             </button>
@@ -491,65 +576,65 @@ const DashboardHome = () => {
                 )}
               </div>
               <div>
-                <Label className="text-xs">Payout (%)</Label>
-                <Input type="number" value={payout} onChange={e => setPayout(e.target.value)} placeholder="80" className="bg-secondary/50" />
+                <Label className="text-xs text-muted-foreground">Payout (%)</Label>
+                <Input type="number" value={payout} onChange={e => setPayout(e.target.value)} placeholder="80" className="bg-secondary/50 h-11" />
               </div>
               <div>
-                <Label className="text-xs">{t('home.entryValue')}</Label>
-                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="10.00" className="bg-secondary/50" />
+                <Label className="text-xs text-muted-foreground">{t('home.entryValue')}</Label>
+                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="10.00" className="bg-secondary/50 h-11" />
               </div>
             </div>
             <div className="flex gap-3">
               <Button onClick={() => handleTrade('win')} disabled={!pair.trim() || !amount || submitting}
-                className="flex-1 font-display gap-2 bg-success/15 text-success hover:bg-success/25 border border-success/20">
-                <CheckCircle className="w-4 h-4" /> WIN
+                className="flex-1 font-bold gap-2 h-12 text-base bg-success/15 text-success hover:bg-success/25 border border-success/20 transition-all duration-200 hover:scale-[1.02]">
+                <CheckCircle className="w-5 h-5" /> WIN
               </Button>
               <Button onClick={() => handleTrade('loss')} disabled={!pair.trim() || !amount || submitting}
-                className="flex-1 font-display gap-2 bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/20">
-                <XCircle className="w-4 h-4" /> LOSS
+                className="flex-1 font-bold gap-2 h-12 text-base bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/20 transition-all duration-200 hover:scale-[1.02]">
+                <XCircle className="w-5 h-5" /> LOSS
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Patent System */}
-      <Card className="border-border/50 bg-card/80">
-        <CardContent className="p-4 sm:p-6">
-          <h3 className="font-display text-xs font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
+      {/* ═══════ Patent System ═══════ */}
+      <Card className="border-border bg-card">
+        <CardContent className="p-5 sm:p-6">
+          <h3 className="font-display text-sm font-bold text-foreground mb-5 flex items-center gap-2 uppercase tracking-wider">
             <Shield className="w-4 h-4 text-primary" /> {t('home.patent')}
           </h3>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: rank.color + '15', border: `2px solid ${rank.color}` }}>
+          <div className="flex items-center gap-5 mb-5">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: rank.color + '12', border: `2px solid ${rank.color}40` }}>
               {rank.emoji}
             </div>
             <div className="flex-1">
-              <p className="font-display font-bold text-foreground" style={{ color: rank.color }}>
+              <p className="font-bold text-lg text-foreground" style={{ color: rank.color }}>
                 {isEn ? rank.nameEn : rank.name}
               </p>
               {nextRank && (
                 <>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                    {t('home.nextRank')}: {isEn ? nextRank.nameEn : nextRank.name} {nextRank.emoji}
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                    Próxima: {isEn ? nextRank.nameEn : nextRank.name} {nextRank.emoji}
                     <ChevronRight className="w-3 h-3" /> R$ {nextRank.minProfit.toLocaleString()}
                   </p>
                   <Progress value={rankProgress} className="h-1.5 mt-2" />
                 </>
               )}
-              {!nextRank && <p className="text-xs text-primary font-bold">{t('home.maxRank')}</p>}
+              {!nextRank && <p className="text-xs text-primary font-bold mt-1">{t('home.maxRank')}</p>}
             </div>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 mt-4">
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
             {TRADER_RANKS.filter(r => r.minProfit > 0).map((r) => {
               const unlocked = totalProfit >= r.minProfit;
               return (
                 <button key={r.minProfit} onClick={() => { if (unlocked) { setSelectedPatentRank(r); setPatentDialogOpen(true); } }} disabled={!unlocked}
-                  className={`group relative rounded-lg border p-3 text-center transition-all ${unlocked
-                    ? 'border-primary/30 bg-primary/5 hover:bg-primary/10 cursor-pointer hover:scale-105'
-                    : 'border-border/30 bg-secondary/20 opacity-35 cursor-not-allowed'}`}>
+                  className={`group relative rounded-xl border p-3 text-center transition-all duration-200 ${unlocked
+                    ? 'border-primary/25 bg-primary/5 hover:bg-primary/10 cursor-pointer hover:scale-105 hover:shadow-lg'
+                    : 'border-border/30 bg-secondary/20 opacity-30 cursor-not-allowed'}`}>
                   <div className="text-2xl mb-1">{r.emoji}</div>
-                  <p className="font-display text-[10px] font-bold leading-tight" style={unlocked ? { color: r.color } : { color: 'hsl(var(--muted-foreground))' }}>
+                  <p className="font-display text-[10px] font-bold leading-tight" style={unlocked ? { color: r.color } : { color: CHART_COLORS.muted }}>
                     {isEn ? r.nameEn : r.name}
                   </p>
                   <p className="text-[10px] text-muted-foreground">R$ {r.minProfit.toLocaleString()}</p>

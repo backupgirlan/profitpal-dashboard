@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, Brain, Upload, Clock, TrendingUp, Shield, Zap, Star, ImageIcon, BarChart3, Activity, AlertTriangle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Eye, Brain, Upload, Clock, TrendingUp, Shield, Zap, Star, ImageIcon, BarChart3, Activity, AlertTriangle, CheckCircle, XCircle, Loader2, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import SuperVipGate from '@/components/SuperVipGate';
+import AccountAnalysis from '@/components/horus/AccountAnalysis';
+import TraderDialog from '@/components/horus/TraderDialog';
 
 const POSITIONING_PHRASES = [
   'Horus IA — inteligência aplicada à disciplina do trader',
@@ -292,9 +294,11 @@ const HorusIA = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start">
-          <TabsTrigger value="behavioral" className="gap-2 font-display text-xs"><Brain className="w-4 h-4" /> Análise Comportamental</TabsTrigger>
-          <TabsTrigger value="print" className="gap-2 font-display text-xs"><ImageIcon className="w-4 h-4" /> Leitura de Print</TabsTrigger>
+        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-1 p-1">
+          <TabsTrigger value="behavioral" className="gap-2 font-display text-xs"><Brain className="w-4 h-4" /> Comportamental</TabsTrigger>
+          <TabsTrigger value="print" className="gap-2 font-display text-xs"><ImageIcon className="w-4 h-4" /> Print</TabsTrigger>
+          <TabsTrigger value="account" className="gap-2 font-display text-xs"><BarChart3 className="w-4 h-4" /> Análise da Conta</TabsTrigger>
+          <TabsTrigger value="dialog" className="gap-2 font-display text-xs"><MessageSquare className="w-4 h-4" /> Diálogo do Trader</TabsTrigger>
           <TabsTrigger value="history" className="gap-2 font-display text-xs"><Clock className="w-4 h-4" /> Histórico</TabsTrigger>
         </TabsList>
 
@@ -543,6 +547,16 @@ const HorusIA = () => {
               </AnimatePresence>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Account Analysis */}
+        <TabsContent value="account" className="mt-4">
+          <AccountAnalysis />
+        </TabsContent>
+
+        {/* Trader Dialog */}
+        <TabsContent value="dialog" className="mt-4">
+          <TraderDialog />
         </TabsContent>
 
         {/* History */}

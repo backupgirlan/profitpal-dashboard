@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,8 +16,9 @@ import {
   ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
   Trash2, RotateCcw
 } from 'lucide-react';
-import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
+import { getRankForProfit, getNextRankForProfit, TRADER_RANKS, TraderRank } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
+import RankAchievementModal from '@/components/RankAchievementModal';
 import { useManagement2x } from '@/hooks/useManagement2x';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';

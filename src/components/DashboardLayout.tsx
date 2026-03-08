@@ -2,11 +2,12 @@ import { ReactNode, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
-  Home, Calculator, BarChart3, Trophy, Brain, Gift, LogOut,
-  Menu, X, TrendingUp, ClipboardList, MessageSquare, Shield, Youtube, KeyRound, Smartphone, Trash2, GraduationCap, FileText
+  Home, BarChart3, Trophy, Brain, LogOut,
+  Menu, X, TrendingUp, ClipboardList, Shield, Youtube, KeyRound, Smartphone, Trash2,
+  GraduationCap, FileText, Wind, Target, BookOpen, Award, Settings, ChevronLeft
 } from 'lucide-react';
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
@@ -17,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { signOut, user } = useAuth();
@@ -25,9 +27,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const { t } = useTranslation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [displayName, setDisplayName] = useState('');
-  const [todayTradeCount, setTodayTradeCount] = useState(0);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -36,15 +38,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [resetLoading, setResetLoading] = useState(false);
 
   const navItems = [
-    { path: '/dashboard', label: t('sidebar.home'), icon: Home },
-    { path: '/dashboard/management', label: t('sidebar.management'), icon: ClipboardList },
-    { path: '/dashboard/rankings', label: t('sidebar.rankings'), icon: Trophy },
-    { path: '/dashboard/evolution', label: t('sidebar.evolution'), icon: TrendingUp },
-    { path: '/dashboard/psychology', label: t('sidebar.psychology'), icon: Brain },
-    { path: '/dashboard/videos', label: t('sidebar.videos'), icon: Youtube },
-    { path: '/dashboard/courses', label: t('sidebar.courses'), icon: GraduationCap },
-    { path: '/dashboard/report', label: t('sidebar.report'), icon: FileText },
-    { path: '/dashboard/mental', label: t('sidebar.mental'), icon: Brain },
+    { path: '/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/dashboard/management', label: 'Registrar Operação', icon: ClipboardList },
+    { path: '/dashboard/report', label: 'Relatórios', icon: FileText },
+    { path: '/dashboard/psychology', label: 'Psicologia', icon: Brain },
+    { path: '/dashboard/mental', label: 'Modo Disciplina', icon: Shield },
+    { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
+    { path: '/dashboard/rankings', label: 'Conquistas', icon: Award },
+    { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
+    { path: '/dashboard/courses', label: 'Cursos', icon: GraduationCap },
   ];
 
   const handleChangePassword = async () => {
@@ -73,17 +75,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       .then(({ data }) => setIsAdmin(!!data));
     supabase.from('profiles').select('display_name').eq('user_id', user.id).single()
       .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
-    const today = new Date().toISOString().split('T')[0];
-    supabase.from('trades').select('id', { count: 'exact' }).eq('user_id', user.id).eq('trade_date', today)
-      .then(({ count }) => setTodayTradeCount(count || 0));
   }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-    const today = new Date().toISOString().split('T')[0];
-    supabase.from('trades').select('id', { count: 'exact' }).eq('user_id', user.id).eq('trade_date', today)
-      .then(({ count }) => setTodayTradeCount(count || 0));
-  }, [location.pathname, user]);
 
   const handleSignOut = async () => { await signOut(); navigate('/'); };
 
@@ -112,96 +104,121 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  const getMoodStatus = (): { isGood: boolean; label: string } => {
-    try {
-      const soros = localStorage.getItem('soros_management_state');
-      if (soros) {
-        const state = JSON.parse(soros);
-        if (state.ativo) {
-          if (state.encerrado) return { isGood: false, label: t('sidebar.sorosEnded') };
-          if (state.pausado) return { isGood: false, label: t('sidebar.sorosPaused') };
-          return { isGood: state.tentativasPerdidas < state.tentativasTotal, label: `Soros ${state.tentativaAtual}/${state.tentativasTotal}` };
-        }
-      }
-      const mgmt = localStorage.getItem('management_engine_state');
-      if (mgmt) {
-        const state = JSON.parse(mgmt);
-        if (state.ativo) {
-          if (state.encerrado || state.bloqueado) return { isGood: false, label: t('sidebar.sessionEnded') };
-          const overLimit = state.tradesDoDia >= state.maxTrades;
-          const overStopLoss = state.stopLossPct > 0 && state.lucroSessao < 0 && Math.abs(state.lucroSessao) >= (state.bancaInicial * state.stopLossPct / 100);
-          if (overLimit || overStopLoss) return { isGood: false, label: t('sidebar.limitReached') };
-          return { isGood: true, label: `${state.tradesDoDia}/${state.maxTrades} trades` };
-        }
-      }
-    } catch {}
-    return { isGood: todayTradeCount <= 3, label: t('sidebar.freeMode') };
-  };
-  const moodStatus = getMoodStatus();
-  const moodEmoji = moodStatus.isGood ? '😊' : '😡';
+  const sidebarWidth = sidebarCollapsed ? 'w-[68px]' : 'w-64';
 
   return (
     <div className="min-h-screen bg-background flex">
-      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-4 left-4 z-50 lg:hidden bg-card border border-border rounded-md p-2 text-primary">
+      {/* Mobile toggle */}
+      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="fixed top-4 left-4 z-50 lg:hidden bg-card border border-border rounded-lg p-2 text-primary shadow-lg">
         {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-card border-r border-border flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-6 border-b border-border">
+      {/* Sidebar */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-40 ${sidebarWidth} bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        {/* Brand */}
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold text-primary text-glow">TECHNICAL GIRLAN</h2>
-            <span className="text-2xl" title={moodStatus.isGood ? t('sidebar.withinManagement') : t('sidebar.outsideManagement')}>{moodEmoji}</span>
+            {!sidebarCollapsed && (
+              <h2 className="font-display text-sm font-bold text-primary text-glow tracking-wider">
+                TECHNICAL GIRLAN
+              </h2>
+            )}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className={`w-4 h-4 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
+            </button>
           </div>
-          <p className="text-xs text-foreground mt-1 truncate font-medium">{displayName || user?.email}</p>
-          <div className="mt-2 flex items-center justify-between">
-            <StreakDisplay />
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <LanguageSwitcher />
+          {!sidebarCollapsed && (
+            <div className="mt-3">
+              <p className="text-xs text-muted-foreground truncate">{displayName || user?.email}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <StreakDisplay />
+                <div className="flex items-center gap-1">
+                  <ThemeToggle />
+                  <LanguageSwitcher />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <nav className="flex-1 p-4 space-y-1">
+        {/* Navigation */}
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
-              <Link key={item.path} to={item.path} onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${isActive ? 'bg-primary/10 text-primary box-glow' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
-                <item.icon className="w-4 h-4" />
-                {item.label}
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setSidebarOpen(false)}
+                title={sidebarCollapsed ? item.label : undefined}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group ${
+                  isActive
+                    ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent'
+                } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
+              >
+                <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
           })}
           {isAdmin && (
-            <Link to="/dashboard/admin" onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors mt-2 border-t border-border pt-3 ${location.pathname === '/dashboard/admin' ? 'bg-primary/10 text-primary box-glow' : 'text-muted-foreground hover:text-foreground hover:bg-secondary'}`}>
-              <Shield className="w-4 h-4" />
-              {t('sidebar.admin')}
-            </Link>
+            <>
+              <Separator className="my-2 bg-sidebar-border" />
+              <Link
+                to="/dashboard/admin"
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                  location.pathname === '/dashboard/admin'
+                    ? 'bg-primary/10 text-primary border-l-2 border-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent'
+                } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
+              >
+                <Shield className="w-4 h-4 shrink-0" />
+                {!sidebarCollapsed && <span>Admin</span>}
+              </Link>
+            </>
           )}
         </nav>
 
-        <div className="p-4 border-t border-border space-y-1">
-          <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>
-            <Button variant="ghost" onClick={() => setInstallOpen(true)} className="w-full justify-start gap-3 text-primary hover:bg-primary/10 font-medium">
-              <Smartphone className="w-4 h-4" /> {t('sidebar.installApp')}
-            </Button>
-          </motion.div>
-          <Button variant="ghost" onClick={() => setShowPasswordDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground">
-            <KeyRound className="w-4 h-4" /> {t('sidebar.changePassword')}
-          </Button>
-          <Button variant="ghost" onClick={() => setShowResetDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive">
-            <Trash2 className="w-4 h-4" /> {t('sidebar.resetAccount')}
-          </Button>
-          <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive">
-            <LogOut className="w-4 h-4" /> {t('sidebar.logout')}
-          </Button>
+        {/* Bottom actions */}
+        <div className="p-2 border-t border-sidebar-border space-y-0.5">
+          {!sidebarCollapsed ? (
+            <>
+              <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+                <Button variant="ghost" onClick={() => setInstallOpen(true)} className="w-full justify-start gap-3 text-primary hover:bg-primary/10 text-xs h-8">
+                  <Smartphone className="w-4 h-4" /> {t('sidebar.installApp')}
+                </Button>
+              </motion.div>
+              <Button variant="ghost" onClick={() => setShowPasswordDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground text-xs h-8">
+                <KeyRound className="w-4 h-4" /> {t('sidebar.changePassword')}
+              </Button>
+              <Button variant="ghost" onClick={() => setShowResetDialog(true)} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive text-xs h-8">
+                <Trash2 className="w-4 h-4" /> {t('sidebar.resetAccount')}
+              </Button>
+              <Button variant="ghost" onClick={handleSignOut} className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive text-xs h-8">
+                <LogOut className="w-4 h-4" /> {t('sidebar.logout')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="icon" onClick={() => setInstallOpen(true)} className="w-full text-primary hover:bg-primary/10 h-8" title={t('sidebar.installApp')}>
+                <Smartphone className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="w-full text-muted-foreground hover:text-destructive h-8" title={t('sidebar.logout')}>
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </>
+          )}
         </div>
       </aside>
 
-      {sidebarOpen && <div className="fixed inset-0 z-30 bg-background/50 lg:hidden" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && <div className="fixed inset-0 z-30 bg-background/60 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
+      {/* Dialogs */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
@@ -255,11 +272,30 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
 
-      <main className="flex-1 p-4 lg:p-8 pt-16 lg:pt-8 overflow-y-auto">
-        <motion.div key={location.pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-          {children}
-        </motion.div>
-      </main>
+      {/* Topbar + Main */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Topbar */}
+        <header className="sticky top-0 z-20 h-14 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="lg:hidden w-8" /> {/* spacer for mobile menu button */}
+            <h1 className="font-display text-xs font-bold text-foreground tracking-wide hidden sm:block">
+              {navItems.find(n => n.path === location.pathname)?.label || 'Dashboard'}
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground hidden sm:block">{displayName}</span>
+            <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-display text-xs font-bold">
+              {(displayName || 'T')[0].toUpperCase()}
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
+          <motion.div key={location.pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+            {children}
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 }

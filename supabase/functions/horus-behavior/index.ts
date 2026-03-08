@@ -19,12 +19,11 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey, { global: { headers: { Authorization: authHeader } } });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: claimsErr } = await supabase.auth.getClaims(token);
-    if (claimsErr || !claims?.claims) {
+    const { data: { user }, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !user) {
       return new Response(JSON.stringify({ error: "Token inválido" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    const userId = claims.claims.sub as string;
+    const userId = user.id;
 
     // Check Super VIP
     const { data: profile } = await supabase.from("profiles").select("is_super_vip, balance, total_profit, discipline_score, consecutive_losses, soros_enabled, soros_level, stop_loss, stop_win, entry_percentage, active_management_mode").eq("user_id", userId).single();

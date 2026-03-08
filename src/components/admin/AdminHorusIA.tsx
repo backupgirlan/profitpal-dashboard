@@ -68,6 +68,7 @@ export default function AdminHorusIA() {
           <TabsTrigger value="prompts" className="text-xs gap-1"><FileText className="w-3 h-3" /> Prompts</TabsTrigger>
           <TabsTrigger value="access" className="text-xs gap-1"><Shield className="w-3 h-3" /> Acesso</TabsTrigger>
           <TabsTrigger value="limits" className="text-xs gap-1"><Activity className="w-3 h-3" /> Limites</TabsTrigger>
+          <TabsTrigger value="dialog" className="text-xs gap-1"><Brain className="w-3 h-3" /> Diálogo</TabsTrigger>
         </TabsList>
 
         {/* Control */}
@@ -238,6 +239,49 @@ export default function AdminHorusIA() {
               <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
                 <Label className="text-xs">Acesso ilimitado</Label>
                 <Switch checked={settings['unlimited_access'] === 'true'} onCheckedChange={v => updateSetting('unlimited_access', v ? 'true' : 'false')} />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        {/* Dialog Config */}
+        <TabsContent value="dialog" className="space-y-4 mt-4">
+          <Card className="border-border/50">
+            <CardContent className="p-5 space-y-4">
+              <h3 className="text-sm font-display font-bold flex items-center gap-2">
+                <Brain className="w-4 h-4 text-primary" /> Diálogo do Trader — Configuração
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                  <Label className="text-xs">Ativar Diálogo do Trader</Label>
+                  <Switch checked={settings['dialog_enabled'] !== 'false'} onCheckedChange={v => updateSetting('dialog_enabled', v ? 'true' : 'false')} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                  <Label className="text-xs">Permitir usar contexto da conta</Label>
+                  <Switch checked={settings['dialog_context_enabled'] !== 'false'} onCheckedChange={v => updateSetting('dialog_context_enabled', v ? 'true' : 'false')} />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
+                  <Label className="text-xs">Salvar histórico</Label>
+                  <Switch checked={settings['dialog_save_history'] !== 'false'} onCheckedChange={v => updateSetting('dialog_save_history', v ? 'true' : 'false')} />
+                </div>
+              </div>
+              <Separator />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs text-muted-foreground">Limite de mensagens por dia</Label>
+                  <Input type="number" value={settings['daily_dialog_limit'] || '20'} onChange={e => updateSetting('daily_dialog_limit', e.target.value)} className="bg-secondary mt-1.5" />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Tom padrão do chat</Label>
+                  <Select value={settings['dialog_default_tone'] || 'equilibrado'} onValueChange={v => updateSetting('dialog_default_tone', v)}>
+                    <SelectTrigger className="bg-secondary mt-1.5"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="acolhedor">🤝 Acolhedor</SelectItem>
+                      <SelectItem value="equilibrado">⚖️ Equilibrado</SelectItem>
+                      <SelectItem value="firme">💪 Firme</SelectItem>
+                      <SelectItem value="verdade_dura">🔥 Verdade Dura</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </CardContent>
           </Card>

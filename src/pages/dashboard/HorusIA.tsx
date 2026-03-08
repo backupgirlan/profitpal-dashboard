@@ -161,6 +161,32 @@ const HorusIA = () => {
     }
   }, []);
 
+  // Ctrl+V paste support
+  const handlePaste = useCallback((e: ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+          if (!allowed.includes(file.type)) return;
+          if (file.size > 5 * 1024 * 1024) return;
+          setSelectedFile(file);
+          setPreviewUrl(URL.createObjectURL(file));
+          toast({ title: 'Print colado', description: 'Imagem carregada via Ctrl+V.' });
+        }
+        break;
+      }
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [handlePaste]);
+
   // AXIS: Validação de sincronização temporal
   const validarHorarioEntrada = (horarioSugerido: string): boolean => {
     if (!horarioSugerido || horarioSugerido === '--:--') return false;

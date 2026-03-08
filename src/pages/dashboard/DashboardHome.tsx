@@ -700,7 +700,7 @@ const DashboardHome = () => {
               <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
             </h3>
             <div className="h-60">
-              {evolutionData.length > 1 ? (
+              {evolutionData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={evolutionData}>
                     <defs>
@@ -712,7 +712,7 @@ const DashboardHome = () => {
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} labelStyle={{ color: '#F9FAFB' }} />
-                    <Area type="monotone" dataKey="balance" stroke={CHART_COLORS.gold} strokeWidth={2.5} fill="url(#balanceGrad)" />
+                    <Area type="monotone" dataKey="balance" stroke={CHART_COLORS.gold} strokeWidth={2.5} fill="url(#balanceGrad)" dot={{ r: 3, fill: CHART_COLORS.gold, strokeWidth: 0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (

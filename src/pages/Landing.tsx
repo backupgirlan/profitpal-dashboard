@@ -148,6 +148,32 @@ const Landing = () => {
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Score</p>
             </div>
           </motion.div>
+
+          {/* Scroll down indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 0.8 }}
+            className="mt-14 flex flex-col items-center gap-2 cursor-pointer"
+            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+          >
+            <span className="text-[10px] font-display uppercase tracking-[0.3em] text-muted-foreground">
+              Descubra mais
+            </span>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronDown className="w-6 h-6 text-primary" />
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.15 }}
+              className="-mt-4"
+            >
+              <ChevronDown className="w-6 h-6 text-primary/40" />
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 

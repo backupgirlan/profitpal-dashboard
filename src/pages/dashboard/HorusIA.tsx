@@ -161,6 +161,17 @@ const HorusIA = () => {
     }
   }, []);
 
+  // AXIS: Validação de sincronização temporal
+  const validarHorarioEntrada = (horarioSugerido: string): boolean => {
+    if (!horarioSugerido || horarioSugerido === '--:--') return false;
+    const agora = new Date();
+    const [horas, minutos] = horarioSugerido.split(':').map(Number);
+    if (isNaN(horas) || isNaN(minutos)) return false;
+    const sugestao = new Date();
+    sugestao.setHours(horas, minutos, 0, 0);
+    return sugestao >= agora;
+  };
+
   const runChartAnalysis = async () => {
     if (!session || !selectedFile) return;
     setChartLoading(true);
@@ -183,9 +194,15 @@ const HorusIA = () => {
         toast({ title: 'Erro', description: data.error || 'Falha na análise', variant: 'destructive' });
         return;
       }
+
+      // AXIS: Validar se horário sugerido ainda é válido
+      if (data.entrada_estimada && !validarHorarioEntrada(data.entrada_estimada)) {
+        data._horario_expirado = true;
+      }
+
       setChartResult(data);
       loadHistory();
-      toast({ title: 'Análise concluída', description: 'Print analisado pela Horus IA.' });
+      toast({ title: 'Análise concluída', description: data._horario_expirado ? 'Atenção: horário de entrada já expirou.' : 'Print analisado pela Horus IA.' });
     } catch (e) {
       toast({ title: 'Erro', description: 'Não foi possível interpretar a imagem enviada.', variant: 'destructive' });
     } finally {
@@ -403,6 +420,16 @@ const HorusIA = () => {
                 </Select>
               </div>
 
+              {/* Upload Tips */}
+              <div className="bg-primary/5 border border-primary/10 rounded-lg p-3 space-y-1">
+                <p className="text-xs font-display text-primary flex items-center gap-1.5"><AlertTriangle className="w-3 h-3" /> Dicas para melhor leitura</p>
+                <ul className="text-[11px] text-muted-foreground space-y-0.5 ml-4 list-disc">
+                  <li>Inclua a <strong>régua de preço</strong> (lateral) e <strong>régua de tempo</strong> (inferior)</li>
+                  <li>Confirme que o timeframe ({selectedTimeframe}) está visível no canto do gráfico</li>
+                  <li>Use prints com boa resolução e contraste nítido entre candles e fundo</li>
+                </ul>
+              </div>
+
               {/* Upload Area */}
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileSelect} className="hidden" />
               <div
@@ -474,6 +501,12 @@ const HorusIA = () => {
                         <p className="text-lg font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
                       </div>
                     </div>
+                    {(chartResult as any)._horario_expirado && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+                        <p className="text-xs text-destructive font-medium">Horário de entrada já expirou. Aguarde o próximo candle ou envie um print atualizado.</p>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 pt-2 border-t border-border/30">
                       <Badge variant="outline" className="text-xs">{chartResult.timeframe}</Badge>
                       <p className="text-[10px] text-muted-foreground italic">Análise probabilística. Não representa garantia de resultado.</p>

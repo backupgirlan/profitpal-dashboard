@@ -41,6 +41,7 @@ interface ChartResult {
   saida_estimada: string;
   confianca: number;
   timeframe: string;
+  analysis_id?: string;
 }
 
 const HorusIA = () => {
@@ -65,6 +66,8 @@ const HorusIA = () => {
   // Results
   const [behaviorResult, setBehaviorResult] = useState<BehavioralResult | null>(null);
   const [chartResult, setChartResult] = useState<ChartResult | null>(null);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   // Image upload
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -223,6 +226,7 @@ const HorusIA = () => {
     if (!session || !selectedFile) return;
     setChartLoading(true);
     setChartResult(null);
+    setFeedbackSent(false);
     setLoadingMsg('Horus IA interpretando o cenário...');
 
     try {
@@ -258,6 +262,21 @@ const HorusIA = () => {
     }
   };
   runChartAnalysisRef.current = runChartAnalysis;
+
+  const sendFeedback = async (result: 'win' | 'loss') => {
+    if (!chartResult?.analysis_id || feedbackSent) return;
+    setFeedbackLoading(true);
+    try {
+      await supabase.from('horus_print_analyses').update({ result }).eq('id', chartResult.analysis_id);
+      setFeedbackSent(true);
+      toast({ title: result === 'win' ? '✅ WIN registrado!' : '❌ LOSS registrado!', description: 'Feedback salvo. A Horus IA usará este dado para melhorar futuras análises.' });
+      loadHistory();
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível salvar o feedback.', variant: 'destructive' });
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
 
   if (isSuperVip === null) return null;
   if (!isSuperVip && !isAdmin) return <SuperVipGate />;
@@ -556,6 +575,41 @@ const HorusIA = () => {
                       <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
                         <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
                         <p className="text-xs text-destructive font-medium">Horário de entrada já expirou. Aguarde o próximo candle ou envie um print atualizado.</p>
+                      </div>
+                    )}
+                    {/* Feedback Win/Loss */}
+                    {chartResult.analysis_id && (
+                      <div className="border-t border-border/30 pt-3 space-y-2">
+                        {feedbackSent ? (
+                          <div className="flex items-center gap-2 justify-center py-2">
+                            <CheckCircle className="w-4 h-4 text-success" />
+                            <p className="text-sm text-muted-foreground font-display">Feedback registrado! A Horus IA irá calibrar futuras análises.</p>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-xs text-muted-foreground text-center font-display">Após a operação, informe o resultado:</p>
+                            <div className="flex gap-3 justify-center">
+                              <Button
+                                variant="outline"
+                                onClick={() => sendFeedback('win')}
+                                disabled={feedbackLoading}
+                                className="gap-2 border-success/30 bg-success/10 text-success hover:bg-success/20 font-display"
+                              >
+                                {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                WIN
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => sendFeedback('loss')}
+                                disabled={feedbackLoading}
+                                className="gap-2 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 font-display"
+                              >
+                                {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                                LOSS
+                              </Button>
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                     <div className="flex items-center gap-2 pt-2 border-t border-border/30">

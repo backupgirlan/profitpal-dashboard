@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 5 * 1024 * 1024;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -29,7 +29,6 @@ serve(async (req) => {
     }
     const userId = user.id;
 
-    // Check Super VIP
     const { data: profile } = await supabase.from("profiles").select("is_super_vip").eq("user_id", userId).single();
     const { data: isAdmin } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
 
@@ -37,7 +36,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Acesso restrito a Super VIP" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Parse form data
     const formData = await req.formData();
     const file = formData.get("image") as File;
     const timeframe = (formData.get("timeframe") as string) || "M5";
@@ -45,20 +43,16 @@ serve(async (req) => {
     if (!file) {
       return new Response(JSON.stringify({ error: "Nenhuma imagem enviada" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
     if (!ALLOWED_TYPES.includes(file.type)) {
       return new Response(JSON.stringify({ error: "Formato de imagem inválido. Use PNG, JPG ou WEBP." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
     if (file.size > MAX_SIZE) {
       return new Response(JSON.stringify({ error: "Imagem muito grande. Máximo 5MB." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
     if (!["M5", "M15"].includes(timeframe)) {
       return new Response(JSON.stringify({ error: "Timeframe inválido. Use M5 ou M15." }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Check daily limit
     const today = new Date().toISOString().split("T")[0];
     let { data: usage } = await supabase.from("ai_usage").select("*").eq("user_id", userId).eq("usage_date", today).single();
 
@@ -73,7 +67,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Seu limite diário de prints foi atingido. Tente novamente amanhã." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Upload image to storage
     const fileExt = file.name.split(".").pop() || "png";
     const fileName = `${userId}/${Date.now()}.${fileExt}`;
     const arrayBuffer = await file.arrayBuffer();
@@ -82,14 +75,50 @@ serve(async (req) => {
     const serviceClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     await serviceClient.storage.from("chart-images").upload(fileName, uint8, { contentType: file.type });
 
-    // Convert to base64 for AI
     const base64Image = base64Encode(uint8);
     const mimeType = file.type;
 
-    // Get prompt from DB
     const { data: prompts } = await supabase.from("horus_prompts").select("prompt_key, prompt_value");
     const promptMap: Record<string, string> = {};
     prompts?.forEach((p: any) => { promptMap[p.prompt_key] = p.prompt_value; });
+
+    // Fetch past feedback to improve accuracy
+    const { data: pastFeedback } = await supabase
+      .from("horus_print_analyses")
+      .select("scenario, confidence, result, timeframe")
+      .eq("user_id", userId)
+      .not("result", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    let feedbackContext = "";
+    if (pastFeedback && pastFeedback.length > 0) {
+      const totalWithFeedback = pastFeedback.length;
+      const wins = pastFeedback.filter((f: any) => f.result === "win").length;
+      const losses = pastFeedback.filter((f: any) => f.result === "loss").length;
+      const winRate = totalWithFeedback > 0 ? Math.round((wins / totalWithFeedback) * 100) : 0;
+
+      // Analyze patterns - which scenarios had more wins/losses
+      const buyWins = pastFeedback.filter((f: any) => f.scenario === "compra" && f.result === "win").length;
+      const buyTotal = pastFeedback.filter((f: any) => f.scenario === "compra").length;
+      const sellWins = pastFeedback.filter((f: any) => f.scenario === "venda" && f.result === "win").length;
+      const sellTotal = pastFeedback.filter((f: any) => f.scenario === "venda").length;
+
+      const highConfWins = pastFeedback.filter((f: any) => f.confidence >= 70 && f.result === "win").length;
+      const highConfTotal = pastFeedback.filter((f: any) => f.confidence >= 70).length;
+
+      feedbackContext = `\n\nDADOS DE FEEDBACK DO TRADER (use para calibrar sua análise):
+- Total de análises com feedback: ${totalWithFeedback}
+- Win rate geral: ${winRate}% (${wins} wins, ${losses} losses)
+- Compras: ${buyTotal} análises, ${buyWins} wins (${buyTotal > 0 ? Math.round((buyWins/buyTotal)*100) : 0}% acerto)
+- Vendas: ${sellTotal} análises, ${sellWins} wins (${sellTotal > 0 ? Math.round((sellWins/sellTotal)*100) : 0}% acerto)
+- Alta confiança (>=70%): ${highConfTotal} análises, ${highConfWins} wins (${highConfTotal > 0 ? Math.round((highConfWins/highConfTotal)*100) : 0}% acerto)
+
+INSTRUÇÕES DE CALIBRAÇÃO:
+- Se o win rate geral estiver abaixo de 50%, seja MAIS CONSERVADOR na confiança.
+- Se cenários de compra têm win rate muito diferente de venda, ajuste sua tendência.
+- Se alta confiança não corresponde a alto acerto, reduza suas estimativas de confiança.`;
+    }
 
     const candleMinutes = timeframe === "M5" ? 5 : 15;
     const imagePrompt = promptMap["image_analysis"] || `Você é a Horus IA, analista probabilístico de gráficos de opções binárias no timeframe ${timeframe}.
@@ -114,13 +143,14 @@ REGRAS DE RESPOSTA:
 - confianca: número de 0 a 100
 - Análise probabilística apenas, sem garantias`;
 
+    const fullPrompt = imagePrompt + feedbackContext;
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "Configuração de IA indisponível" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const model = settings["ia_model"] || "google/gemini-2.5-flash";
-    const minConfidence = parseInt(settings["min_confidence"] || "60");
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -128,7 +158,7 @@ REGRAS DE RESPOSTA:
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: imagePrompt },
+          { role: "system", content: fullPrompt },
           {
             role: "user",
             content: [
@@ -188,9 +218,8 @@ REGRAS DE RESPOSTA:
 
     result.timeframe = timeframe;
 
-    // Save to history
     const { data: publicUrl } = serviceClient.storage.from("chart-images").getPublicUrl(fileName);
-    await supabase.from("horus_print_analyses").insert({
+    const { data: insertedAnalysis } = await supabase.from("horus_print_analyses").insert({
       user_id: userId,
       timeframe,
       scenario: result.cenario,
@@ -199,9 +228,11 @@ REGRAS DE RESPOSTA:
       confidence: result.confianca,
       image_url: publicUrl?.publicUrl || null,
       raw_response: JSON.stringify(result),
-    });
+    }).select("id").single();
 
-    // Update usage
+    // Return the analysis ID so the frontend can update with feedback
+    result.analysis_id = insertedAnalysis?.id || null;
+
     if (usage) {
       await supabase.from("ai_usage").update({ image_used_today: usage.image_used_today + 1, last_request_at: new Date().toISOString() }).eq("id", usage.id);
     } else {

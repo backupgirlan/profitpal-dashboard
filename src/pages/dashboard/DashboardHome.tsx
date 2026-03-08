@@ -518,8 +518,8 @@ const DashboardHome = () => {
           <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
             <Zap className="w-4 h-4" /> Registrar Operação
           </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <div className="relative col-span-2 sm:col-span-1">
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="relative">
               <Label className="text-xs text-muted-foreground">{t('home.pair')}</Label>
               <Input
                 value={pair}

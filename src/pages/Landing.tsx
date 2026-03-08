@@ -236,7 +236,7 @@ const HorusIAShowcase = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="sticky top-24"
+            className="lg:sticky lg:top-24"
           >
             <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl">
               {/* Terminal header */}
@@ -252,7 +252,7 @@ const HorusIAShowcase = () => {
               </div>
 
               {/* Terminal body */}
-              <div className="p-5 min-h-[280px]">
+              <div className="p-4 sm:p-5 min-h-[220px] sm:min-h-[280px]">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeFeature}
@@ -720,11 +720,11 @@ const Landing = () => {
             </motion.p>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {problems.map((p, i) => (
-              <motion.div key={i} variants={fadeUp} className="bg-card border border-destructive/20 rounded-xl p-5 text-center hover:border-destructive/40 transition-colors group">
-                <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-destructive/20 transition-colors">
-                  <p.icon className="w-5 h-5 text-destructive" />
+              <motion.div key={i} variants={fadeUp} className="bg-card border border-destructive/20 rounded-xl p-4 sm:p-5 text-center hover:border-destructive/40 transition-colors group">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-2 sm:mb-3 group-hover:bg-destructive/20 transition-colors">
+                  <p.icon className="w-4 h-4 sm:w-5 sm:h-5 text-destructive" />
                 </div>
                 <h3 className="font-display text-xs font-bold text-foreground mb-1">{p.label}</h3>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">{p.desc}</p>

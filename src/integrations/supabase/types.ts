@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_analyses: {
+        Row: {
+          created_at: string
+          final_phrase: string | null
+          full_response: Json | null
+          id: string
+          improvements: string[] | null
+          insights: string[] | null
+          patterns: string[] | null
+          risk_level: string
+          score: number
+          strengths: string[] | null
+          summary: string | null
+          user_id: string
+          weaknesses: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          final_phrase?: string | null
+          full_response?: Json | null
+          id?: string
+          improvements?: string[] | null
+          insights?: string[] | null
+          patterns?: string[] | null
+          risk_level?: string
+          score?: number
+          strengths?: string[] | null
+          summary?: string | null
+          user_id: string
+          weaknesses?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          final_phrase?: string | null
+          full_response?: Json | null
+          id?: string
+          improvements?: string[] | null
+          insights?: string[] | null
+          patterns?: string[] | null
+          risk_level?: string
+          score?: number
+          strengths?: string[] | null
+          summary?: string | null
+          user_id?: string
+          weaknesses?: string[] | null
+        }
+        Relationships: []
+      }
       admin_advice: {
         Row: {
           content: string
@@ -69,6 +117,7 @@ export type Database = {
         Row: {
           behavior_used_today: number
           created_at: string
+          dialog_used_today: number
           id: string
           image_used_today: number
           last_request_at: string | null
@@ -79,6 +128,7 @@ export type Database = {
         Insert: {
           behavior_used_today?: number
           created_at?: string
+          dialog_used_today?: number
           id?: string
           image_used_today?: number
           last_request_at?: string | null
@@ -89,6 +139,7 @@ export type Database = {
         Update: {
           behavior_used_today?: number
           created_at?: string
+          dialog_used_today?: number
           id?: string
           image_used_today?: number
           last_request_at?: string | null
@@ -588,6 +639,30 @@ export type Database = {
           price?: number
           status?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trader_dialog_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
           user_id?: string
         }
         Relationships: []

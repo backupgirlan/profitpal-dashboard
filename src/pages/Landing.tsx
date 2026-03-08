@@ -87,7 +87,249 @@ const FloatingStatsToggle = () => {
   );
 };
 
-const Landing = () => {
+const HorusIAShowcase = () => {
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [typedText, setTypedText] = useState('');
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  const features = [
+    {
+      icon: Brain,
+      title: "Análise Comportamental",
+      desc: "IA analisa seu histórico de operações, score de disciplina e padrões emocionais para gerar insights personalizados.",
+      mockResponse: "🧠 Análise: Seus últimos 3 losses ocorreram após 15h em dias de alta volatilidade. Seu score cai 23% quando opera recuperando perdas. Recomendação: encerre operações às 14h30 em dias com mais de 2 losses.",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      borderColor: "border-primary/30",
+    },
+    {
+      icon: Eye,
+      title: "Leitura de Print do Gráfico",
+      desc: "Envie prints do gráfico M5 ou M15 e receba análise probabilística com pontos de entrada, cenários e confiança.",
+      mockResponse: "📊 Cenário: Tendência de alta com suporte em 1.0842. Entrada sugerida: 1.0855 (rompimento). Confiança: 78%. Timeframe: M15. ⚠️ Atenção: resistência forte em 1.0890, considere parcial.",
+      color: "text-accent",
+      bgColor: "bg-accent/10",
+      borderColor: "border-accent/30",
+    },
+    {
+      icon: Shield,
+      title: "Alertas de Risco Emocional",
+      desc: "Detecta automaticamente quando você está em estado emocional de risco e sugere pausas antes que o colapso aconteça.",
+      mockResponse: "🔴 ALERTA: 3 losses consecutivos detectados. Padrão de revenge trading identificado. Valor da última entrada 2x maior que o normal. Recomendação: PARE agora. Sua banca agradece amanhã.",
+      color: "text-destructive",
+      bgColor: "bg-destructive/10",
+      borderColor: "border-destructive/30",
+    },
+    {
+      icon: Target,
+      title: "Insights de Performance",
+      desc: "Métricas avançadas sobre seus melhores horários, pares mais lucrativos e padrões de consistência ao longo do tempo.",
+      mockResponse: "📈 Performance: Melhor horário 09h-11h (73% win rate). Par mais lucrativo: EUR/USD (+R$ 342). Dias sem operar emocional: 12. Seu score subiu 18 pontos este mês. Continue assim! 🏆",
+      color: "text-success",
+      bgColor: "bg-success/10",
+      borderColor: "border-success/30",
+    },
+  ];
+
+  useEffect(() => {
+    if (!isInView) return;
+    const response = features[activeFeature].mockResponse;
+    setTypedText('');
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < response.length) {
+        setTypedText(response.slice(0, i + 1));
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 18);
+    return () => clearInterval(interval);
+  }, [activeFeature, isInView]);
+
+  useEffect(() => {
+    if (!isInView) return;
+    const interval = setInterval(() => {
+      setActiveFeature(prev => (prev + 1) % features.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isInView]);
+
+  const ActiveIcon = features[activeFeature].icon;
+
+  return (
+    <section ref={ref} className="py-20 sm:py-28 relative overflow-hidden">
+      {/* Glow effects */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="absolute top-1/3 right-0 w-[400px] h-[400px] bg-accent rounded-full blur-[180px]" />
+        <div className="absolute bottom-1/3 left-0 w-[300px] h-[300px] bg-primary rounded-full blur-[150px]" />
+      </div>
+
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-8">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={stagger} className="text-center mb-14">
+          <motion.div variants={fadeUp} className="mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/5 px-4 py-1.5 text-xs font-display uppercase tracking-widest text-accent">
+              <Eye className="w-3 h-3" /> Super VIP • R$ 29,90/mês
+            </span>
+          </motion.div>
+          <motion.h2 variants={fadeUp} className="font-display text-2xl sm:text-4xl font-black text-foreground mb-4">
+            Conheça a <span className="text-accent" style={{ textShadow: '0 0 30px hsl(var(--accent) / 0.5)' }}>Horus IA</span>
+          </motion.h2>
+          <motion.p variants={fadeUp} className="text-muted-foreground max-w-xl mx-auto">
+            Assistente de performance com inteligência artificial que analisa seu comportamento e lê gráficos em tempo real.
+          </motion.p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Feature selector */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="space-y-3">
+            {features.map((f, i) => (
+              <motion.button
+                key={i}
+                variants={fadeUp}
+                onClick={() => setActiveFeature(i)}
+                className={`w-full text-left p-4 rounded-xl border transition-all duration-500 group ${
+                  activeFeature === i
+                    ? `${f.bgColor} ${f.borderColor} shadow-lg`
+                    : 'bg-card/50 border-border/50 hover:border-border'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-500 ${
+                    activeFeature === i ? f.bgColor : 'bg-secondary'
+                  }`}>
+                    <f.icon className={`w-5 h-5 transition-colors duration-500 ${
+                      activeFeature === i ? f.color : 'text-muted-foreground'
+                    }`} />
+                  </div>
+                  <div>
+                    <h3 className={`font-display text-sm font-bold transition-colors duration-500 ${
+                      activeFeature === i ? 'text-foreground' : 'text-muted-foreground'
+                    }`}>{f.title}</h3>
+                    <p className={`text-xs mt-1 leading-relaxed transition-all duration-500 ${
+                      activeFeature === i ? 'text-muted-foreground opacity-100 max-h-20' : 'opacity-0 max-h-0 overflow-hidden'
+                    }`}>{f.desc}</p>
+                  </div>
+                </div>
+                {/* Progress bar */}
+                {activeFeature === i && (
+                  <motion.div
+                    className="mt-3 h-0.5 rounded-full overflow-hidden bg-border/30"
+                  >
+                    <motion.div
+                      className={`h-full rounded-full ${f.color.replace('text-', 'bg-')}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 8, ease: 'linear' }}
+                      key={`progress-${i}-${activeFeature}`}
+                    />
+                  </motion.div>
+                )}
+              </motion.button>
+            ))}
+          </motion.div>
+
+          {/* Mock AI terminal */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="sticky top-24"
+          >
+            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl">
+              {/* Terminal header */}
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-secondary/30">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-destructive/60" />
+                  <div className="w-3 h-3 rounded-full bg-primary/60" />
+                  <div className="w-3 h-3 rounded-full bg-success/60" />
+                </div>
+                <span className="text-[10px] font-display uppercase tracking-widest text-muted-foreground ml-2">
+                  Horus IA — {features[activeFeature].title}
+                </span>
+              </div>
+
+              {/* Terminal body */}
+              <div className="p-5 min-h-[280px]">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeFeature}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {/* User prompt */}
+                    <div className="flex items-start gap-3 mb-4">
+                      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                        <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="bg-secondary/50 rounded-lg rounded-tl-none px-3 py-2">
+                        <p className="text-xs text-muted-foreground">
+                          {activeFeature === 0 && "Analise meu comportamento dos últimos 7 dias"}
+                          {activeFeature === 1 && "Leia este print do gráfico EUR/USD M15"}
+                          {activeFeature === 2 && "Como estou emocionalmente hoje?"}
+                          {activeFeature === 3 && "Quais são minhas melhores métricas?"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* AI response */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-7 h-7 rounded-full ${features[activeFeature].bgColor} flex items-center justify-center shrink-0`}>
+                        <ActiveIcon className={`w-3.5 h-3.5 ${features[activeFeature].color}`} />
+                      </div>
+                      <div className={`rounded-lg rounded-tl-none px-3 py-2 border ${features[activeFeature].borderColor} ${features[activeFeature].bgColor}`}>
+                        <p className="text-xs text-foreground leading-relaxed whitespace-pre-wrap">
+                          {typedText}
+                          <motion.span
+                            animate={{ opacity: [1, 0] }}
+                            transition={{ duration: 0.5, repeat: Infinity }}
+                            className="inline-block w-0.5 h-3 bg-foreground ml-0.5 align-middle"
+                          />
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Terminal footer */}
+              <div className="px-4 py-3 border-t border-border bg-secondary/20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${features[activeFeature].color.replace('text-', 'bg-')} animate-pulse`} />
+                  <span className="text-[10px] text-muted-foreground">IA processando...</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground font-display">
+                  Confiança: <span className={`font-bold ${features[activeFeature].color}`}>
+                    {activeFeature === 0 ? '94%' : activeFeature === 1 ? '78%' : activeFeature === 2 ? '89%' : '91%'}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            {/* Floating badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.8 }}
+              className="mt-4 text-center"
+            >
+              <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                <Lock className="w-3 h-3" /> Exclusivo para assinantes Super VIP
+              </span>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [scores, setScores] = useState<LiveScore[]>([]);

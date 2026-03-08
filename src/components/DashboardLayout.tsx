@@ -41,12 +41,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/dashboard/rankings', label: t('sidebar.rankings'), icon: Trophy },
     { path: '/dashboard/evolution', label: t('sidebar.evolution'), icon: TrendingUp },
     { path: '/dashboard/psychology', label: t('sidebar.psychology'), icon: Brain },
-    { path: '/dashboard/advice', label: t('sidebar.advice'), icon: MessageSquare },
     { path: '/dashboard/videos', label: t('sidebar.videos'), icon: Youtube },
     { path: '/dashboard/courses', label: t('sidebar.courses'), icon: GraduationCap },
     { path: '/dashboard/report', label: t('sidebar.report'), icon: FileText },
     { path: '/dashboard/mental', label: t('sidebar.mental'), icon: Brain },
-    { path: '/dashboard/rewards', label: t('sidebar.rewards'), icon: Gift },
   ];
 
   const handleChangePassword = async () => {

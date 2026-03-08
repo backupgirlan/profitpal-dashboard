@@ -37,7 +37,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const navItems = [
     { path: '/dashboard', label: t('sidebar.home'), icon: Home },
-    { path: '/dashboard/calculator', label: t('sidebar.calculator'), icon: Calculator },
     { path: '/dashboard/management', label: t('sidebar.management'), icon: ClipboardList },
     { path: '/dashboard/rankings', label: t('sidebar.rankings'), icon: Trophy },
     { path: '/dashboard/evolution', label: t('sidebar.evolution'), icon: TrendingUp },

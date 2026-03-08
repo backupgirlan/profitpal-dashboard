@@ -6,12 +6,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
-import { Wallet, TrendingUp, CheckCircle, XCircle, Trophy, Shield, ChevronRight, PiggyBank, Edit2, Pencil, X } from 'lucide-react';
-import { getRankForProfit, getNextRankForProfit, PROFIT_TROPHIES, TRADER_RANKS } from '@/lib/traderRanks';
+import { Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank, Pencil, X, Target, ClipboardList } from 'lucide-react';
+import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
 import FieldHelp from '@/components/FieldHelp';
+import { useManagement2x } from '@/hooks/useManagement2x';
 
 interface CandleData { index: number; open: number; close: number; color: string; }
 
@@ -55,6 +57,7 @@ const DashboardHome = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const isEn = i18n.language === 'en';
+  const mgmt = useManagement2x();
 
   const [balance, setBalance] = useState(0);
   const [totalProfit, setTotalProfit] = useState(0);
@@ -74,9 +77,7 @@ const DashboardHome = () => {
   const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
   const [editingPairValue, setEditingPairValue] = useState('');
 
-  // Balance edit & deposit
-  const [editingBalance, setEditingBalance] = useState(false);
-  const [balanceInput, setBalanceInput] = useState('');
+  // Deposit
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
 
@@ -123,15 +124,11 @@ const DashboardHome = () => {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Load saved pairs from trades
   useEffect(() => {
     if (!user) return;
     supabase.from('trades').select('pair_name').eq('user_id', user.id)
       .then(({ data }) => {
-        if (data) {
-          const unique = [...new Set(data.map(d => d.pair_name))].sort();
-          setSavedPairs(unique);
-        }
+        if (data) setSavedPairs([...new Set(data.map(d => d.pair_name))].sort());
       });
   }, [user]);
 
@@ -154,8 +151,8 @@ const DashboardHome = () => {
       setEditingPairIndex(null);
       return;
     }
-    await supabase.from('trades').update({ pair_name: newName.trim() }).eq('user_id', user.id).eq('pair_name', oldName);
-    setSavedPairs(prev => prev.map(p => p === oldName ? newName.trim() : p).sort());
+    await supabase.from('trades').update({ pair_name: newName.trim().toUpperCase() }).eq('user_id', user.id).eq('pair_name', oldName);
+    setSavedPairs(prev => prev.map(p => p === oldName ? newName.trim().toUpperCase() : p).sort());
     setEditingPairIndex(null);
     toast.success(isEn ? 'Pair updated!' : 'Par atualizado!');
   };
@@ -164,7 +161,7 @@ const DashboardHome = () => {
     if (!pair.trim() || !amount || !user) return;
     const amtNum = Number(amount);
     const payNum = Number(payout) / 100;
-    if (amtNum <= 0 || amtNum > balance) {
+    if (amtNum <= 0) {
       toast.error(t('home.invalidAmount'));
       return;
     }
@@ -175,7 +172,7 @@ const DashboardHome = () => {
 
     const [tradeRes, profileRes] = await Promise.all([
       supabase.from('trades').insert({
-        user_id: user.id, pair_name: pair.trim(), payout: Number(payout),
+        user_id: user.id, pair_name: pair.trim().toUpperCase(), payout: Number(payout),
         result, amount: amtNum, profit, management_mode: 'quick',
       }),
       supabase.from('profiles').update({ balance: newBalance, total_profit: newTotalProfit }).eq('user_id', user.id),
@@ -188,7 +185,7 @@ const DashboardHome = () => {
       setTotalProfit(newTotalProfit);
       if (result === 'win') setWins(w => w + 1); else setLosses(l => l + 1);
       toast.success(result === 'win' ? `✅ WIN +R$ ${(amtNum * payNum).toFixed(2)}` : `❌ LOSS -R$ ${amtNum.toFixed(2)}`);
-      if (!savedPairs.includes(pair.trim())) setSavedPairs(prev => [...prev, pair.trim()].sort());
+      if (!savedPairs.includes(pair.trim().toUpperCase())) setSavedPairs(prev => [...prev, pair.trim().toUpperCase()].sort());
       setPair(''); setAmount('');
       window.dispatchEvent(new Event('balance-updated'));
       loadData();
@@ -200,8 +197,76 @@ const DashboardHome = () => {
   const nextRank = getNextRankForProfit(totalProfit);
   const rankProgress = nextRank ? Math.min(100, (totalProfit / nextRank.minProfit) * 100) : 100;
 
+  // Management summary
+  const mgmtState = mgmt.state;
+  const mgmtActive = mgmtState.ativo;
+
   return (
     <div className="space-y-6">
+      {/* Management Summary - shown when active */}
+      {mgmtActive && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4">
+            <h3 className="font-display text-sm font-bold text-primary mb-3 flex items-center gap-2">
+              <ClipboardList className="w-4 h-4" /> Resumo do Gerenciamento em Andamento
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div>
+                <p className="text-muted-foreground">Modelo ativo</p>
+                <p className="font-display font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Banca</p>
+                <p className="font-display font-bold text-foreground">R$ {mgmtState.banca.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Entrada recomendada</p>
+                <p className="font-display font-bold text-primary">R$ {mgmtState.entradaRecomendada.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Placar</p>
+                <p className="font-display font-bold">
+                  <span className="text-success">{mgmtState.cicloWins} WIN</span>
+                  <span className="text-muted-foreground"> x </span>
+                  <span className="text-destructive">{mgmtState.cicloLosses} LOSS</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Status</p>
+                <Badge variant="outline" className={
+                  mgmtState.cicloStatus === 'won' ? 'border-success/30 text-success' :
+                  mgmtState.cicloStatus === 'lost' ? 'border-destructive/30 text-destructive' :
+                  'border-primary/30 text-primary'
+                }>
+                  {mgmtState.cicloStatus === 'won' ? 'Concluído ✓' : mgmtState.cicloStatus === 'lost' ? 'Encerrado ✗' : 'Em andamento'}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Meta</p>
+                <p className="font-display font-bold text-foreground">2 Wins</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Acerto</p>
+                <p className="font-display font-bold text-foreground">
+                  {mgmtState.cicloTrades.length > 0 ? ((mgmtState.cicloWins / mgmtState.cicloTrades.length) * 100).toFixed(0) : 0}%
+                </p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Lucro do ciclo</p>
+                <p className={`font-display font-bold ${mgmtState.cicloLucro >= 0 ? 'text-success' : 'text-destructive'}`}>
+                  R$ {mgmtState.cicloLucro.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            {mgmtState.cicloTrades.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/30">
+                <p className="text-[10px] text-muted-foreground">Última operação: <span className="text-foreground font-medium">{mgmtState.cicloTrades[mgmtState.cicloTrades.length - 1].pair}</span> — <span className={mgmtState.cicloTrades[mgmtState.cicloTrades.length - 1].result === 'win' ? 'text-success' : 'text-destructive'}>{mgmtState.cicloTrades[mgmtState.cicloTrades.length - 1].result.toUpperCase()}</span></p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Card className="border-border">
@@ -209,29 +274,11 @@ const DashboardHome = () => {
             <div className="flex items-center gap-2 mb-1">
               <Wallet className="w-4 h-4 text-primary" />
               <span className="text-xs text-muted-foreground font-medium">{t('home.balance')}</span>
-              <FieldHelp text={isEn ? 'Your current trading balance. Edit by clicking the pencil icon.' : 'Sua banca atual para operações. Edite clicando no ícone de lápis.'} />
-              <button onClick={() => { setEditingBalance(true); setBalanceInput(balance.toFixed(2)); }} className="ml-auto text-muted-foreground hover:text-primary">
-                <Edit2 className="w-3 h-3" />
-              </button>
+              <FieldHelp text={isEn ? 'Your current balance. It changes via deposits and trade results.' : 'Sua banca atual. Ela muda via depósitos e resultados de operações.'} />
             </div>
-            {editingBalance ? (
-              <div className="flex items-center gap-1">
-                <span className="text-sm font-bold text-foreground">R$</span>
-                <Input type="number" value={balanceInput} onChange={e => setBalanceInput(e.target.value)} className="h-7 bg-secondary text-sm w-24" />
-                <Button size="sm" className="h-7 text-xs px-2" onClick={async () => {
-                  const val = Number(balanceInput);
-                  if (isNaN(val) || val < 0) return;
-                  await supabase.from('profiles').update({ balance: val }).eq('user_id', user!.id);
-                  setBalance(val); setEditingBalance(false);
-                  window.dispatchEvent(new Event('balance-updated'));
-                }}>OK</Button>
-                <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={() => setEditingBalance(false)}>✕</Button>
-              </div>
-            ) : (
-              <p className="text-lg sm:text-xl font-display font-bold text-foreground">
-                R$ {balance.toFixed(2)}
-              </p>
-            )}
+            <p className="text-lg sm:text-xl font-display font-bold text-foreground">
+              R$ {balance.toFixed(2)}
+            </p>
           </CardContent>
         </Card>
 
@@ -278,7 +325,7 @@ const DashboardHome = () => {
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <PiggyBank className="w-4 h-4 text-primary" /> {t('home.deposit')}
-            <FieldHelp text={isEn ? 'Add funds to your trading balance. This is for tracking purposes.' : 'Adicione fundos à sua banca de operações. Isso é para controle.'} />
+            <FieldHelp text={isEn ? 'Add funds to your balance. New deposits add to the current balance (even if negative).' : 'Adicione fundos à sua banca. Novos depósitos somam ao saldo atual (mesmo se negativo).'} />
           </h3>
           <div className="flex gap-3">
             <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositPlaceholder')} className="bg-secondary" />
@@ -313,15 +360,15 @@ const DashboardHome = () => {
             <div className="relative">
               <Label className="text-xs flex items-center gap-1">
                 {t('home.pair')}
-                <FieldHelp text={isEn ? 'Currency pair or asset you traded. Start typing and saved pairs will appear.' : 'Par de moeda ou ativo que você operou. Comece a digitar e os pares salvos aparecem.'} />
+                <FieldHelp text={isEn ? 'Currency pair or asset you traded.' : 'Par de moeda ou ativo que você operou.'} />
               </Label>
               <Input
                 value={pair}
-                onChange={e => { setPair(e.target.value); setShowPairSuggestions(true); }}
+                onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
                 onFocus={() => setShowPairSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 200)}
+                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 300)}
                 placeholder="EUR/USD"
-                className="bg-secondary"
+                className="bg-secondary uppercase"
                 autoComplete="off"
               />
               {showPairSuggestions && filteredPairs.length > 0 && (
@@ -329,18 +376,19 @@ const DashboardHome = () => {
                   {filteredPairs.map((p, idx) => (
                     <div key={p} className="flex items-center hover:bg-secondary transition-colors">
                       {editingPairIndex === idx ? (
-                        <div className="flex items-center gap-1 w-full px-2 py-1">
+                        <div className="flex items-center gap-1 w-full px-2 py-1" onClick={e => e.stopPropagation()}>
                           <Input
                             autoFocus
                             value={editingPairValue}
-                            onChange={e => setEditingPairValue(e.target.value)}
+                            onChange={e => setEditingPairValue(e.target.value.toUpperCase())}
                             onKeyDown={e => { if (e.key === 'Enter') handleEditPair(p, editingPairValue); if (e.key === 'Escape') setEditingPairIndex(null); }}
-                            className="h-6 text-xs bg-secondary"
+                            className="h-6 text-xs bg-secondary uppercase"
+                            onBlur={e => e.stopPropagation()}
                           />
-                          <button type="button" onMouseDown={() => handleEditPair(p, editingPairValue)} className="text-primary hover:text-primary/80">
+                          <button type="button" onMouseDown={e => { e.preventDefault(); e.stopPropagation(); handleEditPair(p, editingPairValue); }} className="text-primary hover:text-primary/80">
                             <CheckCircle className="w-3.5 h-3.5" />
                           </button>
-                          <button type="button" onMouseDown={() => setEditingPairIndex(null)} className="text-muted-foreground hover:text-foreground">
+                          <button type="button" onMouseDown={e => { e.preventDefault(); e.stopPropagation(); setEditingPairIndex(null); }} className="text-muted-foreground hover:text-foreground">
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -356,7 +404,12 @@ const DashboardHome = () => {
                           <button
                             type="button"
                             className="px-2 text-muted-foreground hover:text-primary"
-                            onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); setEditingPairIndex(idx); setEditingPairValue(p); }}
+                            onMouseDown={e => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setEditingPairIndex(idx);
+                              setEditingPairValue(p);
+                            }}
                           >
                             <Pencil className="w-3 h-3" />
                           </button>
@@ -406,7 +459,7 @@ const DashboardHome = () => {
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-primary" /> {t('home.evolution')}
-            <FieldHelp text={isEn ? 'Visual chart showing your trading performance over time as candlesticks.' : 'Gráfico visual mostrando sua performance de trading ao longo do tempo em candles.'} />
+            <FieldHelp text={isEn ? 'Visual chart showing your trading performance over time.' : 'Gráfico visual mostrando sua performance ao longo do tempo.'} />
           </h3>
           <div className="h-48">
             {chartData.length > 0 ? <MiniCandlestickChart candles={chartData} /> : (
@@ -425,9 +478,8 @@ const DashboardHome = () => {
         <CardContent className="p-4 sm:p-6">
           <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" /> {t('home.patent')}
-            <FieldHelp text={isEn ? 'Your trader rank based on total profit. Click on unlocked patents to generate an Instagram Story image!' : 'Sua patente de trader baseada no lucro total. Clique nas patentes desbloqueadas para gerar uma imagem de Story do Instagram!'} />
+            <FieldHelp text={isEn ? 'Your trader rank based on total profit. Click on unlocked patents to generate an Instagram Story image!' : 'Sua patente de trader baseada no lucro total. Clique nas patentes desbloqueadas para gerar uma imagem de Story!'} />
           </h3>
-          {/* Current rank */}
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: rank.color + '22', border: `2px solid ${rank.color}` }}>
               {rank.emoji}
@@ -450,7 +502,6 @@ const DashboardHome = () => {
             </div>
           </div>
 
-          {/* All ranks grid */}
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 mt-4">
             {TRADER_RANKS.filter(r => r.minProfit > 0).map((r) => {
               const unlocked = totalProfit >= r.minProfit;
@@ -485,34 +536,6 @@ const DashboardHome = () => {
                     </div>
                   )}
                 </button>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trophies */}
-      <Card className="border-border">
-        <CardContent className="p-4 sm:p-6">
-          <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-primary" /> {t('home.trophies')}
-            <FieldHelp text={isEn ? 'Profit milestones you achieve as you grow as a trader.' : 'Marcos de lucro que você conquista conforme evolui como trader.'} />
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {PROFIT_TROPHIES.map((trophy) => {
-              const unlocked = totalProfit >= trophy.minProfit;
-              return (
-                <div
-                  key={trophy.minProfit}
-                  className={`rounded-lg border p-4 text-center transition-all ${unlocked ? 'border-primary/50 bg-primary/5' : 'border-border bg-secondary/30 opacity-50'}`}
-                >
-                  <div className="text-3xl mb-2">{trophy.emoji}</div>
-                  <p className="font-display text-xs font-bold text-foreground">
-                    {isEn ? trophy.nameEn : trophy.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">R$ {trophy.minProfit.toLocaleString()}</p>
-                  {unlocked && <span className="text-xs win-text font-bold">✓ {t('home.unlocked')}</span>}
-                </div>
               );
             })}
           </div>

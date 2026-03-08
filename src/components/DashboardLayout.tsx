@@ -122,13 +122,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center justify-between">
             {!sidebarCollapsed && (
-              <h2 className="font-display text-sm font-bold text-primary text-glow tracking-wider">
+              <h2 className="font-display text-sm font-bold text-primary tracking-wider">
                 TECHNICAL GIRLAN
               </h2>
             )}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
+              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
             >
               <ChevronLeft className={`w-4 h-4 transition-transform ${sidebarCollapsed ? 'rotate-180' : ''}`} />
             </button>
@@ -278,16 +278,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* Topbar + Main */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 h-14 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 lg:px-8">
+        <header className="sticky top-0 z-20 h-14 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="lg:hidden w-8" /> {/* spacer for mobile menu button */}
+            <div className="lg:hidden w-8" />
             <h1 className="font-display text-xs font-bold text-foreground tracking-wide hidden sm:block">
               {navItems.find(n => n.path === location.pathname)?.label || 'Dashboard'}
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-muted-foreground hidden sm:block">{displayName}</span>
-            <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary font-display text-xs font-bold">
+            <span className="text-sm text-muted-foreground hidden sm:block">{displayName}</span>
+            <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs">
               {(displayName || 'T')[0].toUpperCase()}
             </div>
           </div>

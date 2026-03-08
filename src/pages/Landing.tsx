@@ -605,7 +605,7 @@ const Landing = () => {
           <div className="absolute top-1/3 right-1/4 w-[250px] h-[250px] bg-primary rounded-full blur-[120px]" />
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={stagger} className="text-center mb-14">
             <motion.div variants={fadeUp} className="mb-4">
               <span className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-destructive/5 px-4 py-1.5 text-xs font-display uppercase tracking-widest text-destructive">

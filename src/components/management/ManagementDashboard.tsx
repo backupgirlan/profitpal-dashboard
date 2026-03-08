@@ -11,6 +11,7 @@ import { useManagement2x, ManagementModel } from '@/hooks/useManagement2x';
 import { useAuth } from '@/hooks/useAuth';
 import { useStreak } from '@/hooks/useStreak';
 import { supabase } from '@/integrations/supabase/client';
+import { DEFAULT_PAIRS } from '@/lib/defaultPairs';
 import { useToast } from '@/hooks/use-toast';
 import FieldHelp from '@/components/FieldHelp';
 import {

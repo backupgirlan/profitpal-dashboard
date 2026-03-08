@@ -263,6 +263,21 @@ const HorusIA = () => {
   };
   runChartAnalysisRef.current = runChartAnalysis;
 
+  const sendFeedback = async (result: 'win' | 'loss') => {
+    if (!chartResult?.analysis_id || feedbackSent) return;
+    setFeedbackLoading(true);
+    try {
+      await supabase.from('horus_print_analyses').update({ result }).eq('id', chartResult.analysis_id);
+      setFeedbackSent(true);
+      toast({ title: result === 'win' ? '✅ WIN registrado!' : '❌ LOSS registrado!', description: 'Feedback salvo. A Horus IA usará este dado para melhorar futuras análises.' });
+      loadHistory();
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível salvar o feedback.', variant: 'destructive' });
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
+
   if (isSuperVip === null) return null;
   if (!isSuperVip && !isAdmin) return <SuperVipGate />;
 

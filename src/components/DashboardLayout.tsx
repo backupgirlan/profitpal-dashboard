@@ -105,8 +105,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
       .then(({ data }) => setIsAdmin(!!data));
-    supabase.from('profiles').select('display_name').eq('user_id', user.id).single()
-      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+    supabase.from('profiles').select('display_name, is_vip, is_super_vip').eq('user_id', user.id).single()
+      .then(({ data }) => {
+        if (data?.display_name) setDisplayName(data.display_name);
+        if ((data as any)?.is_super_vip) setUserLevel('super_vip');
+        else if ((data as any)?.is_vip) setUserLevel('vip');
+        else setUserLevel('common');
+      });
   }, [user]);
 
   const handleSignOut = async () => { await signOut(); navigate('/'); };

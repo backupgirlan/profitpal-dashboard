@@ -50,6 +50,7 @@ const NAV_SECTIONS = [
     title: 'Premium',
     items: [
       { path: '/dashboard/horus', label: 'Horus IA', icon: Eye },
+      { path: '/dashboard/super-vip', label: 'Comprar Super VIP', icon: Award },
     ],
   },
   {
@@ -225,8 +226,15 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               )}
               {sidebarCollapsed && <Separator className="my-1.5 bg-sidebar-border" />}
               <div className="space-y-0.5">
-                {section.items.map((item) => {
+                {section.items
+                  .filter((item) => {
+                    // Hide "Comprar Super VIP" if user is already super_vip
+                    if (item.path === '/dashboard/super-vip' && userLevel === 'super_vip') return false;
+                    return true;
+                  })
+                  .map((item) => {
                   const isActive = location.pathname === item.path;
+                  const isSuperVipLink = item.path === '/dashboard/super-vip';
                   return (
                     <Link
                       key={item.path}
@@ -236,7 +244,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group relative ${
                         isActive
                           ? 'bg-primary/10 text-primary'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70'
+                          : isSuperVipLink
+                            ? 'text-primary bg-primary/5 border border-primary/20 hover:bg-primary/10'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70'
                       } ${sidebarCollapsed ? 'justify-center px-2' : ''}`}
                     >
                       {isActive && (
@@ -246,8 +256,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                           transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                         />
                       )}
-                      <item.icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                      {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
+                      <item.icon className={`w-[18px] h-[18px] shrink-0 transition-colors ${isActive ? 'text-primary' : isSuperVipLink ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
+                      {!sidebarCollapsed && (
+                        <span className="truncate flex items-center gap-1.5">
+                          {item.label}
+                          {isSuperVipLink && <span className="text-[9px] font-bold gradient-gold text-transparent bg-clip-text">⭐</span>}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

@@ -88,7 +88,12 @@ const Evolution = () => {
         <p className="text-muted-foreground">{t('evolution.subtitle')}</p>
       </div>
       <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-display text-sm font-bold text-foreground mb-4">{t('evolution.chartTitle')}</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display text-sm font-bold text-foreground">{t('evolution.chartTitle')}</h3>
+          <div className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">
+            Cada candle = R$ 30,00
+          </div>
+        </div>
         <div className="h-72">
           {chartData.length > 0 ? <CandlestickChart candles={chartData} /> : (
             <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('evolution.registerTrades')}</div>

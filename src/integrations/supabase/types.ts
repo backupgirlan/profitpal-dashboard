@@ -65,6 +65,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage: {
+        Row: {
+          behavior_used_today: number
+          created_at: string
+          id: string
+          image_used_today: number
+          last_request_at: string | null
+          updated_at: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          behavior_used_today?: number
+          created_at?: string
+          id?: string
+          image_used_today?: number
+          last_request_at?: string | null
+          updated_at?: string
+          usage_date?: string
+          user_id: string
+        }
+        Update: {
+          behavior_used_today?: number
+          created_at?: string
+          id?: string
+          image_used_today?: number
+          last_request_at?: string | null
+          updated_at?: string
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       course_categories: {
         Row: {
           created_at: string | null

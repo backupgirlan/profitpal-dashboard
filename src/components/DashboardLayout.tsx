@@ -50,6 +50,7 @@ const NAV_SECTIONS = [
     title: 'Premium',
     items: [
       { path: '/dashboard/horus', label: 'Horus IA', icon: Eye },
+      { path: '/dashboard/super-vip', label: 'Comprar Super VIP', icon: Award },
     ],
   },
   {

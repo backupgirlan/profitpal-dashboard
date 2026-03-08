@@ -577,6 +577,41 @@ const HorusIA = () => {
                         <p className="text-xs text-destructive font-medium">Horário de entrada já expirou. Aguarde o próximo candle ou envie um print atualizado.</p>
                       </div>
                     )}
+                    {/* Feedback Win/Loss */}
+                    {chartResult.analysis_id && (
+                      <div className="border-t border-border/30 pt-3 space-y-2">
+                        {feedbackSent ? (
+                          <div className="flex items-center gap-2 justify-center py-2">
+                            <CheckCircle className="w-4 h-4 text-success" />
+                            <p className="text-sm text-muted-foreground font-display">Feedback registrado! A Horus IA irá calibrar futuras análises.</p>
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-xs text-muted-foreground text-center font-display">Após a operação, informe o resultado:</p>
+                            <div className="flex gap-3 justify-center">
+                              <Button
+                                variant="outline"
+                                onClick={() => sendFeedback('win')}
+                                disabled={feedbackLoading}
+                                className="gap-2 border-success/30 bg-success/10 text-success hover:bg-success/20 font-display"
+                              >
+                                {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                WIN
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => sendFeedback('loss')}
+                                disabled={feedbackLoading}
+                                className="gap-2 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 font-display"
+                              >
+                                {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                                LOSS
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 pt-2 border-t border-border/30">
                       <Badge variant="outline" className="text-xs">{chartResult.timeframe}</Badge>
                       <p className="text-[10px] text-muted-foreground italic">Análise probabilística. Não representa garantia de resultado.</p>

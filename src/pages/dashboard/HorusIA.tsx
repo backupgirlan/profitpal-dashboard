@@ -41,6 +41,7 @@ interface ChartResult {
   saida_estimada: string;
   confianca: number;
   timeframe: string;
+  analysis_id?: string;
 }
 
 const HorusIA = () => {

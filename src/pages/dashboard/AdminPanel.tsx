@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Search, CheckCircle, XCircle, Plus, Trash2, Youtube, MessageSquare, GraduationCap, Trophy } from 'lucide-react';
+import { Shield, Search, CheckCircle, XCircle, Plus, Trash2, Youtube, MessageSquare, GraduationCap, Trophy, Eye } from 'lucide-react';
+import HorusAdminTabs from '@/components/admin/HorusAdminTabs';
 import { useTranslation } from 'react-i18next';
 
 interface UserProfile { id: string; user_id: string; display_name: string | null; is_vip: boolean; created_at: string | null; }
@@ -121,6 +122,7 @@ const AdminPanel = () => {
           <TabsTrigger value="videos">{t('admin.videos')}</TabsTrigger>
           <TabsTrigger value="courses">{t('admin.coursesTab')}</TabsTrigger>
           <TabsTrigger value="livescores">{t('admin.liveScoresTab')}</TabsTrigger>
+          <TabsTrigger value="horus" className="gap-1"><Eye className="w-3 h-3" /> Horus IA</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -269,6 +271,10 @@ const AdminPanel = () => {
               })}
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="horus" className="mt-4">
+          <HorusAdminTabs />
         </TabsContent>
       </Tabs>
     </div>

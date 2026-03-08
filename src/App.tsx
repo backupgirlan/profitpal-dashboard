@@ -23,6 +23,7 @@ import AdminPanel from "./pages/dashboard/AdminPanel";
 import Videos from "./pages/dashboard/Videos";
 import Courses from "./pages/dashboard/Courses";
 import TradeReport from "./pages/dashboard/TradeReport";
+import MentalProtectionPage from "./pages/dashboard/MentalProtection";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const AppRoutes = () => (
     <Route path="/dashboard/videos" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Videos /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/courses" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><Courses /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/report" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><TradeReport /></VipGate></DashboardLayout></ProtectedRoute>} />
+    <Route path="/dashboard/mental" element={<ProtectedRoute><DashboardLayout><AdminMessagePopup /><VipGate><MentalProtectionPage /></VipGate></DashboardLayout></ProtectedRoute>} />
     <Route path="/dashboard/admin" element={<ProtectedRoute><DashboardLayout><AdminPanel /></DashboardLayout></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>

@@ -45,6 +45,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     { path: '/dashboard/videos', label: t('sidebar.videos'), icon: Youtube },
     { path: '/dashboard/courses', label: t('sidebar.courses'), icon: GraduationCap },
     { path: '/dashboard/report', label: t('sidebar.report'), icon: FileText },
+    { path: '/dashboard/mental', label: t('sidebar.mental'), icon: Brain },
     { path: '/dashboard/rewards', label: t('sidebar.rewards'), icon: Gift },
   ];
 

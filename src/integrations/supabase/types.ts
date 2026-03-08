@@ -208,6 +208,123 @@ export type Database = {
         }
         Relationships: []
       }
+      horus_analyses: {
+        Row: {
+          analysis_type: string
+          created_at: string
+          id: string
+          prompt_used: string | null
+          response: string | null
+          tone: string
+          user_id: string
+        }
+        Insert: {
+          analysis_type?: string
+          created_at?: string
+          id?: string
+          prompt_used?: string | null
+          response?: string | null
+          tone?: string
+          user_id: string
+        }
+        Update: {
+          analysis_type?: string
+          created_at?: string
+          id?: string
+          prompt_used?: string | null
+          response?: string | null
+          tone?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      horus_print_analyses: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          entry_time: string | null
+          exit_time: string | null
+          id: string
+          image_url: string | null
+          raw_response: string | null
+          scenario: string | null
+          timeframe: string
+          user_id: string
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          entry_time?: string | null
+          exit_time?: string | null
+          id?: string
+          image_url?: string | null
+          raw_response?: string | null
+          scenario?: string | null
+          timeframe?: string
+          user_id: string
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          entry_time?: string | null
+          exit_time?: string | null
+          id?: string
+          image_url?: string | null
+          raw_response?: string | null
+          scenario?: string | null
+          timeframe?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      horus_prompts: {
+        Row: {
+          id: string
+          prompt_key: string
+          prompt_label: string
+          prompt_value: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          prompt_key: string
+          prompt_label: string
+          prompt_value?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          prompt_key?: string
+          prompt_label?: string
+          prompt_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      horus_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_type: string
+          setting_value: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_type?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_type?: string
+          setting_value?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       live_scores: {
         Row: {
           day_of_week: number
@@ -273,6 +390,7 @@ export type Database = {
           entry_percentage: number | null
           forced_pause_until: string | null
           id: string
+          is_super_vip: boolean
           is_vip: boolean
           last_login_date: string | null
           soros_enabled: boolean | null
@@ -282,6 +400,7 @@ export type Database = {
           stop_weekly: number | null
           stop_win: number | null
           streak_days: number | null
+          super_vip_expires_at: string | null
           total_profit: number | null
           updated_at: string | null
           user_id: string
@@ -296,6 +415,7 @@ export type Database = {
           entry_percentage?: number | null
           forced_pause_until?: string | null
           id?: string
+          is_super_vip?: boolean
           is_vip?: boolean
           last_login_date?: string | null
           soros_enabled?: boolean | null
@@ -305,6 +425,7 @@ export type Database = {
           stop_weekly?: number | null
           stop_win?: number | null
           streak_days?: number | null
+          super_vip_expires_at?: string | null
           total_profit?: number | null
           updated_at?: string | null
           user_id: string
@@ -319,6 +440,7 @@ export type Database = {
           entry_percentage?: number | null
           forced_pause_until?: string | null
           id?: string
+          is_super_vip?: boolean
           is_vip?: boolean
           last_login_date?: string | null
           soros_enabled?: boolean | null
@@ -328,6 +450,7 @@ export type Database = {
           stop_weekly?: number | null
           stop_win?: number | null
           streak_days?: number | null
+          super_vip_expires_at?: string | null
           total_profit?: number | null
           updated_at?: string | null
           user_id?: string
@@ -389,6 +512,48 @@ export type Database = {
           streak_freeze_disponivel?: number
           total_freezes?: number
           ultimo_dia_ativo?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      super_vip_subscriptions: {
+        Row: {
+          activated_at: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          payment_id: string | null
+          payment_method: string | null
+          plan_name: string
+          price: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          payment_method?: string | null
+          plan_name?: string
+          price?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activated_at?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          payment_method?: string | null
+          plan_name?: string
+          price?: number
+          status?: string
           updated_at?: string
           user_id?: string
         }

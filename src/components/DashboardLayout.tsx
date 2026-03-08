@@ -8,7 +8,7 @@ import {
   Home, BarChart3, Brain, LogOut,
   Menu, X, TrendingUp, ClipboardList, Shield, Youtube, KeyRound, Smartphone, Trash2,
   GraduationCap, FileText, Wind, BookOpen, Award, Settings, ChevronLeft, ChevronRight,
-  Dot
+  Dot, Eye
 } from 'lucide-react';
 import InstallAppDialog from '@/components/InstallAppDialog';
 import StreakDisplay from '@/components/StreakDisplay';
@@ -44,6 +44,12 @@ const NAV_SECTIONS = [
     items: [
       { path: '/dashboard/rankings', label: 'Conquistas', icon: Award },
       { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
+    ],
+  },
+  {
+    title: 'Premium',
+    items: [
+      { path: '/dashboard/horus', label: 'Horus IA', icon: Eye },
     ],
   },
   {

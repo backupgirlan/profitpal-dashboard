@@ -13,6 +13,7 @@ import AdminMessagePopup from "./components/AdminMessagePopup";
 import VipGate from "./components/VipGate";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import Management from "./pages/dashboard/Management";
+import HorusIA from "./pages/dashboard/HorusIA";
 import Rankings from "./pages/dashboard/Rankings";
 import Evolution from "./pages/dashboard/Evolution";
 import Psychology from "./pages/dashboard/Psychology";
@@ -52,6 +53,7 @@ const AppRoutes = () => (
     <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
     <Route path="/dashboard" element={<DashboardRoute><DashboardHome /></DashboardRoute>} />
     <Route path="/dashboard/management" element={<DashboardRoute><Management /></DashboardRoute>} />
+    <Route path="/dashboard/horus" element={<DashboardRoute><HorusIA /></DashboardRoute>} />
     <Route path="/dashboard/rankings" element={<DashboardRoute><Rankings /></DashboardRoute>} />
     <Route path="/dashboard/evolution" element={<DashboardRoute><Evolution /></DashboardRoute>} />
     <Route path="/dashboard/psychology" element={<DashboardRoute><Psychology /></DashboardRoute>} />

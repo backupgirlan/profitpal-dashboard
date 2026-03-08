@@ -455,6 +455,9 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* HORUS IA SECTION */}
+      <HorusIAShowcase />
+
       {/* FINAL CTA */}
       <section className="py-20 sm:py-32 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">

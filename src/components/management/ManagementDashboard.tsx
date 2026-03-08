@@ -175,7 +175,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     }
     if (!followed && user) {
       await supabase.from('profiles').update({
-        consecutive_losses: (stats as any)?.consecutiveLosses || 0,
+        consecutive_losses: 0,
       }).eq('user_id', user.id);
     }
     setShowFollowedPlan(false);

@@ -71,6 +71,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [userLevel, setUserLevel] = useState<'common' | 'vip' | 'super_vip'>('common');
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -104,8 +105,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
       .then(({ data }) => setIsAdmin(!!data));
-    supabase.from('profiles').select('display_name').eq('user_id', user.id).single()
-      .then(({ data }) => { if (data?.display_name) setDisplayName(data.display_name); });
+    supabase.from('profiles').select('display_name, is_vip, is_super_vip').eq('user_id', user.id).single()
+      .then(({ data }) => {
+        if (data?.display_name) setDisplayName(data.display_name);
+        if ((data as any)?.is_super_vip) setUserLevel('super_vip');
+        else if ((data as any)?.is_vip) setUserLevel('vip');
+        else setUserLevel('common');
+      });
   }, [user]);
 
   const handleSignOut = async () => { await signOut(); navigate('/'); };
@@ -185,7 +191,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 {(displayName || 'T')[0].toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground truncate">{displayName || 'Trader'}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-medium text-foreground truncate">{displayName || 'Trader'}</p>
+                  {userLevel === 'super_vip' ? (
+                    <span className="shrink-0 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md gradient-gold text-[9px] font-display font-bold text-primary-foreground leading-none">⭐ SUPER VIP</span>
+                  ) : userLevel === 'vip' ? (
+                    <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md bg-primary/15 border border-primary/30 text-[9px] font-display font-bold text-primary leading-none">VIP</span>
+                  ) : (
+                    <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-md bg-muted text-[9px] font-display font-bold text-muted-foreground leading-none">FREE</span>
+                  )}
+                </div>
                 <p className="text-[11px] text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>

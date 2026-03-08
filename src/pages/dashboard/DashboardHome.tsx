@@ -201,12 +201,16 @@ const DashboardHome = () => {
     if (!user) return;
     supabase.from('trades').select('pair_name').eq('user_id', user.id)
       .then(({ data }) => {
-        if (data) setSavedPairs([...new Set(data.map(d => d.pair_name))].sort());
+        if (data) {
+          const userPairs = [...new Set(data.map(d => d.pair_name))];
+          const merged = [...new Set([...DEFAULT_PAIRS, ...userPairs])].sort();
+          setSavedPairs(merged);
+        }
       });
   }, [user]);
 
   const filteredPairs = pair.length > 0
-    ? savedPairs.filter(p => p.toLowerCase().startsWith(pair.toLowerCase()))
+    ? savedPairs.filter(p => p.toLowerCase().includes(pair.toLowerCase()))
     : [];
 
   useEffect(() => {

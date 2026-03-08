@@ -639,7 +639,7 @@ const DashboardHome = () => {
                 value={pair}
                 onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
                 onFocus={() => setShowPairSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 300)}
+                onBlur={() => setTimeout(() => { if (editingPairIndex === null) setShowPairSuggestions(false); }, 300)}
                 placeholder="EUR/USD"
                 className="bg-secondary/50 uppercase h-11"
                 autoComplete="off"

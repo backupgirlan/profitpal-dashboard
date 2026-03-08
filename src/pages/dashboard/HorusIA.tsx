@@ -226,6 +226,7 @@ const HorusIA = () => {
     if (!session || !selectedFile) return;
     setChartLoading(true);
     setChartResult(null);
+    setFeedbackSent(false);
     setLoadingMsg('Horus IA interpretando o cenário...');
 
     try {

@@ -33,22 +33,26 @@ export default function AdminIntegrations() {
     else toast({ title: 'Salvo com sucesso' });
   };
 
+  const horusStatus = settings['ia_model'] ? 'active' : 'inactive';
+  const mpHasKeys = !!(settings['mercadopago_public_key'] && settings['mercadopago_access_token']);
+  const mpStatus = settings['mercadopago_status'] === 'active' ? 'active' : mpHasKeys ? 'testing' : 'inactive';
+
   const apiSections = [
     {
       title: 'Horus IA',
       icon: '🧠',
-      status: 'inactive',
+      status: horusStatus,
       fields: [
-        { key: 'ia_api_key', label: 'API Key da Horus IA', type: 'password' },
-        { key: 'ia_endpoint', label: 'Endpoint da IA', type: 'text' },
-        { key: 'ia_image_key', label: 'Chave da IA de Leitura de Imagem', type: 'password' },
-        { key: 'ia_behavior_endpoint', label: 'Endpoint IA Comportamental', type: 'text' },
+        { key: 'ia_model', label: 'Modelo de IA (ex: google/gemini-2.5-flash)', type: 'text' },
+        { key: 'min_confidence', label: 'Confiança mínima (%)', type: 'text' },
+        { key: 'daily_behavioral_limit', label: 'Limite diário comportamental', type: 'text' },
+        { key: 'daily_print_limit', label: 'Limite diário de prints', type: 'text' },
       ],
     },
     {
       title: 'Mercado Pago',
       icon: '💳',
-      status: settings['mercadopago_status'] || 'inactive',
+      status: mpStatus,
       fields: [
         { key: 'mercadopago_public_key', label: 'Public Key', type: 'text' },
         { key: 'mercadopago_access_token', label: 'Access Token', type: 'password' },

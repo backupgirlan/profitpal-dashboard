@@ -79,6 +79,12 @@ const DashboardHome = () => {
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
 
+  // Achievement modal (auto-triggered on rank up)
+  const [achievementOpen, setAchievementOpen] = useState(false);
+  const [achievedRank, setAchievedRank] = useState<TraderRank | null>(null);
+  const lastRankRef = useRef<string>('');
+  const hasInitialized = useRef(false);
+
   // Emotional check-in modal on page load
   const [emotionalState, setEmotionalState] = useState<string | null>(null);
   const [showEmotionalModal, setShowEmotionalModal] = useState(false);

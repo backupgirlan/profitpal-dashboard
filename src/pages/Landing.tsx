@@ -772,23 +772,23 @@ const Landing = () => {
             </motion.h2>
           </motion.div>
 
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               { label: "Risco Emocional", value: "BAIXO", icon: Heart, valueColor: "text-success" },
               { label: "Score de Disciplina", value: "92", icon: Target, valueColor: "text-primary" },
               { label: "Operações Hoje", value: "2/2", icon: Activity, valueColor: "text-success" },
               { label: "Banca", value: "+12.4%", icon: LineChart, valueColor: "text-success" },
             ].map((item, i) => (
-              <motion.div key={i} variants={fadeUp} className="bg-card border border-border rounded-xl p-5 text-center">
-                <item.icon className="w-6 h-6 text-primary mx-auto mb-3" />
-                <p className={`text-2xl font-display font-black ${item.valueColor}`}>{item.value}</p>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{item.label}</p>
+              <motion.div key={i} variants={fadeUp} className="bg-card border border-border rounded-xl p-4 sm:p-5 text-center">
+                <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary mx-auto mb-2 sm:mb-3" />
+                <p className={`text-lg sm:text-2xl font-display font-black ${item.valueColor}`}>{item.value}</p>
+                <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider mt-1">{item.label}</p>
               </motion.div>
             ))}
           </motion.div>
 
           {/* Fake chart */}
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="mt-8 bg-card border border-border rounded-2xl p-6 overflow-hidden">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="mt-6 sm:mt-8 bg-card border border-border rounded-2xl p-4 sm:p-6 overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-sm font-bold text-foreground">Evolução da Banca</h3>
               <span className="text-xs text-success font-bold">+R$ 847,50</span>

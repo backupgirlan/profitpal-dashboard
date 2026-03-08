@@ -592,6 +592,26 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Followed Plan Dialog */}
+      <Dialog open={showFollowedPlan} onOpenChange={setShowFollowedPlan}>
+        <DialogContent className="bg-card border-primary/30 max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="font-display text-primary text-center">
+              Você seguiu seu plano nessa operação?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground text-center">Isso cria consciência de disciplina e alimenta seu Score de Disciplina.</p>
+          <div className="flex gap-3">
+            <Button onClick={() => handleFollowedPlan(true)} className="flex-1 bg-success/20 text-success hover:bg-success/30 border border-success/30 font-display gap-2">
+              <CheckCircle className="w-4 h-4" /> Sim
+            </Button>
+            <Button onClick={() => handleFollowedPlan(false)} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 border border-destructive/30 font-display gap-2">
+              <XCircle className="w-4 h-4" /> Não
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

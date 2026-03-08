@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
@@ -16,7 +17,7 @@ import {
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
 import { useManagement2x } from '@/hooks/useManagement2x';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 const MOTIVATIONAL_QUOTES = [
@@ -63,13 +64,18 @@ const DashboardHome = () => {
   const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
   const [editingPairValue, setEditingPairValue] = useState('');
 
+  // Deposit inline on Banca card
+  const [showDepositInput, setShowDepositInput] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
 
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
 
+  // Emotional check-in modal on page load
   const [emotionalState, setEmotionalState] = useState<string | null>(null);
+  const [showEmotionalModal, setShowEmotionalModal] = useState(false);
+  const [emotionalDismissed, setEmotionalDismissed] = useState(false);
 
   const [todayProfit, setTodayProfit] = useState(0);
   const [weekProfit, setWeekProfit] = useState(0);
@@ -82,6 +88,40 @@ const DashboardHome = () => {
   const [disciplineRate, setDisciplineRate] = useState(100);
 
   const quoteIndex = useMemo(() => Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length), []);
+
+  // Show emotional modal on first load of the day
+  useEffect(() => {
+    const todayKey = `emotional_checkin_${new Date().toISOString().split('T')[0]}`;
+    const alreadyDone = localStorage.getItem(todayKey);
+    if (!alreadyDone) {
+      const timer = setTimeout(() => setShowEmotionalModal(true), 800);
+      return () => clearTimeout(timer);
+    } else {
+      setEmotionalState(alreadyDone);
+      setEmotionalDismissed(true);
+    }
+  }, []);
+
+  const handleEmotionalSelect = (key: string) => {
+    setEmotionalState(key);
+    const todayKey = `emotional_checkin_${new Date().toISOString().split('T')[0]}`;
+    localStorage.setItem(todayKey, key);
+  };
+
+  const handleEmotionalConfirm = () => {
+    setEmotionalDismissed(true);
+    setShowEmotionalModal(false);
+    // Save to DB
+    if (user && emotionalState) {
+      const safe = emotionalOptions.find(o => o.key === emotionalState)?.safe ?? true;
+      supabase.from('emotional_checkins').insert({
+        user_id: user.id,
+        emotional_state: emotionalState,
+        is_risky: !safe,
+        proceeded: true,
+      });
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -186,6 +226,21 @@ const DashboardHome = () => {
     toast.success('Par atualizado!');
   };
 
+  const handleDeposit = async () => {
+    const val = Number(depositAmount);
+    if (!val || val <= 0 || !user) return;
+    setDepositing(true);
+    const newBalance = +(balance + val).toFixed(2);
+    await Promise.all([
+      supabase.from('deposits').insert({ user_id: user.id, amount: val }),
+      supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id),
+    ]);
+    setBalance(newBalance); setDepositAmount(''); setShowDepositInput(false);
+    toast.success(`💰 Depósito de R$ ${val.toFixed(2)} realizado!`);
+    window.dispatchEvent(new Event('balance-updated'));
+    setDepositing(false);
+  };
+
   const handleTrade = async (result: 'win' | 'loss') => {
     if (!pair.trim() || !amount || !user) return;
     if (emotionalState === 'ansioso' || emotionalState === 'impulsivo') {
@@ -245,8 +300,65 @@ const DashboardHome = () => {
 
   const formatCurrency = (v: number) => `R$ ${v.toFixed(2)}`;
 
+  const emotionalEmoji = emotionalState
+    ? emotionalOptions.find(o => o.key === emotionalState)?.label.split(' ')[0] || '😊'
+    : '😊';
+  const isEmotionalRisky = emotionalState ? !emotionalOptions.find(o => o.key === emotionalState)?.safe : false;
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+      {/* ═══════ Emotional Check-in Modal ═══════ */}
+      <Dialog open={showEmotionalModal} onOpenChange={(open) => { if (!open && emotionalState) handleEmotionalConfirm(); }}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-lg text-foreground text-center">
+              Como foi seu dia hoje?
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground text-center mb-4">
+            Antes de operar, precisamos entender como você está se sentindo. Isso nos ajuda a proteger sua banca.
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {emotionalOptions.map(opt => (
+              <button
+                key={opt.key}
+                onClick={() => handleEmotionalSelect(opt.key)}
+                className={`px-4 py-4 rounded-xl text-sm font-medium transition-all duration-200 border flex flex-col items-center gap-2 ${
+                  emotionalState === opt.key
+                    ? opt.safe
+                      ? 'border-success/50 bg-success/10 text-success scale-105'
+                      : 'border-destructive/50 bg-destructive/10 text-destructive scale-105'
+                    : 'border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-[1.02]'
+                }`}
+              >
+                <span className="text-2xl">{opt.label.split(' ')[0]}</span>
+                <span>{opt.label.split(' ')[1]}</span>
+              </button>
+            ))}
+          </div>
+          {emotionalState && !emotionalOptions.find(o => o.key === emotionalState)?.safe && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-2 p-4 rounded-xl bg-destructive/10 border border-destructive/25 flex items-start gap-3"
+            >
+              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-destructive">ATENÇÃO</p>
+                <p className="text-xs text-muted-foreground mt-1">Operar com emocional alterado aumenta drasticamente o risco. Considere pausar e voltar mais tarde.</p>
+              </div>
+            </motion.div>
+          )}
+          <Button
+            onClick={handleEmotionalConfirm}
+            disabled={!emotionalState}
+            className="w-full mt-2 gradient-gold text-primary-foreground font-semibold h-11"
+          >
+            Continuar para o Dashboard
+          </Button>
+        </DialogContent>
+      </Dialog>
+
       {/* Motivational Quote */}
       <motion.div
         initial={{ opacity: 0, y: -4 }}
@@ -274,14 +386,27 @@ const DashboardHome = () => {
         </Card>
       )}
 
-      {/* ═══════ BANCA ATUAL — Hero Card ═══════ */}
+      {/* ═══════ BANCA ATUAL — Hero Card with Pencil for Deposit ═══════ */}
       <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}>
         <Card className="border-primary/20 bg-card box-glow-strong relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
           <CardContent className="p-6 sm:p-8 relative">
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Banca Atual</span>
-              <Wallet className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-3">
+                {/* Emotional indicator */}
+                <span className={`text-lg ${isEmotionalRisky ? 'animate-pulse-loss' : ''}`} title={emotionalState || 'Humor'}>
+                  {emotionalEmoji}
+                </span>
+                <Wallet className="w-5 h-5 text-primary" />
+                <button
+                  onClick={() => setShowDepositInput(!showDepositInput)}
+                  className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
+                  title="Depositar na banca"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">
               R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -292,6 +417,37 @@ const DashboardHome = () => {
                 {totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total
               </span>
             </div>
+
+            {/* Inline deposit area */}
+            <AnimatePresence>
+              {showDepositInput && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex gap-3 mt-4 pt-4 border-t border-border">
+                    <Input
+                      type="number"
+                      value={depositAmount}
+                      onChange={e => setDepositAmount(e.target.value)}
+                      placeholder="Valor do depósito"
+                      className="bg-secondary/50 h-11 text-base flex-1"
+                      autoFocus
+                    />
+                    <Button
+                      disabled={!depositAmount || depositing}
+                      className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
+                      onClick={handleDeposit}
+                    >
+                      <PiggyBank className="w-4 h-4 mr-2" />
+                      Depositar
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </CardContent>
         </Card>
       </motion.div>
@@ -355,6 +511,71 @@ const DashboardHome = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* ═══════ REGISTRAR OPERAÇÃO (above charts) ═══════ */}
+      <Card className="border-border bg-card">
+        <CardContent className="p-5 sm:p-6">
+          <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
+            <Zap className="w-4 h-4" /> Registrar Operação
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div className="relative col-span-2 sm:col-span-1">
+              <Label className="text-xs text-muted-foreground">{t('home.pair')}</Label>
+              <Input
+                value={pair}
+                onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
+                onFocus={() => setShowPairSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowPairSuggestions(false), 300)}
+                placeholder="EUR/USD"
+                className="bg-secondary/50 uppercase h-11"
+                autoComplete="off"
+              />
+              {showPairSuggestions && filteredPairs.length > 0 && (
+                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl max-h-40 overflow-y-auto">
+                  {filteredPairs.map((p, idx) => (
+                    <div key={p} className="flex items-center hover:bg-secondary transition-colors">
+                      {editingPairIndex === idx ? (
+                        <div className="flex items-center gap-1 w-full px-2 py-1" onClick={e => e.stopPropagation()}>
+                          <Input autoFocus value={editingPairValue} onChange={e => setEditingPairValue(e.target.value.toUpperCase())}
+                            onKeyDown={e => { if (e.key === 'Enter') handleEditPair(p, editingPairValue); if (e.key === 'Escape') setEditingPairIndex(null); }}
+                            className="h-7 text-xs bg-secondary uppercase" onBlur={e => e.stopPropagation()} />
+                          <button type="button" onMouseDown={e => { e.preventDefault(); handleEditPair(p, editingPairValue); }} className="text-primary"><CheckCircle className="w-3.5 h-3.5" /></button>
+                          <button type="button" onMouseDown={e => { e.preventDefault(); setEditingPairIndex(null); }} className="text-muted-foreground"><X className="w-3.5 h-3.5" /></button>
+                        </div>
+                      ) : (
+                        <>
+                          <button type="button" className="flex-1 text-left px-3 py-2 text-sm text-foreground" onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}>{p}</button>
+                          <button type="button" className="px-2 text-muted-foreground hover:text-primary" onMouseDown={e => { e.preventDefault(); setEditingPairIndex(idx); setEditingPairValue(p); }}>
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Payout (%)</Label>
+              <Input type="number" value={payout} onChange={e => setPayout(e.target.value)} placeholder="80" className="bg-secondary/50 h-11" />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">{t('home.entryValue')}</Label>
+              <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="10.00" className="bg-secondary/50 h-11" />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button onClick={() => handleTrade('win')} disabled={!pair.trim() || !amount || submitting}
+              className="flex-1 font-bold gap-2 h-12 text-base bg-success/15 text-success hover:bg-success/25 border border-success/20 transition-all duration-200 hover:scale-[1.02]">
+              <CheckCircle className="w-5 h-5" /> WIN
+            </Button>
+            <Button onClick={() => handleTrade('loss')} disabled={!pair.trim() || !amount || submitting}
+              className="flex-1 font-bold gap-2 h-12 text-base bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/20 transition-all duration-200 hover:scale-[1.02]">
+              <XCircle className="w-5 h-5" /> LOSS
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* ═══════ Charts Row ═══════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -461,142 +682,6 @@ const DashboardHome = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* ═══════ Emotional Status ═══════ */}
-      <Card className="border-border bg-card">
-        <CardContent className="p-5 sm:p-6">
-          <h3 className="font-display text-sm font-bold text-foreground mb-2 uppercase tracking-wider">
-            Estado Emocional Antes de Operar
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4">Como você está se sentindo agora?</p>
-          <div className="flex flex-wrap gap-2">
-            {emotionalOptions.map(opt => (
-              <button
-                key={opt.key}
-                onClick={() => setEmotionalState(emotionalState === opt.key ? null : opt.key)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 border ${
-                  emotionalState === opt.key
-                    ? opt.safe
-                      ? 'border-success/50 bg-success/10 text-success'
-                      : 'border-destructive/50 bg-destructive/10 text-destructive'
-                    : 'border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-          {emotionalState && !emotionalOptions.find(o => o.key === emotionalState)?.safe && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-4 p-4 rounded-xl bg-destructive/10 border border-destructive/25 flex items-start gap-3"
-            >
-              <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-bold text-destructive">ATENÇÃO</p>
-                <p className="text-xs text-muted-foreground mt-1">Operar com emocional alterado aumenta drasticamente o risco. Considere pausar e voltar mais tarde.</p>
-              </div>
-            </motion.div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* ═══════ Deposit + Quick Trade ═══════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Deposit */}
-        <Card className="border-border bg-card">
-          <CardContent className="p-5 sm:p-6">
-            <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <PiggyBank className="w-4 h-4 text-primary" /> {t('home.deposit')}
-            </h3>
-            <div className="flex gap-3">
-              <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositPlaceholder')} className="bg-secondary/50 h-12 text-base" />
-              <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0 h-12 px-6 font-semibold" onClick={async () => {
-                const val = Number(depositAmount);
-                if (!val || val <= 0 || !user) return;
-                setDepositing(true);
-                const newBalance = +(balance + val).toFixed(2);
-                await Promise.all([
-                  supabase.from('deposits').insert({ user_id: user.id, amount: val }),
-                  supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id),
-                ]);
-                setBalance(newBalance); setDepositAmount('');
-                toast.success(`💰 ${t('home.depositSuccess')} R$ ${val.toFixed(2)}`);
-                window.dispatchEvent(new Event('balance-updated'));
-                setDepositing(false);
-              }}>
-                {t('home.depositBtn')}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Trade */}
-        <Card className="border-border bg-card">
-          <CardContent className="p-5 sm:p-6">
-            <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <Zap className="w-4 h-4" /> {t('home.quickTrade')}
-            </h3>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="relative">
-                <Label className="text-xs text-muted-foreground">{t('home.pair')}</Label>
-                <Input
-                  value={pair}
-                  onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
-                  onFocus={() => setShowPairSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowPairSuggestions(false), 300)}
-                  placeholder="EUR/USD"
-                  className="bg-secondary/50 uppercase h-11"
-                  autoComplete="off"
-                />
-                {showPairSuggestions && filteredPairs.length > 0 && (
-                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl max-h-40 overflow-y-auto">
-                    {filteredPairs.map((p, idx) => (
-                      <div key={p} className="flex items-center hover:bg-secondary transition-colors">
-                        {editingPairIndex === idx ? (
-                          <div className="flex items-center gap-1 w-full px-2 py-1" onClick={e => e.stopPropagation()}>
-                            <Input autoFocus value={editingPairValue} onChange={e => setEditingPairValue(e.target.value.toUpperCase())}
-                              onKeyDown={e => { if (e.key === 'Enter') handleEditPair(p, editingPairValue); if (e.key === 'Escape') setEditingPairIndex(null); }}
-                              className="h-7 text-xs bg-secondary uppercase" onBlur={e => e.stopPropagation()} />
-                            <button type="button" onMouseDown={e => { e.preventDefault(); handleEditPair(p, editingPairValue); }} className="text-primary"><CheckCircle className="w-3.5 h-3.5" /></button>
-                            <button type="button" onMouseDown={e => { e.preventDefault(); setEditingPairIndex(null); }} className="text-muted-foreground"><X className="w-3.5 h-3.5" /></button>
-                          </div>
-                        ) : (
-                          <>
-                            <button type="button" className="flex-1 text-left px-3 py-2 text-sm text-foreground" onMouseDown={() => { setPair(p); setShowPairSuggestions(false); }}>{p}</button>
-                            <button type="button" className="px-2 text-muted-foreground hover:text-primary" onMouseDown={e => { e.preventDefault(); setEditingPairIndex(idx); setEditingPairValue(p); }}>
-                              <Pencil className="w-3 h-3" />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">Payout (%)</Label>
-                <Input type="number" value={payout} onChange={e => setPayout(e.target.value)} placeholder="80" className="bg-secondary/50 h-11" />
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">{t('home.entryValue')}</Label>
-                <Input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="10.00" className="bg-secondary/50 h-11" />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button onClick={() => handleTrade('win')} disabled={!pair.trim() || !amount || submitting}
-                className="flex-1 font-bold gap-2 h-12 text-base bg-success/15 text-success hover:bg-success/25 border border-success/20 transition-all duration-200 hover:scale-[1.02]">
-                <CheckCircle className="w-5 h-5" /> WIN
-              </Button>
-              <Button onClick={() => handleTrade('loss')} disabled={!pair.trim() || !amount || submitting}
-                className="flex-1 font-bold gap-2 h-12 text-base bg-destructive/15 text-destructive hover:bg-destructive/25 border border-destructive/20 transition-all duration-200 hover:scale-[1.02]">
-                <XCircle className="w-5 h-5" /> LOSS
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* ═══════ Patent System ═══════ */}
       <Card className="border-border bg-card">

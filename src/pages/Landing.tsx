@@ -328,8 +328,7 @@ const HorusIAShowcase = () => {
     </section>
   );
 };
-
-
+const Landing = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [scores, setScores] = useState<LiveScore[]>([]);

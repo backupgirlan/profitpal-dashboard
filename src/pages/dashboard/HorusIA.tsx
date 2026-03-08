@@ -189,11 +189,13 @@ const HorusIA = () => {
   }, [toast]);
 
   // Enter key triggers analysis after paste
+  const runChartAnalysisRef = useRef<() => void>(() => {});
+
   const handleKeyDownAnalysis = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Enter' && pastedFileRef.current && !chartLoading) {
       e.preventDefault();
       pastedFileRef.current = null;
-      runChartAnalysis();
+      runChartAnalysisRef.current();
     }
   }, [chartLoading]);
 

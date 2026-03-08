@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { motion } from 'framer-motion';
-import { Eye, Brain, Upload, Clock, TrendingUp, Shield, Zap, Star, Lock, ChevronRight, ImageIcon, BarChart3, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, Brain, Upload, Clock, TrendingUp, Shield, Zap, Star, ImageIcon, BarChart3, Activity, AlertTriangle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 import SuperVipGate from '@/components/SuperVipGate';
 
 const POSITIONING_PHRASES = [
@@ -19,17 +20,54 @@ const POSITIONING_PHRASES = [
   'Analise seu padrão antes que ele destrua sua banca.',
 ];
 
+const LOADING_MESSAGES = [
+  'Horus IA analisando comportamento...',
+  'Horus IA cruzando dados operacionais...',
+  'Horus IA interpretando o cenário...',
+];
+
+interface BehavioralResult {
+  resumo: string;
+  padroes_detectados: string[];
+  nivel_risco: string;
+  recomendacao: string;
+}
+
+interface ChartResult {
+  cenario: string;
+  entrada_estimada: string;
+  saida_estimada: string;
+  confianca: number;
+  timeframe: string;
+}
+
 const HorusIA = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
+  const { toast } = useToast();
   const [isSuperVip, setIsSuperVip] = useState<boolean | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeTab, setActiveTab] = useState('behavioral');
   const [tone, setTone] = useState('equilibrado');
+  const [focus, setFocus] = useState('geral');
   const [behavioralQuery, setBehavioralQuery] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState('M5');
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [analyses, setAnalyses] = useState<any[]>([]);
   const [printAnalyses, setPrintAnalyses] = useState<any[]>([]);
+
+  // Loading states
+  const [behaviorLoading, setBehaviorLoading] = useState(false);
+  const [chartLoading, setChartLoading] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState('');
+
+  // Results
+  const [behaviorResult, setBehaviorResult] = useState<BehavioralResult | null>(null);
+  const [chartResult, setChartResult] = useState<ChartResult | null>(null);
+
+  // Image upload
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -58,17 +96,114 @@ const HorusIA = () => {
     if (p) setPrintAnalyses(p);
   };
 
+  const runBehavioralAnalysis = async () => {
+    if (!session) return;
+    setBehaviorLoading(true);
+    setBehaviorResult(null);
+    const msgs = LOADING_MESSAGES;
+    let idx = 0;
+    setLoadingMsg(msgs[0]);
+    const interval = setInterval(() => { idx = (idx + 1) % msgs.length; setLoadingMsg(msgs[idx]); }, 2000);
+
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/horus-behavior`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ tone, focus, query: behavioralQuery }),
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        toast({ title: 'Erro', description: data.error || 'Falha na análise', variant: 'destructive' });
+        return;
+      }
+      setBehaviorResult(data);
+      loadHistory();
+      toast({ title: 'Análise concluída', description: 'Horus IA finalizou sua análise comportamental.' });
+    } catch (e) {
+      toast({ title: 'Erro', description: 'A Horus IA está temporariamente indisponível.', variant: 'destructive' });
+    } finally {
+      clearInterval(interval);
+      setBehaviorLoading(false);
+      setLoadingMsg('');
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      toast({ title: 'Formato inválido', description: 'Use PNG, JPG ou WEBP.', variant: 'destructive' });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Arquivo muito grande', description: 'Máximo 5MB.', variant: 'destructive' });
+      return;
+    }
+    setSelectedFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      if (fileInputRef.current) {
+        fileInputRef.current.files = dt.files;
+        handleFileSelect({ target: { files: dt.files } } as any);
+      }
+    }
+  }, []);
+
+  const runChartAnalysis = async () => {
+    if (!session || !selectedFile) return;
+    setChartLoading(true);
+    setChartResult(null);
+    setLoadingMsg('Horus IA interpretando o cenário...');
+
+    try {
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      formData.append('timeframe', selectedTimeframe);
+
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/horus-chart-image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData,
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        toast({ title: 'Erro', description: data.error || 'Falha na análise', variant: 'destructive' });
+        return;
+      }
+      setChartResult(data);
+      loadHistory();
+      toast({ title: 'Análise concluída', description: 'Print analisado pela Horus IA.' });
+    } catch (e) {
+      toast({ title: 'Erro', description: 'Não foi possível interpretar a imagem enviada.', variant: 'destructive' });
+    } finally {
+      setChartLoading(false);
+      setLoadingMsg('');
+    }
+  };
+
   if (isSuperVip === null) return null;
   if (!isSuperVip && !isAdmin) return <SuperVipGate />;
+
+  const riskColor = (r: string) => r === 'alto' ? 'text-destructive' : r === 'medio' ? 'text-primary' : 'text-success';
 
   return (
     <div className="space-y-6">
       {/* Hero Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-4">
@@ -76,24 +211,15 @@ const HorusIA = () => {
               <Eye className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-display font-bold text-primary text-glow">
-                HORUS IA
-              </h1>
-              <p className="text-xs text-muted-foreground font-medium tracking-wider">
-                ASSISTENTE INTELIGENTE DE PERFORMANCE
-              </p>
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-primary text-glow">HORUS IA</h1>
+              <p className="text-xs text-muted-foreground font-medium tracking-wider">ASSISTENTE INTELIGENTE DE PERFORMANCE</p>
             </div>
             <Badge className="ml-auto gradient-gold text-primary-foreground border-0 font-display text-xs">
               <Star className="w-3 h-3 mr-1" /> SUPER VIP
             </Badge>
           </div>
-          <motion.p
-            key={phraseIdx}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="text-sm text-muted-foreground italic max-w-xl"
-          >
+          <motion.p key={phraseIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="text-sm text-muted-foreground italic max-w-xl">
             "{POSITIONING_PHRASES[phraseIdx]}"
           </motion.p>
         </div>
@@ -107,12 +233,7 @@ const HorusIA = () => {
           { icon: Activity, label: 'Confiança Média', value: printAnalyses.length > 0 ? Math.round(printAnalyses.reduce((s, p) => s + (p.confidence || 0), 0) / printAnalyses.length) + '%' : '--', color: 'text-success' },
           { icon: Shield, label: 'Status', value: 'Ativo', color: 'text-primary' },
         ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-          >
+          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
             <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
               <CardContent className="p-4 flex items-center gap-3">
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
@@ -129,15 +250,9 @@ const HorusIA = () => {
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start">
-          <TabsTrigger value="behavioral" className="gap-2 font-display text-xs">
-            <Brain className="w-4 h-4" /> Análise Comportamental
-          </TabsTrigger>
-          <TabsTrigger value="print" className="gap-2 font-display text-xs">
-            <ImageIcon className="w-4 h-4" /> Leitura de Print
-          </TabsTrigger>
-          <TabsTrigger value="history" className="gap-2 font-display text-xs">
-            <Clock className="w-4 h-4" /> Histórico
-          </TabsTrigger>
+          <TabsTrigger value="behavioral" className="gap-2 font-display text-xs"><Brain className="w-4 h-4" /> Análise Comportamental</TabsTrigger>
+          <TabsTrigger value="print" className="gap-2 font-display text-xs"><ImageIcon className="w-4 h-4" /> Leitura de Print</TabsTrigger>
+          <TabsTrigger value="history" className="gap-2 font-display text-xs"><Clock className="w-4 h-4" /> Histórico</TabsTrigger>
         </TabsList>
 
         {/* Behavioral Analysis */}
@@ -145,8 +260,7 @@ const HorusIA = () => {
           <Card className="border-primary/10 bg-card/80">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-display text-foreground flex items-center gap-2">
-                <Brain className="w-5 h-5 text-primary" />
-                Análise Comportamental do Trader
+                <Brain className="w-5 h-5 text-primary" /> Análise Comportamental do Trader
               </CardTitle>
               <p className="text-xs text-muted-foreground">
                 A Horus IA analisa seus dados de operações, gestão, diário emocional e padrões de comportamento.
@@ -157,9 +271,7 @@ const HorusIA = () => {
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Tom da IA</label>
                   <Select value={tone} onValueChange={setTone}>
-                    <SelectTrigger className="bg-secondary">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="acolhedor">🤝 Acolhedor</SelectItem>
                       <SelectItem value="equilibrado">⚖️ Equilibrado</SelectItem>
@@ -170,10 +282,8 @@ const HorusIA = () => {
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foco da Análise</label>
-                  <Select defaultValue="geral">
-                    <SelectTrigger className="bg-secondary">
-                      <SelectValue />
-                    </SelectTrigger>
+                  <Select value={focus} onValueChange={setFocus}>
+                    <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="geral">Visão Geral</SelectItem>
                       <SelectItem value="emocional">Padrão Emocional</SelectItem>
@@ -188,55 +298,86 @@ const HorusIA = () => {
 
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Pergunta ou contexto adicional (opcional)</label>
-                <Textarea
-                  placeholder="Ex: Quero entender meu padrão após perdas consecutivas..."
-                  value={behavioralQuery}
-                  onChange={e => setBehavioralQuery(e.target.value)}
-                  className="bg-secondary min-h-[80px]"
-                />
+                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[80px]" />
               </div>
 
               <div className="flex items-center justify-between">
-                <p className="text-[10px] text-muted-foreground">
-                  ⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.
-                </p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2" disabled>
-                  <Zap className="w-4 h-4" /> Analisar
-                  <Badge variant="outline" className="ml-1 text-[10px] border-primary-foreground/30 text-primary-foreground">Em breve</Badge>
+                <p className="text-[10px] text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-2" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
+                  {behaviorLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  {behaviorLoading ? 'Analisando...' : 'Analisar'}
                 </Button>
               </div>
 
-              {/* Example Response Preview */}
-              <div className="mt-4 border border-border/50 rounded-xl bg-secondary/30 p-4">
-                <p className="text-xs font-display text-primary mb-2 flex items-center gap-2">
-                  <Eye className="w-3 h-3" /> PRÉVIA DE RESPOSTA
-                </p>
-                <div className="space-y-2 text-sm text-muted-foreground">
-                  <p>"Seu padrão mostra impulsividade após perdas consecutivas."</p>
-                  <p>"Você opera melhor entre 19h e 21h."</p>
-                  <p>"Seu maior erro recorrente é tentar recuperar prejuízo no mesmo dia."</p>
-                  <p>"Seu comportamento indica risco de tilt emocional após devolução de lucro."</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              {/* Loading */}
+              <AnimatePresence>
+                {behaviorLoading && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="border border-primary/20 rounded-xl bg-primary/5 p-6 text-center space-y-3">
+                    <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
+                      className="w-12 h-12 mx-auto rounded-xl gradient-gold flex items-center justify-center">
+                      <Eye className="w-6 h-6 text-primary-foreground" />
+                    </motion.div>
+                    <p className="text-sm text-primary font-display">{loadingMsg}</p>
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-3/4 mx-auto" />
+                      <Skeleton className="h-4 w-1/2 mx-auto" />
+                      <Skeleton className="h-4 w-2/3 mx-auto" />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-          {/* Data Sources */}
-          <Card className="border-border/50 bg-card/60">
-            <CardContent className="p-4">
-              <p className="text-xs font-display text-muted-foreground mb-3">FONTES DE DADOS ANALISADAS</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {['Gestão de Banca', 'Registro de Operações', 'Diário Emocional', 'Checklist',
-                  'Modo Disciplina', 'Score Consistência', 'Histórico W/L', 'Horários',
-                  'Overtrading', 'Sinais de Tilt', 'Patentes', 'Evolução da Banca',
-                  'Pós-Loss', 'Pós-Win', 'Fora do Plano', 'Relatórios'
-                ].map(src => (
-                  <div key={src} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
-                    {src}
+              {/* Behavior Result */}
+              <AnimatePresence>
+                {behaviorResult && (
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className="border border-primary/20 rounded-xl bg-card p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-display text-primary flex items-center gap-2"><Eye className="w-3 h-3" /> RESULTADO DA ANÁLISE</p>
+                      <Badge variant="outline" className={`text-xs ${riskColor(behaviorResult.nivel_risco)}`}>
+                        Risco: {behaviorResult.nivel_risco.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-foreground">{behaviorResult.resumo}</p>
+                    {behaviorResult.padroes_detectados.length > 0 && (
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-2 font-display">PADRÕES DETECTADOS</p>
+                        <div className="space-y-1.5">
+                          {behaviorResult.padroes_detectados.map((p, i) => (
+                            <div key={i} className="flex items-start gap-2 text-sm text-foreground">
+                              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                              {p}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="border-t border-border/50 pt-3">
+                      <p className="text-xs text-muted-foreground mb-1 font-display">RECOMENDAÇÃO</p>
+                      <p className="text-sm text-foreground font-medium">{behaviorResult.recomendacao}</p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Data Sources */}
+              <Card className="border-border/50 bg-card/60">
+                <CardContent className="p-4">
+                  <p className="text-xs font-display text-muted-foreground mb-3">FONTES DE DADOS ANALISADAS</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {['Gestão de Banca', 'Registro de Operações', 'Diário Emocional', 'Checklist',
+                      'Modo Disciplina', 'Score Consistência', 'Histórico W/L', 'Horários',
+                      'Overtrading', 'Sinais de Tilt', 'Patentes', 'Evolução da Banca',
+                      'Pós-Loss', 'Pós-Win', 'Fora do Plano', 'Relatórios'
+                    ].map(src => (
+                      <div key={src} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60" /> {src}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
@@ -246,20 +387,15 @@ const HorusIA = () => {
           <Card className="border-primary/10 bg-card/80">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-display text-foreground flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-blue-400" />
-                Análise de Print do Gráfico
+                <ImageIcon className="w-5 h-5 text-blue-400" /> Análise de Print do Gráfico
               </CardTitle>
-              <p className="text-xs text-muted-foreground">
-                Envie um print do gráfico para receber análise probabilística de cenário.
-              </p>
+              <p className="text-xs text-muted-foreground">Envie um print do gráfico para receber análise probabilística de cenário.</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Timeframe</label>
                 <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-                  <SelectTrigger className="bg-secondary w-32">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="bg-secondary w-32"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="M5">M5</SelectItem>
                     <SelectItem value="M15">M15</SelectItem>
@@ -268,45 +404,83 @@ const HorusIA = () => {
               </div>
 
               {/* Upload Area */}
-              <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/30 transition-colors cursor-pointer">
-                <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-foreground font-medium">Arraste ou clique para enviar o print</p>
-                <p className="text-xs text-muted-foreground mt-1">PNG, JPG até 5MB</p>
-                <Button variant="outline" className="mt-3 border-primary/30 text-primary gap-2" disabled>
-                  <Upload className="w-4 h-4" /> Enviar Print
-                  <Badge variant="outline" className="ml-1 text-[10px]">Em breve</Badge>
+              <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileSelect} className="hidden" />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={e => e.preventDefault()}
+                className="border-2 border-dashed border-border/60 rounded-xl p-6 text-center hover:border-primary/30 transition-colors cursor-pointer"
+              >
+                {previewUrl ? (
+                  <div className="space-y-3">
+                    <img src={previewUrl} alt="Preview" className="max-h-48 mx-auto rounded-lg border border-border/50" />
+                    <p className="text-xs text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-foreground font-medium">Arraste ou clique para enviar o print</p>
+                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP até 5MB</p>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-2" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
+                  {chartLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                  {chartLoading ? 'Analisando...' : 'Analisar Print'}
                 </Button>
               </div>
 
-              {/* Response Format Preview */}
-              <div className="border border-border/50 rounded-xl bg-secondary/30 p-4">
-                <p className="text-xs font-display text-primary mb-3 flex items-center gap-2">
-                  <Eye className="w-3 h-3" /> FORMATO DE RESPOSTA
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2 p-3 bg-card/50 rounded-lg border border-success/20">
-                    <p className="text-xs text-muted-foreground font-display">EXEMPLO 1</p>
-                    <div className="space-y-1">
-                      <p className="text-sm"><span className="text-muted-foreground">Cenário:</span> <span className="text-success font-bold">Compra</span></p>
-                      <p className="text-sm"><span className="text-muted-foreground">Entrada estimada:</span> <span className="text-foreground font-mono">10:35</span></p>
-                      <p className="text-sm"><span className="text-muted-foreground">Saída estimada:</span> <span className="text-foreground font-mono">10:40</span></p>
-                      <p className="text-sm"><span className="text-muted-foreground">Confiança:</span> <span className="text-primary font-bold">78%</span></p>
+              {/* Loading */}
+              <AnimatePresence>
+                {chartLoading && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    className="border border-primary/20 rounded-xl bg-primary/5 p-6 text-center space-y-3">
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                      className="w-12 h-12 mx-auto rounded-xl gradient-gold flex items-center justify-center">
+                      <Eye className="w-6 h-6 text-primary-foreground" />
+                    </motion.div>
+                    <p className="text-sm text-primary font-display">{loadingMsg}</p>
+                    <Skeleton className="h-20 w-full" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Chart Result */}
+              <AnimatePresence>
+                {chartResult && (
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                    className={`border rounded-xl p-5 space-y-3 ${chartResult.cenario === 'compra' ? 'border-success/30 bg-success/5' : chartResult.cenario === 'venda' ? 'border-destructive/30 bg-destructive/5' : 'border-border/50 bg-card'}`}>
+                    <p className="text-xs font-display text-primary flex items-center gap-2"><Eye className="w-3 h-3" /> RESULTADO DA LEITURA</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Cenário</p>
+                        <p className={`text-xl font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                          {chartResult.cenario === 'compra' ? '🟢 COMPRA' : chartResult.cenario === 'venda' ? '🔴 VENDA' : '⚪ INCONCLUSIVO'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Confiança</p>
+                        <p className="text-xl font-display font-bold text-primary">{chartResult.confianca}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Entrada estimada</p>
+                        <p className="text-lg font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Saída estimada</p>
+                        <p className="text-lg font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2 p-3 bg-card/50 rounded-lg border border-destructive/20">
-                    <p className="text-xs text-muted-foreground font-display">EXEMPLO 2</p>
-                    <div className="space-y-1">
-                      <p className="text-sm"><span className="text-muted-foreground">Cenário:</span> <span className="text-destructive font-bold">Venda</span></p>
-                      <p className="text-sm"><span className="text-muted-foreground">Entrada estimada:</span> <span className="text-foreground font-mono">14:15</span></p>
-                      <p className="text-sm"><span className="text-muted-foreground">Saída estimada:</span> <span className="text-foreground font-mono">14:30</span></p>
-                      <p className="text-sm"><span className="text-muted-foreground">Confiança:</span> <span className="text-primary font-bold">82%</span></p>
+                    <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+                      <Badge variant="outline" className="text-xs">{chartResult.timeframe}</Badge>
+                      <p className="text-[10px] text-muted-foreground italic">Análise probabilística. Não representa garantia de resultado.</p>
                     </div>
-                  </div>
-                </div>
-                <p className="text-[10px] text-muted-foreground mt-3 italic">
-                  ⚠️ Análise probabilística, não garantia de resultado.
-                </p>
-              </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </CardContent>
           </Card>
         </TabsContent>
@@ -316,8 +490,7 @@ const HorusIA = () => {
           <Card className="border-border/50 bg-card/80">
             <CardHeader className="pb-3">
               <CardTitle className="text-lg font-display text-foreground flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary" />
-                Histórico de Análises
+                <Clock className="w-5 h-5 text-primary" /> Histórico de Análises
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -325,7 +498,7 @@ const HorusIA = () => {
                 <div className="text-center py-8">
                   <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">Nenhuma análise realizada ainda.</p>
-                  <p className="text-xs text-muted-foreground mt-1">Suas análises aparecerão aqui quando a Horus IA estiver ativa.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Use a aba Análise Comportamental ou Leitura de Print para começar.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -339,20 +512,23 @@ const HorusIA = () => {
                           <ImageIcon className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs font-display text-foreground">
-                              {item._type === 'behavioral' ? 'Análise Comportamental' : `Print ${item.timeframe}`}
-                            </p>
-                            {item.confidence && (
-                              <Badge variant="outline" className="text-[10px]">{item.confidence}%</Badge>
-                            )}
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-[10px]">{item._type === 'behavioral' ? 'Comportamental' : `Print ${item.timeframe}`}</Badge>
+                            <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleString('pt-BR')}</span>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                            {item.response || item.scenario || 'Sem resposta'}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground mt-1">
-                            {new Date(item.created_at).toLocaleString('pt-BR')}
-                          </p>
+                          {item._type === 'behavioral' ? (
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {(() => { try { return JSON.parse(item.response)?.resumo; } catch { return item.response; } })()}
+                            </p>
+                          ) : (
+                            <div className="flex items-center gap-3 text-xs">
+                              <span className={item.scenario === 'compra' ? 'text-success font-bold' : 'text-destructive font-bold'}>
+                                {item.scenario === 'compra' ? '🟢 Compra' : '🔴 Venda'}
+                              </span>
+                              <span className="text-muted-foreground">Confiança: {item.confidence}%</span>
+                              <span className="text-muted-foreground font-mono">{item.entry_time} → {item.exit_time}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}

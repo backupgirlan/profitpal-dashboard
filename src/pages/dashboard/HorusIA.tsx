@@ -163,7 +163,10 @@ const HorusIA = () => {
     }
   }, []);
 
-  // Ctrl+V paste support
+  // Ref to trigger auto-analysis after paste
+  const pastedFileRef = useRef<File | null>(null);
+
+  // Ctrl+V paste support — auto-analyze on Enter
   const handlePaste = useCallback((e: ClipboardEvent) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -177,17 +180,33 @@ const HorusIA = () => {
           if (file.size > 5 * 1024 * 1024) return;
           setSelectedFile(file);
           setPreviewUrl(URL.createObjectURL(file));
-          toast({ title: 'Print colado', description: 'Imagem carregada via Ctrl+V.' });
+          pastedFileRef.current = file;
+          toast({ title: 'Print colado', description: 'Pressione Enter para analisar automaticamente.' });
         }
         break;
       }
     }
   }, [toast]);
 
+  // Enter key triggers analysis after paste
+  const runChartAnalysisRef = useRef<() => void>(() => {});
+
+  const handleKeyDownAnalysis = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Enter' && pastedFileRef.current && !chartLoading) {
+      e.preventDefault();
+      pastedFileRef.current = null;
+      runChartAnalysisRef.current();
+    }
+  }, [chartLoading]);
+
   useEffect(() => {
     document.addEventListener('paste', handlePaste);
-    return () => document.removeEventListener('paste', handlePaste);
-  }, [handlePaste]);
+    document.addEventListener('keydown', handleKeyDownAnalysis);
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+      document.removeEventListener('keydown', handleKeyDownAnalysis);
+    };
+  }, [handlePaste, handleKeyDownAnalysis]);
 
   // AXIS: Validação de sincronização temporal
   const validarHorarioEntrada = (horarioSugerido: string): boolean => {
@@ -238,6 +257,7 @@ const HorusIA = () => {
       setLoadingMsg('');
     }
   };
+  runChartAnalysisRef.current = runChartAnalysis;
 
   if (isSuperVip === null) return null;
   if (!isSuperVip && !isAdmin) return <SuperVipGate />;

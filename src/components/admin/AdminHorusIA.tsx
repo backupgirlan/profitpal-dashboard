@@ -84,7 +84,20 @@ export default function AdminHorusIA() {
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Modelo da IA</Label>
-                  <Input value={settings['ia_model'] || 'gemini-2.5-flash'} onChange={e => updateSetting('ia_model', e.target.value)} className="bg-secondary mt-1.5" />
+                  <Select value={settings['ia_model'] || 'google/gemini-2.5-flash'} onValueChange={v => updateSetting('ia_model', v)}>
+                    <SelectTrigger className="bg-secondary mt-1.5"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google/gemini-2.5-pro">🧠 Gemini 2.5 Pro</SelectItem>
+                      <SelectItem value="google/gemini-2.5-flash">⚡ Gemini 2.5 Flash</SelectItem>
+                      <SelectItem value="google/gemini-2.5-flash-lite">💨 Gemini 2.5 Flash Lite</SelectItem>
+                      <SelectItem value="google/gemini-3-flash-preview">🚀 Gemini 3 Flash Preview</SelectItem>
+                      <SelectItem value="google/gemini-3.1-pro-preview">🔬 Gemini 3.1 Pro Preview</SelectItem>
+                      <SelectItem value="openai/gpt-5">🤖 GPT-5</SelectItem>
+                      <SelectItem value="openai/gpt-5-mini">🤖 GPT-5 Mini</SelectItem>
+                      <SelectItem value="openai/gpt-5-nano">🤖 GPT-5 Nano</SelectItem>
+                      <SelectItem value="openai/gpt-5.2">🤖 GPT-5.2</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label className="text-xs text-muted-foreground">Tom Padrão</Label>

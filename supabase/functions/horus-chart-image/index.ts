@@ -132,7 +132,7 @@ REGRAS DE RESPOSTA:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analise este gráfico ${timeframe}. Responda usando a tool chart_analysis.` },
+              { type: "text", text: `Analise este gráfico ${timeframe}. Leia o horário visível no gráfico e projete a entrada para o PRÓXIMO candle futuro. Responda usando a tool chart_analysis.` },
               { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Image}` } },
             ],
           },

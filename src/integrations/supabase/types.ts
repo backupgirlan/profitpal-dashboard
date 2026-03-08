@@ -328,9 +328,11 @@ export type Database = {
           created_at: string
           entry_time: string | null
           exit_time: string | null
+          feedback_note: string | null
           id: string
           image_url: string | null
           raw_response: string | null
+          result: string | null
           scenario: string | null
           timeframe: string
           user_id: string
@@ -340,9 +342,11 @@ export type Database = {
           created_at?: string
           entry_time?: string | null
           exit_time?: string | null
+          feedback_note?: string | null
           id?: string
           image_url?: string | null
           raw_response?: string | null
+          result?: string | null
           scenario?: string | null
           timeframe?: string
           user_id: string
@@ -352,9 +356,11 @@ export type Database = {
           created_at?: string
           entry_time?: string | null
           exit_time?: string | null
+          feedback_note?: string | null
           id?: string
           image_url?: string | null
           raw_response?: string | null
+          result?: string | null
           scenario?: string | null
           timeframe?: string
           user_id?: string

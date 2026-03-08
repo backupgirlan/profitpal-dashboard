@@ -133,21 +133,8 @@ const Landing = () => {
             </motion.div>
           </motion.div>
 
-          {/* Floating stats */}
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.8 }} className="mt-16 grid grid-cols-3 gap-4 max-w-md mx-auto">
-            <div className="bg-card/80 backdrop-blur border border-border/50 rounded-xl p-4 text-center">
-              <p className="text-2xl font-display font-black text-primary">2x0</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Modelo</p>
-            </div>
-            <div className="bg-card/80 backdrop-blur border border-border/50 rounded-xl p-4 text-center">
-              <p className="text-2xl font-display font-black text-success">95%</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Quebram</p>
-            </div>
-            <div className="bg-card/80 backdrop-blur border border-border/50 rounded-xl p-4 text-center">
-              <p className="text-2xl font-display font-black text-primary">100</p>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-1">Score</p>
-            </div>
-          </motion.div>
+          {/* Floating stats - animated toggle */}
+          <FloatingStatsToggle />
 
           {/* Scroll down indicator */}
           <motion.div

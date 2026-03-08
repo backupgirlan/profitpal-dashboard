@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
   Pencil, X, Target, ClipboardList, Activity, Calendar, Quote,
-  ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown
+  ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
+  Trash2, RotateCcw
 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
@@ -65,10 +66,14 @@ const DashboardHome = () => {
   const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
   const [editingPairValue, setEditingPairValue] = useState('');
 
-  // Deposit inline on Banca card
+  // Deposit / Edit balance inline on Banca card
   const [showDepositInput, setShowDepositInput] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
+  const [editBalanceMode, setEditBalanceMode] = useState(false);
+  const [editBalanceValue, setEditBalanceValue] = useState('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
@@ -244,6 +249,45 @@ const DashboardHome = () => {
     toast.success(`💰 Depósito de R$ ${val.toFixed(2)} realizado!`);
     window.dispatchEvent(new Event('balance-updated'));
     setDepositing(false);
+  };
+
+  const handleEditBalance = async () => {
+    const val = Number(editBalanceValue);
+    if (isNaN(val) || val < 0 || !user) return;
+    const newBalance = +val.toFixed(2);
+    await supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id);
+    setBalance(newBalance);
+    setEditBalanceMode(false);
+    setEditBalanceValue('');
+    setShowDepositInput(false);
+    toast.success('✅ Banca atualizada!');
+    window.dispatchEvent(new Event('balance-updated'));
+  };
+
+  const handleResetAccount = async () => {
+    if (!user) return;
+    setResetLoading(true);
+    try {
+      await supabase.from('trades').delete().eq('user_id', user.id);
+      await supabase.from('deposits').delete().eq('user_id', user.id);
+      await supabase.from('profiles').update({
+        balance: 0, total_profit: 0, stop_loss: 0, stop_win: 0,
+        entry_percentage: 2, soros_enabled: false, soros_level: 0, active_management_mode: null,
+      }).eq('user_id', user.id);
+      await supabase.from('streaks').update({
+        streak_atual: 0, maior_streak: 0, streak_freeze_disponivel: 0, total_freezes: 0, ultimo_dia_ativo: null,
+      }).eq('user_id', user.id);
+      localStorage.removeItem('management_engine_state');
+      localStorage.removeItem('soros_management_state');
+      toast.success('🔄 Conta resetada com sucesso!');
+      setShowResetConfirm(false);
+      setShowDepositInput(false);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const handleTrade = async (result: 'win' | 'loss') => {
@@ -423,7 +467,7 @@ const DashboardHome = () => {
               </span>
             </div>
 
-            {/* Inline deposit area */}
+            {/* Inline actions area */}
             <AnimatePresence>
               {showDepositInput && (
                 <motion.div
@@ -432,23 +476,88 @@ const DashboardHome = () => {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="flex gap-3 mt-4 pt-4 border-t border-border">
-                    <Input
-                      type="number"
-                      value={depositAmount}
-                      onChange={e => setDepositAmount(e.target.value)}
-                      placeholder="Valor do depósito"
-                      className="bg-secondary/50 h-11 text-base flex-1"
-                      autoFocus
-                    />
-                    <Button
-                      disabled={!depositAmount || depositing}
-                      className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
-                      onClick={handleDeposit}
-                    >
-                      <PiggyBank className="w-4 h-4 mr-2" />
-                      Depositar
-                    </Button>
+                  <div className="mt-4 pt-4 border-t border-border space-y-3">
+                    {/* Edit Balance */}
+                    {editBalanceMode ? (
+                      <div className="flex gap-3">
+                        <Input
+                          type="number"
+                          value={editBalanceValue}
+                          onChange={e => setEditBalanceValue(e.target.value)}
+                          placeholder="Novo valor da banca"
+                          className="bg-secondary/50 h-11 text-base flex-1"
+                          autoFocus
+                        />
+                        <Button
+                          disabled={!editBalanceValue && editBalanceValue !== '0'}
+                          className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
+                          onClick={handleEditBalance}
+                        >
+                          Salvar
+                        </Button>
+                        <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-3">
+                        <Input
+                          type="number"
+                          value={depositAmount}
+                          onChange={e => setDepositAmount(e.target.value)}
+                          placeholder="Valor do depósito"
+                          className="bg-secondary/50 h-11 text-base flex-1"
+                          autoFocus
+                        />
+                        <Button
+                          disabled={!depositAmount || depositing}
+                          className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
+                          onClick={handleDeposit}
+                        >
+                          <PiggyBank className="w-4 h-4 mr-2" />
+                          Depositar
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2">
+                      {!editBalanceMode && (
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary"
+                          onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                          Editar Banca
+                        </Button>
+                      )}
+                      {!showResetConfirm ? (
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive"
+                          onClick={() => setShowResetConfirm(true)}
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          Resetar Dados
+                        </Button>
+                      ) : (
+                        <div className="flex-1 flex gap-2">
+                          <Button
+                            variant="destructive"
+                            className="flex-1 h-9 text-xs gap-2"
+                            onClick={handleResetAccount}
+                            disabled={resetLoading}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
+                          </Button>
+                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>
+                            Cancelar
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               )}

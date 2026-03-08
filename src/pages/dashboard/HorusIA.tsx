@@ -66,6 +66,8 @@ const HorusIA = () => {
   // Results
   const [behaviorResult, setBehaviorResult] = useState<BehavioralResult | null>(null);
   const [chartResult, setChartResult] = useState<ChartResult | null>(null);
+  const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   // Image upload
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

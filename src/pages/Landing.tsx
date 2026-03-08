@@ -471,6 +471,241 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* COMMUNITY + SCOREBOARD SECTION */}
+      <section className="py-14 sm:py-20 bg-card/50 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-destructive rounded-full blur-[150px]" />
+          <div className="absolute top-1/3 right-1/4 w-[250px] h-[250px] bg-primary rounded-full blur-[120px]" />
+        </div>
+
+        <div className="relative max-w-[90rem] mx-auto px-4 sm:px-8">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={stagger} className="text-center mb-10">
+            <motion.div variants={fadeUp} className="mb-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-destructive/5 px-3 py-1 text-[10px] font-display uppercase tracking-widest text-destructive">
+                <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-destructive" /></span>
+                Ao vivo
+              </span>
+            </motion.div>
+            <motion.p variants={fadeUp} className="text-[10px] font-display uppercase tracking-[0.3em] text-primary mb-2">Comunidade</motion.p>
+            <motion.h2 variants={fadeUp} className="font-display text-xl sm:text-3xl font-black text-foreground mb-3">
+              Traders disciplinados operando <span className="text-primary text-glow">juntos</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-sm text-muted-foreground max-w-lg mx-auto">
+              Acompanhe nossos resultados em tempo real nas lives diárias.
+            </motion.p>
+          </motion.div>
+
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Live schedule */}
+            <motion.div variants={fadeUp} className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-all hover:shadow-[0_0_40px_hsla(45,100%,50%,0.08)] group">
+              <div className="px-5 py-3 bg-gradient-to-r from-destructive/10 to-transparent border-b border-border/50">
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" />
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-destructive" />
+                  </span>
+                  <h3 className="font-display text-base font-bold text-foreground">Lives Diárias</h3>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+                    <Youtube className="w-7 h-7 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Seg a Sex</p>
+                    <p className="text-2xl font-display font-black text-primary">20h</p>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+                  Operações ao vivo com análise técnica, gerenciamento e disciplina em tempo real.
+                </p>
+                <div className="flex gap-3">
+                  <a href="https://www.youtube.com/@TechnicalGirlan" target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-display font-bold text-destructive hover:bg-destructive/20 transition-all hover:scale-[1.02]">
+                    <Youtube className="h-5 w-5" /> YouTube
+                  </a>
+                  <a href="https://t.me/girlananalyst" target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-ring/40 bg-ring/10 px-4 py-3 text-sm font-display font-bold text-ring hover:bg-ring/20 transition-all hover:scale-[1.02]">
+                    <Send className="h-5 w-5" /> Telegram
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Weekly Scoreboard */}
+            <motion.div variants={fadeUp} className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-all hover:shadow-[0_0_40px_hsla(45,100%,50%,0.08)]">
+              <div className="px-5 py-3 bg-gradient-to-r from-primary/10 to-transparent border-b border-border/50">
+                <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-primary" /> Placar Semanal
+                </h3>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="text-center flex-1 bg-success/10 border border-success/20 rounded-xl p-3">
+                    <p className="text-3xl font-display font-black text-success">{weekWins}</p>
+                    <p className="text-[10px] text-success/70 uppercase tracking-wider font-display mt-1">Wins</p>
+                  </div>
+                  <span className="text-xl text-muted-foreground font-black">×</span>
+                  <div className="text-center flex-1 bg-destructive/10 border border-destructive/20 rounded-xl p-3">
+                    <p className="text-3xl font-display font-black text-destructive">{weekLosses}</p>
+                    <p className="text-[10px] text-destructive/70 uppercase tracking-wider font-display mt-1">Losses</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {[1, 2, 3, 4, 5].map((dayIdx) => {
+                    const score = scores.find(s => s.day_of_week === dayIdx);
+                    const wins = score?.wins ?? 0;
+                    const losses = score?.losses ?? 0;
+                    const total = wins + losses;
+                    const winPct = total > 0 ? (wins / total) * 100 : 50;
+                    return (
+                      <motion.div
+                        key={dayIdx}
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: dayIdx * 0.08 }}
+                        className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                      >
+                        <span className="text-xs text-muted-foreground font-display font-bold w-8">{DAY_LABELS_PT[dayIdx]}</span>
+                        <div className="flex-1 h-2 rounded-full bg-border/30 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            whileInView={{ width: `${winPct}%` }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8, delay: dayIdx * 0.1 }}
+                            className="h-full rounded-full bg-gradient-to-r from-success to-success/60"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 min-w-[60px] justify-end">
+                          <span className="text-xs font-bold text-success">{wins}</span>
+                          <span className="text-[10px] text-muted-foreground">/</span>
+                          <span className="text-xs font-bold text-destructive">{losses}</span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Monthly */}
+            <motion.div variants={fadeUp} className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/30 transition-all hover:shadow-[0_0_40px_hsla(45,100%,50%,0.08)]">
+              <div className="px-5 py-3 bg-gradient-to-r from-primary/10 to-transparent border-b border-border/50">
+                <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-primary" /> Resultado Mensal
+                </h3>
+              </div>
+              <div className="p-6">
+                <div className="text-center mb-4">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-display uppercase tracking-widest text-primary">
+                    {MONTH_LABELS_PT[new Date().getMonth()]} {new Date().getFullYear()}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-4 mb-2">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, type: 'spring' }}
+                    className="text-center flex-1 bg-success/10 border border-success/20 rounded-xl p-4"
+                  >
+                    <p className="text-4xl font-display font-black text-success">{totalMonthWins}</p>
+                    <p className="text-[10px] text-success/70 uppercase tracking-wider font-display mt-1">Wins</p>
+                  </motion.div>
+                  <span className="text-xl text-muted-foreground font-black">×</span>
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    whileInView={{ scale: 1, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, type: 'spring', delay: 0.1 }}
+                    className="text-center flex-1 bg-destructive/10 border border-destructive/20 rounded-xl p-4"
+                  >
+                    <p className="text-4xl font-display font-black text-destructive">{totalMonthLosses}</p>
+                    <p className="text-[10px] text-destructive/70 uppercase tracking-wider font-display mt-1">Losses</p>
+                  </motion.div>
+                </div>
+
+                {(totalMonthWins + totalMonthLosses) > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 }}
+                    className="mb-4"
+                  >
+                    <div className="h-2.5 rounded-full bg-border/30 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: `${(totalMonthWins / (totalMonthWins + totalMonthLosses)) * 100}%` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1, delay: 0.4 }}
+                        className="h-full rounded-full bg-gradient-to-r from-success to-success/60"
+                      />
+                    </div>
+                    <p className="text-center text-[10px] text-muted-foreground mt-1.5">
+                      Win Rate: <span className="text-success font-bold">{Math.round((totalMonthWins / (totalMonthWins + totalMonthLosses)) * 100)}%</span>
+                    </p>
+                  </motion.div>
+                )}
+
+                {pastMonths.length > 0 && (
+                  <div className="border-t border-border/30 pt-3">
+                    <button
+                      onClick={() => setShowPastMonths(!showPastMonths)}
+                      className="w-full flex items-center justify-center gap-2 text-xs font-display text-primary hover:text-primary/80 transition-colors py-1.5 rounded-lg hover:bg-primary/5"
+                    >
+                      {showPastMonths ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      {showPastMonths ? 'Ocultar' : 'Ver meses anteriores'}
+                    </button>
+                    <AnimatePresence>
+                      {showPastMonths && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-2 space-y-1.5">
+                            {pastMonths.slice(0, 6).map((m, i) => {
+                              const d = new Date(m.month_start);
+                              const mTotal = m.wins + m.losses;
+                              const mWinPct = mTotal > 0 ? (m.wins / mTotal) * 100 : 0;
+                              return (
+                                <motion.div
+                                  key={m.month_start}
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: i * 0.05 }}
+                                  className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30"
+                                >
+                                  <span className="text-xs text-muted-foreground font-display w-20 truncate">
+                                    {MONTH_LABELS_PT[d.getMonth()].slice(0, 3)} {d.getFullYear()}
+                                  </span>
+                                  <div className="flex-1 h-1.5 rounded-full bg-border/30 overflow-hidden">
+                                    <div className="h-full rounded-full bg-gradient-to-r from-success to-success/60" style={{ width: `${mWinPct}%` }} />
+                                  </div>
+                                  <div className="flex items-center gap-1.5 min-w-[50px] justify-end">
+                                    <span className="text-xs font-bold text-success">{m.wins}</span>
+                                    <span className="text-[10px] text-muted-foreground">×</span>
+                                    <span className="text-xs font-bold text-destructive">{m.losses}</span>
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* PROBLEM SECTION */}
       <section className="py-20 sm:py-28 bg-card/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-8">

@@ -15,7 +15,7 @@ import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
   Pencil, X, Target, ClipboardList, Activity, Calendar, Quote,
   ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
-  Trash2, RotateCcw, Brain, Eye, MessageSquare, Sparkles, Lock
+  Trash2, RotateCcw, AlertTriangle, TrendingDown
 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS, TraderRank } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';

@@ -624,16 +624,18 @@ const HorusIA = () => {
                 onDragOver={e => e.preventDefault()}
                 className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/30 transition-colors cursor-pointer"
               >
-                {previewUrl ? (
+              {previewUrl ? (
                   <div className="space-y-4">
                     <img src={previewUrl} alt="Preview" className="max-h-56 mx-auto rounded-lg border border-border/50" />
                     <p className="text-sm text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
+                    <p className="text-xs text-primary font-display animate-pulse">✨ Print pronto! Pressione Enter ou clique em Analisar Print</p>
                   </div>
                 ) : (
                   <>
                     <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-base text-foreground font-medium">Arraste ou clique para enviar o print</p>
+                    <p className="text-base text-foreground font-medium">Arraste, clique ou cole (Ctrl+V) para enviar o print</p>
                     <p className="text-sm text-muted-foreground mt-1.5">PNG, JPG, WEBP até 5MB</p>
+                    <p className="text-xs text-primary/60 mt-2">💡 Dica: Cole o print com Ctrl+V e pressione Enter para análise automática</p>
                   </>
                 )}
               </div>

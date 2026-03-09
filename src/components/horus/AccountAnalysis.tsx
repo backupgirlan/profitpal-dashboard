@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Eye, BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
-  Shield, Zap, RefreshCw, Loader2, Lightbulb, Target, Award, Activity
+  Shield, Zap, RefreshCw, Loader2, Lightbulb, Target, Award, Activity, Bot, User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,13 +31,6 @@ const LOADING_MSGS = [
   'Horus IA gerando plano de melhoria...',
 ];
 
-const PHRASES = [
-  'Sua conta deixa rastros. A Horus IA lê esses rastros.',
-  'Seu resultado final é reflexo do seu comportamento repetido.',
-  'O mercado mostra o preço. Sua conta mostra seus padrões.',
-  'Entender seu erro recorrente vale mais do que buscar mais uma entrada.',
-];
-
 const scoreLabel = (s: number) => {
   if (s <= 30) return { text: 'Conta em risco', color: 'text-destructive', bg: 'bg-destructive/10 border-destructive/20' };
   if (s <= 50) return { text: 'Comportamento instável', color: 'text-orange-400', bg: 'bg-orange-400/10 border-orange-400/20' };
@@ -56,6 +49,135 @@ const riskBadge = (r: string) => {
   return map[r] || map.medio;
 };
 
+interface ChatMessage {
+  id: string;
+  role: 'horus' | 'trader';
+  content: string;
+  type?: 'score' | 'risk' | 'strength' | 'weakness' | 'pattern' | 'improvement' | 'insight' | 'final' | 'summary';
+  icon?: React.ReactNode;
+  color?: string;
+}
+
+function buildChatMessages(result: AccountAnalysisResult): ChatMessage[] {
+  const msgs: ChatMessage[] = [];
+  let id = 0;
+  const next = () => String(++id);
+
+  msgs.push({ id: next(), role: 'trader', content: 'Horus, analisa minha conta por favor. Quero entender como estou operando.' });
+  msgs.push({ id: next(), role: 'horus', content: 'Acabei de cruzar todos os dados da sua conta. Vou te dar uma leitura completa. 🔎' });
+
+  // Score
+  const sl = scoreLabel(result.score);
+  msgs.push({
+    id: next(), role: 'horus', type: 'score',
+    content: `📊 **Score da sua conta: ${result.score}/100**\n\n${sl.text}`,
+    color: sl.color,
+  });
+
+  // Risk
+  const rb = riskBadge(result.risk_level);
+  msgs.push({
+    id: next(), role: 'horus', type: 'risk',
+    content: `🛡️ **Nível de risco: ${rb.text}**`,
+    color: result.risk_level === 'alto' || result.risk_level === 'critico' ? 'text-destructive' : result.risk_level === 'medio' ? 'text-primary' : 'text-success',
+  });
+
+  // Summary
+  msgs.push({ id: next(), role: 'horus', type: 'summary', content: result.summary });
+
+  msgs.push({ id: next(), role: 'trader', content: 'E o que eu tô fazendo de certo?' });
+
+  // Strengths
+  if (result.strengths.length > 0) {
+    msgs.push({
+      id: next(), role: 'horus', type: 'strength',
+      content: `✅ **Pontos fortes:**\n\n${result.strengths.map(s => `• ${s}`).join('\n')}`,
+    });
+  }
+
+  msgs.push({ id: next(), role: 'trader', content: 'E onde estou errando?' });
+
+  // Weaknesses
+  if (result.weaknesses.length > 0) {
+    msgs.push({
+      id: next(), role: 'horus', type: 'weakness',
+      content: `⚠️ **Onde está pecando:**\n\n${result.weaknesses.map(w => `• ${w}`).join('\n')}`,
+    });
+  }
+
+  // Patterns
+  if (result.patterns.length > 0) {
+    msgs.push({
+      id: next(), role: 'horus', type: 'pattern',
+      content: `🔍 **Padrões que detectei:**\n\n${result.patterns.map(p => `• ${p}`).join('\n')}`,
+    });
+  }
+
+  msgs.push({ id: next(), role: 'trader', content: 'O que eu preciso fazer pra melhorar?' });
+
+  // Improvements
+  if (result.improvements.length > 0) {
+    msgs.push({
+      id: next(), role: 'horus', type: 'improvement',
+      content: `🎯 **Plano de melhoria:**\n\n${result.improvements.map((imp, i) => `${i + 1}. ${imp}`).join('\n')}`,
+    });
+  }
+
+  // Insights
+  if (result.insights.length > 0) {
+    msgs.push({
+      id: next(), role: 'horus', type: 'insight',
+      content: `💡 **Insights da sua conta:**\n\n${result.insights.map(ins => `• ${ins}`).join('\n')}`,
+    });
+  }
+
+  // Final phrase
+  if (result.final_phrase) {
+    msgs.push({
+      id: next(), role: 'horus', type: 'final',
+      content: `🏆 **Conclusão:**\n\n"${result.final_phrase}"`,
+    });
+  }
+
+  return msgs;
+}
+
+function ChatBubble({ msg, index }: { msg: ChatMessage; index: number }) {
+  const isHorus = msg.role === 'horus';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.12, duration: 0.35, ease: 'easeOut' }}
+      className={`flex gap-2.5 ${isHorus ? 'justify-start' : 'justify-end'}`}
+    >
+      {isHorus && (
+        <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center shrink-0 mt-1 box-glow">
+          <Bot className="w-4 h-4 text-primary-foreground" />
+        </div>
+      )}
+      <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
+        isHorus
+          ? 'bg-secondary/60 border border-border/50 text-foreground rounded-tl-md'
+          : 'bg-primary/15 border border-primary/20 text-foreground rounded-tr-md'
+      }`}>
+        {msg.content.split(/(\*\*.*?\*\*)/g).map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return <strong key={i} className={msg.color || 'text-primary'}>{part.slice(2, -2)}</strong>;
+          }
+          return <span key={i}>{part}</span>;
+        })}
+      </div>
+      {!isHorus && (
+        <div className="w-8 h-8 rounded-full bg-secondary border border-border/50 flex items-center justify-center shrink-0 mt-1">
+          <User className="w-4 h-4 text-muted-foreground" />
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 export default function AccountAnalysis() {
   const { session } = useAuth();
   const { toast } = useToast();
@@ -63,20 +185,35 @@ export default function AccountAnalysis() {
   const [loadingMsg, setLoadingMsg] = useState('');
   const [result, setResult] = useState<AccountAnalysisResult | null>(null);
   const [lastAnalysis, setLastAnalysis] = useState<{ created_at: string; score: number } | null>(null);
-  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadLastAnalysis();
-    const iv = setInterval(() => setPhraseIdx(i => (i + 1) % PHRASES.length), 6000);
-    return () => clearInterval(iv);
   }, []);
+
+  // Animate messages appearing one by one
+  useEffect(() => {
+    if (chatMessages.length === 0) { setVisibleCount(0); return; }
+    if (visibleCount >= chatMessages.length) return;
+    const timer = setTimeout(() => {
+      setVisibleCount(v => v + 1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [chatMessages, visibleCount]);
+
+  // Auto-scroll
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [visibleCount]);
 
   const loadLastAnalysis = async () => {
     if (!session) return;
     const { data } = await supabase.from('account_analyses').select('*').order('created_at', { ascending: false }).limit(1).single();
     if (data) {
       setLastAnalysis({ created_at: data.created_at, score: data.score });
-      setResult({
+      const r: AccountAnalysisResult = {
         score: data.score,
         risk_level: data.risk_level,
         summary: data.summary || '',
@@ -86,7 +223,11 @@ export default function AccountAnalysis() {
         improvements: (data.improvements as string[]) || [],
         insights: (data.insights as string[]) || [],
         final_phrase: data.final_phrase || '',
-      });
+      };
+      setResult(r);
+      const msgs = buildChatMessages(r);
+      setChatMessages(msgs);
+      setVisibleCount(msgs.length); // Show all immediately for loaded data
     }
   };
 
@@ -94,6 +235,8 @@ export default function AccountAnalysis() {
     if (!session) return;
     setLoading(true);
     setResult(null);
+    setChatMessages([]);
+    setVisibleCount(0);
     let idx = 0;
     setLoadingMsg(LOADING_MSGS[0]);
     const iv = setInterval(() => { idx = (idx + 1) % LOADING_MSGS.length; setLoadingMsg(LOADING_MSGS[idx]); }, 3000);
@@ -111,6 +254,9 @@ export default function AccountAnalysis() {
       }
       setResult(data);
       setLastAnalysis({ created_at: new Date().toISOString(), score: data.score });
+      const msgs = buildChatMessages(data);
+      setChatMessages(msgs);
+      setVisibleCount(0); // Start animation from 0
       toast({ title: 'Análise concluída', description: 'Horus IA finalizou a leitura da sua conta.' });
     } catch {
       toast({ title: 'Erro', description: 'Horus IA temporariamente indisponível.', variant: 'destructive' });
@@ -121,43 +267,33 @@ export default function AccountAnalysis() {
     }
   };
 
-  const sl = result ? scoreLabel(result.score) : null;
-  const rb = result ? riskBadge(result.risk_level) : null;
-
   return (
-    <div className="space-y-6">
-      {/* Hero Card */}
+    <div className="space-y-4">
+      {/* Header */}
       <Card className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden relative">
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <CardContent className="p-6 relative z-10">
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
-                  <BarChart3 className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-display font-bold text-foreground">Análise da Conta</h2>
-                  <p className="text-xs text-muted-foreground">Receba uma leitura completa do seu comportamento operacional</p>
-                </div>
+        <CardContent className="p-5 relative z-10">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
+                <BarChart3 className="w-5 h-5 text-primary-foreground" />
               </div>
-              <motion.p key={phraseIdx} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }}
-                className="text-xs text-primary italic font-medium">
-                "{PHRASES[phraseIdx]}"
-              </motion.p>
+              <div>
+                <h2 className="text-lg font-display font-bold text-foreground">Análise da Conta</h2>
+                <p className="text-xs text-muted-foreground">Conversa inteligente com a Horus IA sobre sua performance</p>
+              </div>
             </div>
-
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-col items-end gap-1.5">
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Button size="lg" onClick={runAnalysis} disabled={loading}
+                <Button size="sm" onClick={runAnalysis} disabled={loading}
                   className="gradient-gold text-primary-foreground font-display gap-2 box-glow">
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : result ? <RefreshCw className="w-5 h-5" /> : <Zap className="w-5 h-5" />}
-                  {loading ? 'Analisando...' : result ? 'Atualizar análise' : 'Analisar minha conta'}
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : result ? <RefreshCw className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+                  {loading ? 'Analisando...' : result ? 'Atualizar' : 'Analisar minha conta'}
                 </Button>
               </motion.div>
               {lastAnalysis && (
                 <p className="text-[10px] text-muted-foreground">
-                  Última análise: {new Date(lastAnalysis.created_at).toLocaleString('pt-BR')} • Score: {lastAnalysis.score}/100
+                  Última: {new Date(lastAnalysis.created_at).toLocaleString('pt-BR')} • Score: {lastAnalysis.score}/100
                 </p>
               )}
             </div>
@@ -176,132 +312,64 @@ export default function AccountAnalysis() {
             </motion.div>
             <p className="text-sm text-primary font-display">{loadingMsg}</p>
             <div className="space-y-2 max-w-md mx-auto">
-              <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-5/6" /><Skeleton className="h-4 w-2/3" />
+              <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-3/4" /><Skeleton className="h-4 w-5/6" />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Result */}
-      <AnimatePresence>
-        {result && !loading && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-
-            {/* Score Card */}
-            <Card className={`border ${sl!.bg}`}>
-              <CardContent className="p-6 flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <p className={`text-5xl font-display font-bold ${sl!.color}`}>{result.score}</p>
-                    <p className="text-xs text-muted-foreground">/100</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-display font-bold text-foreground">Score Geral da Conta</p>
-                    <p className={`text-xs font-bold ${sl!.color}`}>{sl!.text}</p>
-                  </div>
-                </div>
-                <Badge className={`${rb!.cls} border text-xs font-display px-3 py-1`}>
-                  Risco: {rb!.text}
-                </Badge>
-              </CardContent>
-            </Card>
-
-            {/* Summary */}
-            <Card className="border-border/50">
-              <CardContent className="p-5 space-y-2">
-                <p className="text-xs font-display text-primary flex items-center gap-2"><Eye className="w-3 h-3" /> RESUMO GERAL</p>
-                <p className="text-sm text-foreground leading-relaxed">{result.summary}</p>
-              </CardContent>
-            </Card>
-
-            {/* Strengths & Weaknesses */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="border-success/20">
-                <CardContent className="p-5 space-y-3">
-                  <p className="text-xs font-display text-success flex items-center gap-2"><TrendingUp className="w-3 h-3" /> PONTOS FORTES</p>
-                  <div className="space-y-2">
-                    {result.strengths.map((s, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                        <CheckCircle className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" /> {s}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-destructive/20">
-                <CardContent className="p-5 space-y-3">
-                  <p className="text-xs font-display text-destructive flex items-center gap-2"><TrendingDown className="w-3 h-3" /> ONDE ESTÁ PECANDO</p>
-                  <div className="space-y-2">
-                    {result.weaknesses.map((w, i) => (
-                      <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                        <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0 mt-0.5" /> {w}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Patterns */}
-            <Card className="border-border/50">
-              <CardContent className="p-5 space-y-3">
-                <p className="text-xs font-display text-primary flex items-center gap-2"><Activity className="w-3 h-3" /> PADRÕES DETECTADOS</p>
-                <div className="space-y-2">
-                  {result.patterns.map((p, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> {p}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Improvements */}
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="p-5 space-y-3">
-                <p className="text-xs font-display text-primary flex items-center gap-2"><Target className="w-3 h-3" /> PLANO DE MELHORIA</p>
-                <div className="space-y-2">
-                  {result.improvements.map((imp, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                      <span className="text-primary font-display font-bold text-xs mt-0.5">{i + 1}.</span> {imp}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Insights */}
-            <div>
-              <p className="text-xs font-display text-muted-foreground mb-3 flex items-center gap-2"><Lightbulb className="w-3 h-3" /> INSIGHTS DA SUA CONTA</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {result.insights.map((ins, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}>
-                    <Card className="border-border/50 bg-card/80 hover:border-primary/20 transition-colors">
-                      <CardContent className="p-3 flex items-start gap-2">
-                        <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                        <p className="text-xs text-foreground">{ins}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+      {/* Chat Conversation */}
+      {chatMessages.length > 0 && !loading && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <Card className="border-border/50 bg-card/90 overflow-hidden">
+            {/* Chat Header */}
+            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30 bg-secondary/30">
+              <div className="w-9 h-9 rounded-full gradient-gold flex items-center justify-center">
+                <Bot className="w-4.5 h-4.5 text-primary-foreground" />
               </div>
+              <div className="flex-1">
+                <p className="text-sm font-display font-bold text-foreground">Horus IA</p>
+                <p className="text-[10px] text-success flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> Online • Trader Profissional
+                </p>
+              </div>
+              {result && (
+                <Badge className={`${scoreLabel(result.score).bg} border text-xs font-display px-2 py-0.5`}>
+                  Score: {result.score}
+                </Badge>
+              )}
             </div>
 
-            {/* Final Phrase */}
-            <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-transparent">
-              <CardContent className="p-5 flex items-start gap-3">
-                <Award className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs font-display text-primary mb-1">CONCLUSÃO DA HORUS IA</p>
-                  <p className="text-sm text-foreground font-medium italic">"{result.final_phrase}"</p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Messages */}
+            <div className="p-4 space-y-4 max-h-[600px] overflow-y-auto">
+              {chatMessages.slice(0, visibleCount).map((msg, i) => (
+                <ChatBubble key={msg.id} msg={msg} index={i} />
+              ))}
 
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {/* Typing indicator when messages are still appearing */}
+              {visibleCount < chatMessages.length && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2.5 justify-start">
+                  <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center shrink-0">
+                    <Bot className="w-4 h-4 text-primary-foreground" />
+                  </div>
+                  <div className="bg-secondary/60 border border-border/50 rounded-2xl rounded-tl-md px-4 py-3">
+                    <div className="flex gap-1.5">
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                        className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+                        className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+                      <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+                        className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              <div ref={chatEndRef} />
+            </div>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 }

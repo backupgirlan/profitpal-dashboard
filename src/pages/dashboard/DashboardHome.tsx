@@ -169,6 +169,10 @@ const DashboardHome = () => {
       let cumBalance = 0, peak = 0, mdd = 0;
       const evoMap: Record<string, number> = {};
       const dailyProfitMap: Record<string, number> = {};
+      // For candles: track daily open/high/low/close
+      const dailyOHLC: Record<string, { open: number; high: number; low: number; close: number; started: boolean }> = {};
+      let runningBalance = 0;
+
       tradesRes.data.forEach(trade => {
         const profit = Number(trade.profit);
         if (trade.result === 'win') w++; else l++;
@@ -182,6 +186,23 @@ const DashboardHome = () => {
         if (dd > mdd) mdd = dd;
         evoMap[tradeDate] = cumBalance;
         dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
+
+        // Build OHLC per day
+        const prevBalance = runningBalance;
+        runningBalance += profit;
+        if (!dailyOHLC[tradeDate]) {
+          dailyOHLC[tradeDate] = {
+            open: prevBalance,
+            high: Math.max(prevBalance, runningBalance),
+            low: Math.min(prevBalance, runningBalance),
+            close: runningBalance,
+            started: true,
+          };
+        } else {
+          dailyOHLC[tradeDate].high = Math.max(dailyOHLC[tradeDate].high, runningBalance);
+          dailyOHLC[tradeDate].low = Math.min(dailyOHLC[tradeDate].low, runningBalance);
+          dailyOHLC[tradeDate].close = runningBalance;
+        }
       });
       for (let i = tradesRes.data.length - 1; i >= 0; i--) {
         if (tradesRes.data[i].result === 'win') { if (currentLossStreak > 0) break; currentWinStreak++; }
@@ -197,6 +218,16 @@ const DashboardHome = () => {
       setEvolutionData(evoEntries.map(([day, balance]) => ({ day: day.slice(5), balance })));
       const consistencyEntries = Object.entries(dailyProfitMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
+
+      // Build candle data (each candle = 1 day, value scale R$30 per unit)
+      const candleEntries = Object.entries(dailyOHLC).sort((a, b) => a[0].localeCompare(b[0]));
+      setCandleData(candleEntries.map(([day, ohlc]) => ({
+        day: day.slice(5),
+        open: +ohlc.open.toFixed(2),
+        close: +ohlc.close.toFixed(2),
+        high: +ohlc.high.toFixed(2),
+        low: +ohlc.low.toFixed(2),
+      })));
     }
 
   }, [user]);

@@ -27,15 +27,7 @@ import BehaviorRadar from '@/components/horus/BehaviorRadar';
 import EmotionalRiskMap from '@/components/horus/EmotionalRiskMap';
 import BankSimulator from '@/components/horus/BankSimulator';
 
-const MOTIVATIONAL_QUOTES = [
-  "A maioria quebra após o segundo loss. A Horus IA observa isso.",
-  "O mercado mostra o preço. A Horus IA mostra seu comportamento.",
-  "Disciplina não é entrar bem. É saber parar.",
-  "A Horus IA observa padrões que você não percebe.",
-  "Preservar o dia é mais inteligente do que tentar salvá-lo no impulso.",
-  "Consistência supera intensidade.",
-  "O mercado sempre estará aqui amanhã.",
-];
+// Quotes are now loaded from translations
 
 const CHART_COLORS = {
   gold: 'hsl(48, 96%, 53%)',
@@ -102,8 +94,10 @@ const DashboardHome = () => {
   const [negativeDays, setNegativeDays] = useState(0);
   const [disciplineRate, setDisciplineRate] = useState(100);
 
-
-  const quoteIndex = useMemo(() => Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length), []);
+  const MOTIVATIONAL_QUOTES = [
+    t('quotes.q1'), t('quotes.q2'), t('quotes.q3'), t('quotes.q4'), t('quotes.q5'), t('quotes.q6'), t('quotes.q7'),
+  ];
+  const quoteIndex = useMemo(() => Math.floor(Math.random() * 7), []);
 
   useEffect(() => {
     const todayKey = `emotional_checkin_${new Date().toISOString().split('T')[0]}`;
@@ -360,14 +354,14 @@ const DashboardHome = () => {
   const mgmtActive = mgmtState.ativo;
 
   const emotionalOptions = [
-    { key: 'calmo', label: '😌 Calmo', safe: true },
-    { key: 'concentrado', label: '🎯 Concentrado', safe: true },
-    { key: 'ansioso', label: '😰 Ansioso', safe: false },
-    { key: 'cansado', label: '😴 Cansado', safe: false },
-    { key: 'impulsivo', label: '⚡ Impulsivo', safe: false },
+    { key: 'calmo', label: t('home.calm'), safe: true },
+    { key: 'concentrado', label: t('home.focused'), safe: true },
+    { key: 'ansioso', label: t('home.anxious'), safe: false },
+    { key: 'cansado', label: t('home.tired'), safe: false },
+    { key: 'impulsivo', label: t('home.impulsive'), safe: false },
   ];
 
-  const consistencyLevel = disciplineRate >= 90 ? 'Trader Consistente' : disciplineRate >= 70 ? 'Consistência Alta' : disciplineRate >= 50 ? 'Consistência Média' : 'Consistência Baixa';
+  const consistencyLevel = disciplineRate >= 90 ? t('home.consistentTrader') : disciplineRate >= 70 ? t('home.highConsistency') : disciplineRate >= 50 ? t('home.mediumConsistency') : t('home.lowConsistency');
   const consistencyColor = disciplineRate >= 90 ? 'text-success' : disciplineRate >= 70 ? 'text-primary' : disciplineRate >= 50 ? 'text-primary' : 'text-destructive';
 
   const pieData = [
@@ -375,7 +369,7 @@ const DashboardHome = () => {
     { name: 'LOSS', value: losses, color: CHART_COLORS.red },
   ];
 
-  const formatCurrency = (v: number) => `R$ ${v.toFixed(2)}`;
+  const formatCurrency = (v: number) => `${isEn ? '$' : 'R$'} ${v.toFixed(2)}`;
 
   const emotionalEmoji = emotionalState ? emotionalOptions.find(o => o.key === emotionalState)?.label.split(' ')[0] || '😊' : '😊';
   const isEmotionalRisky = emotionalState ? !emotionalOptions.find(o => o.key === emotionalState)?.safe : false;
@@ -390,9 +384,9 @@ const DashboardHome = () => {
       <Dialog open={showEmotionalModal} onOpenChange={(open) => { if (!open && emotionalState) handleEmotionalConfirm(); }}>
         <DialogContent className="bg-card border-border max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-lg text-foreground text-center">Como foi seu dia hoje?</DialogTitle>
+            <DialogTitle className="font-display text-lg text-foreground text-center">{t('home.howWasYourDay')}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground text-center mb-4">Antes de operar, precisamos entender como você está se sentindo. Isso nos ajuda a proteger sua banca.</p>
+          <p className="text-sm text-muted-foreground text-center mb-4">{t('home.emotionalDesc')}</p>
           <div className="grid grid-cols-2 gap-3">
             {emotionalOptions.map(opt => (
               <button key={opt.key} onClick={() => handleEmotionalSelect(opt.key)}
@@ -410,13 +404,13 @@ const DashboardHome = () => {
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mt-2 p-4 rounded-xl bg-destructive/10 border border-destructive/25 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-destructive">ATENÇÃO</p>
-                <p className="text-xs text-muted-foreground mt-1">Operar com emocional alterado aumenta drasticamente o risco. Considere pausar e voltar mais tarde.</p>
+                <p className="text-sm font-bold text-destructive">{t('home.attention')}</p>
+                <p className="text-xs text-muted-foreground mt-1">{t('home.emotionalWarning')}</p>
               </div>
             </motion.div>
           )}
           <Button onClick={handleEmotionalConfirm} disabled={!emotionalState} className="w-full mt-2 gradient-gold text-primary-foreground font-semibold h-11">
-            Continuar para o Dashboard
+            {t('home.continueToDashboard')}
           </Button>
         </DialogContent>
       </Dialog>
@@ -432,13 +426,13 @@ const DashboardHome = () => {
         <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm">
           <CardContent className="p-5">
             <h3 className="font-display text-xs font-bold text-primary mb-3 flex items-center gap-2 uppercase tracking-wider">
-              <ClipboardList className="w-4 h-4" /> Gerenciamento em Andamento
+              <ClipboardList className="w-4 h-4" /> {t('home.managementInProgress')}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div><p className="text-muted-foreground text-xs">Modelo</p><p className="font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p></div>
-              <div><p className="text-muted-foreground text-xs">Banca</p><p className="font-bold text-foreground">R$ {mgmtState.banca.toFixed(2)}</p></div>
-              <div><p className="text-muted-foreground text-xs">Entrada</p><p className="font-bold text-primary">R$ {mgmtState.entradaRecomendada.toFixed(2)}</p></div>
-              <div><p className="text-muted-foreground text-xs">Placar</p><p className="font-bold"><span className="win-text">{mgmtState.cicloWins}W</span> / <span className="loss-text">{mgmtState.cicloLosses}L</span></p></div>
+              <div><p className="text-muted-foreground text-xs">{t('home.model')}</p><p className="font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p></div>
+              <div><p className="text-muted-foreground text-xs">{t('home.balance')}</p><p className="font-bold text-foreground">{isEn ? '$' : 'R$'} {mgmtState.banca.toFixed(2)}</p></div>
+              <div><p className="text-muted-foreground text-xs">{t('home.entry')}</p><p className="font-bold text-primary">{isEn ? '$' : 'R$'} {mgmtState.entradaRecomendada.toFixed(2)}</p></div>
+              <div><p className="text-muted-foreground text-xs">{t('home.score')}</p><p className="font-bold"><span className="win-text">{mgmtState.cicloWins}W</span> / <span className="loss-text">{mgmtState.cicloLosses}L</span></p></div>
             </div>
           </CardContent>
         </Card>
@@ -450,19 +444,19 @@ const DashboardHome = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
           <CardContent className="p-6 sm:p-8 relative">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Banca Atual</span>
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">{t('home.currentBalance')}</span>
               <div className="flex items-center gap-3">
                 <span className={`text-lg ${isEmotionalRisky ? 'animate-pulse-loss' : ''}`} title={emotionalState || 'Humor'}>{emotionalEmoji}</span>
                 <Wallet className="w-5 h-5 text-primary" />
-                <button onClick={() => setShowDepositInput(!showDepositInput)} className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" title="Depositar na banca">
+                <button onClick={() => setShowDepositInput(!showDepositInput)} className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" title={t('home.depositInBalance')}>
                   <Pencil className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">{isEn ? '$' : 'R$'} {balance.toLocaleString(isEn ? 'en-US' : 'pt-BR', { minimumFractionDigits: 2 })}</p>
             <div className="flex items-center gap-2 mt-3">
               {totalProfit >= 0 ? <ArrowUpRight className="w-4 h-4 text-success" /> : <ArrowDownRight className="w-4 h-4 text-destructive" />}
-              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>{totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total</span>
+              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>{totalProfit >= 0 ? '+' : ''}{isEn ? '$' : 'R$'} {totalProfit.toFixed(2)} {t('home.total')}</span>
             </div>
             <AnimatePresence>
               {showDepositInput && (
@@ -470,13 +464,13 @@ const DashboardHome = () => {
                   <div className="mt-4 pt-4 border-t border-border space-y-3">
                     {editBalanceMode ? (
                       <div className="flex gap-3">
-                        <Input type="number" value={editBalanceValue} onChange={e => setEditBalanceValue(e.target.value)} placeholder="Novo valor da banca" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
-                        <Button disabled={!editBalanceValue && editBalanceValue !== '0'} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleEditBalance}>Salvar</Button>
+                        <Input type="number" value={editBalanceValue} onChange={e => setEditBalanceValue(e.target.value)} placeholder={t('home.newBankValue')} className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
+                        <Button disabled={!editBalanceValue && editBalanceValue !== '0'} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleEditBalance}>{t('home.save')}</Button>
                         <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}><X className="w-4 h-4" /></Button>
                       </div>
                     ) : (
                       <div className="flex gap-3">
-                        <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="Valor do depósito" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
+                        <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder={t('home.depositValue')} className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
                         <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleDeposit}>
                           <PiggyBank className="w-4 h-4 mr-2" /> Depositar
                         </Button>
@@ -485,19 +479,19 @@ const DashboardHome = () => {
                     <div className="flex gap-2">
                       {!editBalanceMode && (
                         <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary" onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}>
-                          <Pencil className="w-3.5 h-3.5" /> Editar Banca
+                          <Pencil className="w-3.5 h-3.5" /> {t('home.editBank')}
                         </Button>
                       )}
                       {!showResetConfirm ? (
                         <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive" onClick={() => setShowResetConfirm(true)}>
-                          <RotateCcw className="w-3.5 h-3.5" /> Resetar Dados
+                          <RotateCcw className="w-3.5 h-3.5" /> {t('home.resetData')}
                         </Button>
                       ) : (
                         <div className="flex-1 flex gap-2">
                           <Button variant="destructive" className="flex-1 h-9 text-xs gap-2" onClick={handleResetAccount} disabled={resetLoading}>
-                            <Trash2 className="w-3.5 h-3.5" /> {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
+                            <Trash2 className="w-3.5 h-3.5" /> {resetLoading ? t('home.resetting') : t('home.confirmReset')}
                           </Button>
-                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>Cancelar</Button>
+                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>{t('home.cancel')}</Button>
                         </div>
                       )}
                     </div>
@@ -512,10 +506,10 @@ const DashboardHome = () => {
       {/* ═══════ Stat Cards Grid ═══════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: TrendingUp, label: 'Lucro do Dia', value: formatCurrency(todayProfit), positive: todayProfit >= 0 },
-          { icon: Calendar, label: 'Lucro da Semana', value: formatCurrency(weekProfit), positive: weekProfit >= 0 },
-          { icon: BarChart3, label: 'Lucro do Mês', value: formatCurrency(monthProfit), positive: monthProfit >= 0 },
-          { icon: TrendingDown, label: 'Máx. Drawdown', value: formatCurrency(maxDrawdown), positive: false, alwaysRed: true },
+          { icon: TrendingUp, label: t('home.dayProfit'), value: formatCurrency(todayProfit), positive: todayProfit >= 0 },
+          { icon: Calendar, label: t('home.weekProfit'), value: formatCurrency(weekProfit), positive: weekProfit >= 0 },
+          { icon: BarChart3, label: t('home.monthProfit'), value: formatCurrency(monthProfit), positive: monthProfit >= 0 },
+          { icon: TrendingDown, label: t('home.maxDrawdown'), value: formatCurrency(maxDrawdown), positive: false, alwaysRed: true },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card className="border-border bg-card hover:border-primary/15 transition-all duration-300">
@@ -535,17 +529,17 @@ const DashboardHome = () => {
 
       {/* ═══════ Win Rate + Streaks + Meta ═══════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Win Rate</p><p className="text-3xl font-bold text-primary">{winRate}%</p><p className="text-xs text-muted-foreground mt-1">{totalTrades} operações</p></CardContent></Card>
-        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><div className="flex items-center justify-center gap-1.5 mb-2"><ArrowUpRight className="w-3.5 h-3.5 text-success" /><p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Wins</p></div><p className="text-3xl font-bold win-text">{winStreak}</p></CardContent></Card>
-        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><div className="flex items-center justify-center gap-1.5 mb-2"><ArrowDownRight className="w-3.5 h-3.5 text-destructive" /><p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Losses</p></div><p className="text-3xl font-bold loss-text">{lossStreak}</p></CardContent></Card>
-        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Meta Diária</p><p className="text-3xl font-bold text-primary">{todayProfit >= 0 ? '✓' : '—'}</p><p className="text-xs text-muted-foreground mt-1">{todayProfit >= 0 ? 'No alvo' : 'Abaixo'}</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t('home.winRate')}</p><p className="text-3xl font-bold text-primary">{winRate}%</p><p className="text-xs text-muted-foreground mt-1">{totalTrades} {t('home.operations')}</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><div className="flex items-center justify-center gap-1.5 mb-2"><ArrowUpRight className="w-3.5 h-3.5 text-success" /><p className="text-xs text-muted-foreground uppercase tracking-wider">{t('home.winStreak')}</p></div><p className="text-3xl font-bold win-text">{winStreak}</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><div className="flex items-center justify-center gap-1.5 mb-2"><ArrowDownRight className="w-3.5 h-3.5 text-destructive" /><p className="text-xs text-muted-foreground uppercase tracking-wider">{t('home.lossStreak')}</p></div><p className="text-3xl font-bold loss-text">{lossStreak}</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{t('home.dailyGoal')}</p><p className="text-3xl font-bold text-primary">{todayProfit >= 0 ? '✓' : '—'}</p><p className="text-xs text-muted-foreground mt-1">{todayProfit >= 0 ? t('home.onTarget') : t('home.belowTarget')}</p></CardContent></Card>
       </div>
 
       {/* ═══════ REGISTRAR OPERAÇÃO ═══════ */}
       <Card className="border-border bg-card">
         <CardContent className="p-5 sm:p-6">
           <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
-            <Zap className="w-4 h-4" /> Registrar Operação
+            <Zap className="w-4 h-4" /> {t('home.registerTrade')}
           </h3>
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="relative">
@@ -608,9 +602,9 @@ const DashboardHome = () => {
           <CardContent className="p-5 sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
-                <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
+                <Activity className="w-4 h-4 text-primary" /> {t('home.bankEvolution')}
               </h3>
-              <span className="text-[10px] text-muted-foreground">Cada candle = R$30 • 1 operação</span>
+              <span className="text-[10px] text-muted-foreground">{t('home.eachCandle')}</span>
             </div>
             <div className="h-64 overflow-x-auto">
               {candleData.length > 0 ? (
@@ -681,22 +675,22 @@ const DashboardHome = () => {
               )}
             </div>
             <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: 'hsl(142, 71%, 45%)' }} /> WIN (+R$30)</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> LOSS (-R$30)</span>
-              <span className="font-mono">Nível: R${candleData.length > 0 ? candleData[candleData.length - 1].close : 0}</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: 'hsl(142, 71%, 45%)' }} /> WIN (+{isEn ? '$' : 'R$'}30)</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> LOSS (-{isEn ? '$' : 'R$'}30)</span>
+              <span className="font-mono">{t('home.level')}: {isEn ? '$' : 'R$'}{candleData.length > 0 ? candleData[candleData.length - 1].close : 0}</span>
             </div>
           </CardContent>
         </Card>
         <Card className="border-border bg-card">
           <CardContent className="p-5 sm:p-6">
-            <h3 className="font-display text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Distribuição</h3>
+            <h3 className="font-display text-sm font-bold text-foreground mb-4 uppercase tracking-wider">{t('home.distribution')}</h3>
             <div className="h-48">
               {totalTrades > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value" strokeWidth={0}>{pieData.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}</Pie><Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} /></PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Sem dados</div>
+                <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('home.noData')}</div>
               )}
             </div>
             <div className="flex justify-center gap-6 mt-2 text-xs">
@@ -711,14 +705,14 @@ const DashboardHome = () => {
       <Card className="border-border bg-card">
         <CardContent className="p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider"><Target className="w-4 h-4 text-primary" /> Consistência</h3>
+            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider"><Target className="w-4 h-4 text-primary" /> {t('home.consistency')}</h3>
             <span className={`text-xs font-bold ${consistencyColor}`}>{consistencyLevel}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-            <div className="text-center"><p className="text-2xl font-bold win-text">{positiveDays}</p><p className="text-xs text-muted-foreground">Dias Positivos</p></div>
-            <div className="text-center"><p className="text-2xl font-bold loss-text">{negativeDays}</p><p className="text-xs text-muted-foreground">Dias Negativos</p></div>
-            <div className="text-center"><p className="text-2xl font-bold text-primary">{disciplineRate}%</p><p className="text-xs text-muted-foreground">Disciplina</p></div>
-            <div className="text-center"><p className="text-2xl font-bold text-foreground">{daysTrading}</p><p className="text-xs text-muted-foreground">Dias Operando</p></div>
+            <div className="text-center"><p className="text-2xl font-bold win-text">{positiveDays}</p><p className="text-xs text-muted-foreground">{t('home.positiveDays')}</p></div>
+            <div className="text-center"><p className="text-2xl font-bold loss-text">{negativeDays}</p><p className="text-xs text-muted-foreground">{t('home.negativeDays')}</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-primary">{disciplineRate}%</p><p className="text-xs text-muted-foreground">{t('home.discipline')}</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-foreground">{daysTrading}</p><p className="text-xs text-muted-foreground">{t('home.daysTrading')}</p></div>
           </div>
           <Progress value={disciplineRate} className="h-2 mb-4" />
           <div className="h-44">
@@ -732,7 +726,7 @@ const DashboardHome = () => {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Sem dados suficientes</div>
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('home.insufficientData')}</div>
             )}
           </div>
         </CardContent>
@@ -750,7 +744,7 @@ const DashboardHome = () => {
               <p className="font-bold text-lg text-foreground" style={{ color: rank.color }}>{isEn ? rank.nameEn : rank.name}</p>
               {nextRank && (
                 <>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">Próxima: {isEn ? nextRank.nameEn : nextRank.name} {nextRank.emoji}<ChevronRight className="w-3 h-3" /> R$ {nextRank.minProfit.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">{t('home.next')}: {isEn ? nextRank.nameEn : nextRank.name} {nextRank.emoji}<ChevronRight className="w-3 h-3" /> {isEn ? '$' : 'R$'} {nextRank.minProfit.toLocaleString()}</p>
                   <Progress value={rankProgress} className="h-1.5 mt-2" />
                 </>
               )}
@@ -765,7 +759,7 @@ const DashboardHome = () => {
                   className={`group relative rounded-xl border p-3 text-center transition-all duration-200 ${unlocked ? 'border-primary/25 bg-primary/5 hover:bg-primary/10 cursor-pointer hover:scale-105 hover:shadow-lg' : 'border-border/30 bg-secondary/20 opacity-30 cursor-not-allowed'}`}>
                   <div className="text-2xl mb-1">{r.emoji}</div>
                   <p className="font-display text-[10px] font-bold leading-tight" style={unlocked ? { color: r.color } : { color: CHART_COLORS.muted }}>{isEn ? r.nameEn : r.name}</p>
-                  <p className="text-[10px] text-muted-foreground">R$ {r.minProfit.toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground">{isEn ? '$' : 'R$'} {r.minProfit.toLocaleString()}</p>
                   {unlocked && <span className="text-[9px] win-text font-bold mt-1 block">✓ Story</span>}
                   {!unlocked && <span className="text-[9px] text-muted-foreground mt-1 block">🔒</span>}
                 </button>
@@ -779,7 +773,7 @@ const DashboardHome = () => {
       <div className="space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-          <p className="text-xs font-display font-bold text-primary uppercase tracking-widest">Módulos Avançados Horus IA</p>
+          <p className="text-xs font-display font-bold text-primary uppercase tracking-widest">{t('home.advancedModules')}</p>
           <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

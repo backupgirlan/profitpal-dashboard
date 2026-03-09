@@ -17,14 +17,12 @@ import { supabase } from "@/integrations/supabase/client";
 interface LiveScore { day_of_week: number; wins: number; losses: number; }
 interface MonthlyScore { month_start: string; wins: number; losses: number; }
 
-const DAY_LABELS_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-const MONTH_LABELS_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-
 const fadeUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0 } };
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 
 /* ═══════ HORUS IA INTERACTIVE SHOWCASE ═══════ */
 const HorusIAShowcase = () => {
+  const { t } = useTranslation();
   const [activeFeature, setActiveFeature] = useState(0);
   const [typedText, setTypedText] = useState('');
   const ref = React.useRef(null);
@@ -32,29 +30,36 @@ const HorusIAShowcase = () => {
 
   const features = [
     {
-      icon: Brain, title: "Análise Comportamental",
-      desc: "IA analisa seu histórico de operações, score de disciplina e padrões emocionais para gerar insights personalizados.",
-      mockResponse: "🧠 Análise: Seus últimos 3 losses ocorreram após 15h em dias de alta volatilidade. Seu score cai 23% quando opera recuperando perdas. Recomendação: encerre operações às 14h30 em dias com mais de 2 losses.",
+      icon: Brain, title: t('landing.showcaseBehavioralTitle'),
+      desc: t('landing.showcaseBehavioralDesc'),
+      mockResponse: t('landing.showcaseBehavioralResponse'),
       color: "text-primary", bgColor: "bg-primary/10", borderColor: "border-primary/30",
     },
     {
-      icon: Eye, title: "Leitura de Print do Gráfico",
-      desc: "Envie prints do gráfico M5 ou M15 e receba análise probabilística com pontos de entrada, cenários e confiança.",
-      mockResponse: "📊 Cenário: Tendência de alta com suporte em 1.0842. Entrada sugerida: 1.0855 (rompimento). Confiança: 78%. Timeframe: M15. ⚠️ Atenção: resistência forte em 1.0890, considere parcial.",
+      icon: Eye, title: t('landing.showcaseChartTitle'),
+      desc: t('landing.showcaseChartDesc'),
+      mockResponse: t('landing.showcaseChartResponse'),
       color: "text-accent-foreground", bgColor: "bg-accent/10", borderColor: "border-accent/30",
     },
     {
-      icon: Shield, title: "Alertas de Risco Emocional",
-      desc: "Detecta automaticamente quando você está em estado emocional de risco e sugere pausas antes que o colapso aconteça.",
-      mockResponse: "🔴 ALERTA: 3 losses consecutivos detectados. Padrão de revenge trading identificado. Valor da última entrada 2x maior que o normal. Recomendação: PARE agora. Sua banca agradece amanhã.",
+      icon: Shield, title: t('landing.showcaseAlertTitle'),
+      desc: t('landing.showcaseAlertDesc'),
+      mockResponse: t('landing.showcaseAlertResponse'),
       color: "text-destructive", bgColor: "bg-destructive/10", borderColor: "border-destructive/30",
     },
     {
-      icon: Target, title: "Insights de Performance",
-      desc: "Métricas avançadas sobre seus melhores horários, pares mais lucrativos e padrões de consistência ao longo do tempo.",
-      mockResponse: "📈 Performance: Melhor horário 09h-11h (73% win rate). Par mais lucrativo: EUR/USD (+R$ 342). Dias sem operar emocional: 12. Seu score subiu 18 pontos este mês. Continue assim! 🏆",
+      icon: Target, title: t('landing.showcaseInsightTitle'),
+      desc: t('landing.showcaseInsightDesc'),
+      mockResponse: t('landing.showcaseInsightResponse'),
       color: "text-success", bgColor: "bg-success/10", borderColor: "border-success/30",
     },
+  ];
+
+  const userMessages = [
+    t('landing.showcaseUserMsg0'),
+    t('landing.showcaseUserMsg1'),
+    t('landing.showcaseUserMsg2'),
+    t('landing.showcaseUserMsg3'),
   ];
 
   useEffect(() => {
@@ -85,10 +90,10 @@ const HorusIAShowcase = () => {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={stagger} className="text-center mb-14">
           <motion.h2 variants={fadeUp} className="font-display text-2xl sm:text-4xl font-black text-foreground mb-4">
-            Veja a <span className="text-primary text-glow">Horus IA</span> em ação
+            {t('landing.seeHorusInAction', { name: 'Horus IA' })}
           </motion.h2>
           <motion.p variants={fadeUp} className="text-muted-foreground max-w-xl mx-auto">
-            Assistente de performance com inteligência artificial que analisa seu comportamento e lê gráficos em tempo real.
+            {t('landing.horusAssistantDesc')}
           </motion.p>
         </motion.div>
 
@@ -133,12 +138,7 @@ const HorusIAShowcase = () => {
                     <div className="flex items-start gap-3 mb-4">
                       <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center shrink-0"><Users className="w-3.5 h-3.5 text-muted-foreground" /></div>
                       <div className="bg-secondary/50 rounded-lg rounded-tl-none px-3 py-2">
-                        <p className="text-xs text-muted-foreground">
-                          {activeFeature === 0 && "Analise meu comportamento dos últimos 7 dias"}
-                          {activeFeature === 1 && "Leia este print do gráfico EUR/USD M15"}
-                          {activeFeature === 2 && "Como estou emocionalmente hoje?"}
-                          {activeFeature === 3 && "Quais são minhas melhores métricas?"}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{userMessages[activeFeature]}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
@@ -158,10 +158,10 @@ const HorusIAShowcase = () => {
               <div className="px-4 py-3 border-t border-border bg-secondary/20 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${features[activeFeature].color.replace('text-', 'bg-')} animate-pulse`} />
-                  <span className="text-[10px] text-muted-foreground">IA processando...</span>
+                  <span className="text-[10px] text-muted-foreground">{t('landing.iaProcessing')}</span>
                 </div>
                 <span className="text-[10px] text-muted-foreground font-display">
-                  Confiança: <span className={`font-bold ${features[activeFeature].color}`}>
+                  {t('landing.confidence')}: <span className={`font-bold ${features[activeFeature].color}`}>
                     {activeFeature === 0 ? '94%' : activeFeature === 1 ? '78%' : activeFeature === 2 ? '89%' : '91%'}
                   </span>
                 </span>
@@ -176,6 +176,9 @@ const HorusIAShowcase = () => {
 
 /* ═══════ PRICING SECTION (dynamic from horus_plan) ═══════ */
 const PricingSection = ({ onActivate }: { onActivate: () => void }) => {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  const currency = isEn ? '$' : 'R$';
   const [plan, setPlan] = useState<{ name: string; price: number; currency: string; benefits: string[]; description: string } | null>(null);
 
   useEffect(() => {
@@ -190,14 +193,12 @@ const PricingSection = ({ onActivate }: { onActivate: () => void }) => {
   }, []);
 
   const benefits = plan?.benefits || [
-    "Análise comportamental completa da conta",
-    "Leitura de prints de gráfico",
-    "Modo proteção após sequência de losses",
-    "Check-in emocional antes de operar",
-    "Diálogo inteligente com a IA",
-    "Insights automáticos da conta",
-    "Score de disciplina do trader",
-    "Acompanhamento do padrão operacional",
+    t('landing.featureBehavioral'),
+    t('landing.featureChart'),
+    t('landing.featureProtection'),
+    t('landing.featureCheckin'),
+    t('landing.featureDialog'),
+    t('landing.featureAccount'),
   ];
 
   return (
@@ -207,12 +208,12 @@ const PricingSection = ({ onActivate }: { onActivate: () => void }) => {
       </div>
       <div className="relative max-w-4xl mx-auto px-4 sm:px-8">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-12">
-          <motion.p variants={fadeUp} className="text-xs font-display uppercase tracking-[0.3em] text-primary mb-3">Plano Premium</motion.p>
+          <motion.p variants={fadeUp} className="text-xs font-display uppercase tracking-[0.3em] text-primary mb-3">{t('landing.premiumPlan')}</motion.p>
           <motion.h2 variants={fadeUp} className="font-display text-2xl sm:text-4xl font-black text-foreground mb-4">
-            Desbloqueie o poder da <span className="text-primary text-glow">Horus IA</span>
+            {t('landing.unlockHorus', { name: 'Horus IA' })}
           </motion.h2>
           <motion.p variants={fadeUp} className="text-muted-foreground max-w-lg mx-auto">
-            {plan?.description || "Uma inteligência artificial criada para acompanhar seu comportamento no trading, proteger sua banca e orientar suas decisões."}
+            {plan?.description || t('landing.horusPlanDesc')}
           </motion.p>
         </motion.div>
 
@@ -240,18 +241,18 @@ const PricingSection = ({ onActivate }: { onActivate: () => void }) => {
                 </div>
               </div>
               <div className="text-center sm:text-right shrink-0">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">A partir de</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{t('landing.startingAt')}</p>
                 <p className="text-5xl font-display font-black text-primary text-glow-strong">
-                  R$ {plan?.price?.toFixed(2).replace('.', ',') || '29,90'}
+                  {currency} {plan?.price?.toFixed(2).replace('.', ',') || '29.90'}
                 </p>
-                <p className="text-sm text-muted-foreground mb-6">/mês</p>
+                <p className="text-sm text-muted-foreground mb-6">{t('landing.perMonth')}</p>
                 <motion.button
                   onClick={onActivate}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   className="inline-flex items-center gap-3 rounded-xl px-8 py-4 font-display text-sm font-bold uppercase tracking-wider text-primary-foreground gradient-gold box-glow-strong transition-all hover:shadow-[0_0_50px_hsla(45,100%,50%,0.4)]"
                 >
-                  <Zap className="w-5 h-5" /> Ativar Horus IA agora
+                  <Zap className="w-5 h-5" /> {t('landing.activateHorusNow')}
                 </motion.button>
               </div>
             </div>
@@ -259,7 +260,7 @@ const PricingSection = ({ onActivate }: { onActivate: () => void }) => {
         </motion.div>
 
         <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="text-center mt-6 text-xs text-muted-foreground">
-          Pagamento seguro via Pix • Acesso liberado instantaneamente
+          {t('landing.securePayment')}
         </motion.p>
       </div>
     </section>
@@ -269,10 +270,14 @@ const PricingSection = ({ onActivate }: { onActivate: () => void }) => {
 /* ═══════ LANDING PAGE ═══════ */
 const Landing = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   const [scores, setScores] = useState<LiveScore[]>([]);
   const [monthlyScores, setMonthlyScores] = useState<MonthlyScore[]>([]);
   const [showPastMonths, setShowPastMonths] = useState(false);
+
+  const dayLabels = t('common.dayLabels', { returnObjects: true }) as string[];
+  const monthLabels = t('common.monthLabels', { returnObjects: true }) as string[];
 
   useEffect(() => {
     const getMonday = () => {
@@ -288,20 +293,20 @@ const Landing = () => {
   }, []);
 
   const horusFeatures = [
-    { icon: Brain, title: "Análise Comportamental da Conta", desc: "A Horus IA analisa todos os dados da sua conta e identifica padrões de erro, impulsividade e quebra de disciplina." },
-    { icon: Eye, title: "Leitura de Print do Gráfico", desc: "Envie um print do gráfico e receba uma leitura objetiva de cenário com probabilidade e sugestão de direção." },
-    { icon: Shield, title: "Modo Proteção do Trader", desc: "Se detectar risco emocional ou sequência de perdas, a Horus IA ativa um modo de proteção e orienta você a parar." },
-    { icon: BarChart3, title: "Análise Completa da Conta", desc: "Com apenas um clique, a IA analisa sua evolução, detecta padrões comportamentais e sugere melhorias." },
-    { icon: MessageSquare, title: "Diálogo do Trader", desc: "Converse com a Horus IA sobre emocional, disciplina, gerenciamento e comportamento no mercado financeiro." },
-    { icon: Compass, title: "Check-in Inteligente", desc: "Antes de operar, a IA avalia seu estado mental e identifica se é um bom momento para entrar no mercado." },
+    { icon: Brain, title: t('landing.featureBehavioral'), desc: t('landing.featureBehavioralDesc') },
+    { icon: Eye, title: t('landing.featureChart'), desc: t('landing.featureChartDesc') },
+    { icon: Shield, title: t('landing.featureProtection'), desc: t('landing.featureProtectionDesc') },
+    { icon: BarChart3, title: t('landing.featureAccount'), desc: t('landing.featureAccountDesc') },
+    { icon: MessageSquare, title: t('landing.featureDialog'), desc: t('landing.featureDialogDesc') },
+    { icon: Compass, title: t('landing.featureCheckin'), desc: t('landing.featureCheckinDesc') },
   ];
 
   const protectionPoints = [
-    "Sequência de losses consecutivos",
-    "Tentativa de recuperação emocional",
-    "Overtrading — excesso de operações",
-    "Operações fora do horário ideal",
-    "Padrões de impulsividade detectados",
+    t('landing.protectionPoint1'),
+    t('landing.protectionPoint2'),
+    t('landing.protectionPoint3'),
+    t('landing.protectionPoint4'),
+    t('landing.protectionPoint5'),
   ];
 
   const weekWins = scores.reduce((a, s) => a + s.wins, 0);
@@ -317,12 +322,12 @@ const Landing = () => {
       {/* NAVBAR */}
       <nav className="sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border/50 safe-area-top">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-8 py-3">
-          <span className="font-display text-sm sm:text-lg font-bold text-primary text-glow tracking-wider">TECHNICAL GIRLAN</span>
+          <span className="font-display text-sm sm:text-lg font-bold text-primary text-glow tracking-wider">{t('nav.brand')}</span>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <LanguageSwitcher />
             <button onClick={() => navigate("/login")} className="flex items-center gap-2 rounded-lg px-4 py-2 font-display text-xs font-bold uppercase tracking-wider text-primary-foreground gradient-gold box-glow transition-all hover:scale-105">
-              <LogIn className="h-4 w-4" /> Entrar
+              <LogIn className="h-4 w-4" /> {t('nav.enter')}
             </button>
           </div>
         </div>
@@ -341,33 +346,33 @@ const Landing = () => {
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.div variants={fadeUp} transition={{ duration: 0.6 }} className="mb-4">
               <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs font-display uppercase tracking-widest text-primary">
-                <Brain className="w-3 h-3" /> Inteligência Artificial para Traders
+                <Brain className="w-3 h-3" /> {t('landing.aiForTraders')}
               </span>
             </motion.div>
 
             <motion.h1 variants={fadeUp} transition={{ duration: 0.6, delay: 0.1 }} className="font-display text-3xl sm:text-5xl lg:text-6xl font-black text-foreground leading-tight mb-6">
-              <span className="text-primary text-glow-strong">Horus IA</span> — A inteligência
-              <br />que protege e evolui o trader
+              <span className="text-primary text-glow-strong">{t('landing.heroTitle1')}</span>{t('landing.heroTitle2')}
+              <br />{t('landing.heroTitle3')}
             </motion.h1>
 
             <motion.p variants={fadeUp} transition={{ duration: 0.6, delay: 0.2 }} className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed">
-              Uma inteligência artificial criada para analisar seu comportamento, proteger sua banca e orientar suas decisões no mercado financeiro.
+              {t('landing.heroDesc')}
             </motion.p>
 
             <motion.p variants={fadeUp} transition={{ duration: 0.6, delay: 0.25 }} className="text-sm text-primary/80 font-display italic max-w-lg mx-auto mb-10">
-              "A maioria dos traders perde por comportamento. A Horus IA observa exatamente isso."
+              {t('landing.heroQuote')}
             </motion.p>
 
             <motion.div variants={fadeUp} transition={{ duration: 0.6, delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button onClick={() => navigate("/register")} className="group flex items-center gap-3 rounded-xl px-8 py-4 font-display text-sm sm:text-base font-bold uppercase tracking-wider text-primary-foreground gradient-gold box-glow-strong transition-all hover:scale-105 hover:shadow-[0_0_50px_hsla(45,100%,50%,0.4)]">
-                <Sparkles className="w-5 h-5" /> Experimentar Horus IA
+                <Sparkles className="w-5 h-5" /> {t('landing.tryHorus')}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
               <button onClick={() => {
                 const el = document.getElementById('pricing-section');
                 el?.scrollIntoView({ behavior: 'smooth' });
               }} className="flex items-center gap-3 rounded-xl px-8 py-4 font-display text-sm sm:text-base font-bold uppercase tracking-wider text-foreground border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all hover:scale-105">
-                <Award className="w-5 h-5 text-primary" /> Tornar-se Super VIP
+                <Award className="w-5 h-5 text-primary" /> {t('landing.becomeSuperVip')}
               </button>
             </motion.div>
           </motion.div>
@@ -375,7 +380,7 @@ const Landing = () => {
           {/* Scroll indicator */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2, duration: 0.8 }} className="mt-14 flex flex-col items-center gap-2 cursor-pointer"
             onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
-            <span className="text-[10px] font-display uppercase tracking-[0.3em] text-muted-foreground">Descubra mais</span>
+            <span className="text-[10px] font-display uppercase tracking-[0.3em] text-muted-foreground">{t('landing.discoverMore')}</span>
             <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}>
               <ChevronDown className="w-6 h-6 text-primary" />
             </motion.div>
@@ -387,12 +392,12 @@ const Landing = () => {
       <section className="py-20 sm:py-28 bg-card/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-8">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={stagger} className="text-center mb-14">
-            <motion.p variants={fadeUp} className="text-xs font-display uppercase tracking-[0.3em] text-primary mb-3">Funcionalidades</motion.p>
+            <motion.p variants={fadeUp} className="text-xs font-display uppercase tracking-[0.3em] text-primary mb-3">{t('landing.features')}</motion.p>
             <motion.h2 variants={fadeUp} className="font-display text-2xl sm:text-4xl font-black text-foreground mb-4">
-              O que a <span className="text-primary text-glow">Horus IA</span> faz por você
+              {t('landing.whatHorusDoes', { name: 'Horus IA' })}
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground max-w-xl mx-auto">
-              Seis módulos inteligentes que transformam a forma como você opera.
+              {t('landing.sixModules')}
             </motion.p>
           </motion.div>
 
@@ -416,13 +421,13 @@ const Landing = () => {
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={stagger}>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
-                <motion.p variants={fadeUp} className="text-xs font-display uppercase tracking-[0.3em] text-destructive mb-3">Proteção Inteligente</motion.p>
+                <motion.p variants={fadeUp} className="text-xs font-display uppercase tracking-[0.3em] text-destructive mb-3">{t('landing.smartProtection')}</motion.p>
                 <motion.h2 variants={fadeUp} className="font-display text-2xl sm:text-3xl font-black text-foreground mb-6">
-                  A maioria perde por comportamento.<br />
-                  <span className="text-primary text-glow">A Horus IA observa isso.</span>
+                  {t('landing.mostLoseBehavior')}<br />
+                  <span className="text-primary text-glow">{t('landing.horusObserves')}</span>
                 </motion.h2>
                 <motion.p variants={fadeUp} className="text-muted-foreground mb-8 leading-relaxed">
-                  A IA monitora continuamente sua conta e intervém automaticamente quando detecta padrões de risco:
+                  {t('landing.aiMonitors')}
                 </motion.p>
                 <motion.div variants={stagger} className="space-y-3">
                   {protectionPoints.map((p, i) => (
@@ -439,30 +444,30 @@ const Landing = () => {
                 <div className="bg-card border border-destructive/20 rounded-2xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <Shield className="w-5 h-5 text-destructive" />
-                    <span className="font-display text-xs font-bold text-destructive uppercase tracking-wider">Modo Proteção Ativado</span>
+                    <span className="font-display text-xs font-bold text-destructive uppercase tracking-wider">{t('landing.protectionActivated')}</span>
                   </div>
                   <p className="text-sm text-foreground leading-relaxed">
-                    "Duas perdas consecutivas detectadas.<br />
-                    Seu risco de impulsividade aumentou.<br />
-                    A melhor decisão agora pode ser encerrar o dia."
+                    "{t('landing.protectionMsg1')}<br />
+                    {t('landing.protectionMsg2')}<br />
+                    {t('landing.protectionMsg3')}"
                   </p>
                 </div>
                 <div className="bg-card border border-primary/20 rounded-2xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <Target className="w-5 h-5 text-primary" />
-                    <span className="font-display text-xs font-bold text-primary uppercase tracking-wider">Insight da IA</span>
+                    <span className="font-display text-xs font-bold text-primary uppercase tracking-wider">{t('landing.iaInsight')}</span>
                   </div>
                   <p className="text-sm text-foreground leading-relaxed">
-                    "Seu padrão mostra que você opera melhor entre 19h e 21h. Fora desse horário, seu win rate cai 34%."
+                    "{t('landing.iaInsightMsg')}"
                   </p>
                 </div>
                 <div className="bg-card border border-success/20 rounded-2xl p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <Brain className="w-5 h-5 text-success" />
-                    <span className="font-display text-xs font-bold text-success uppercase tracking-wider">Análise Comportamental</span>
+                    <span className="font-display text-xs font-bold text-success uppercase tracking-wider">{t('landing.behavioralAnalysis')}</span>
                   </div>
                   <p className="text-sm text-foreground leading-relaxed">
-                    "Seu comportamento após o loss vale mais do que sua análise antes da entrada. Disciplina não é entrar bem — é saber parar."
+                    "{t('landing.behavioralMsg')}"
                   </p>
                 </div>
               </motion.div>
@@ -485,12 +490,12 @@ const Landing = () => {
             <motion.div variants={fadeUp} className="mb-3">
               <span className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-destructive/5 px-3 py-1 text-[10px] font-display uppercase tracking-widest text-destructive">
                 <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-destructive" /></span>
-                Ao vivo
+                {t('landing.live')}
               </span>
             </motion.div>
-            <motion.p variants={fadeUp} className="text-[10px] font-display uppercase tracking-[0.3em] text-primary mb-2">Comunidade</motion.p>
+            <motion.p variants={fadeUp} className="text-[10px] font-display uppercase tracking-[0.3em] text-primary mb-2">{t('landing.community')}</motion.p>
             <motion.h2 variants={fadeUp} className="font-display text-xl sm:text-3xl font-black text-foreground mb-3">
-              Traders disciplinados operando <span className="text-primary text-glow">juntos</span>
+              {t('landing.tradersTogetherTitle', { highlight: '' })} <span className="text-primary text-glow">{t('landing.tradersTogetherHighlight')}</span>
             </motion.h2>
           </motion.div>
 
@@ -500,7 +505,7 @@ const Landing = () => {
               <div className="px-5 py-3 bg-gradient-to-r from-destructive/10 to-transparent border-b border-border/50">
                 <div className="flex items-center gap-3">
                   <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive opacity-75" /><span className="relative inline-flex rounded-full h-3 w-3 bg-destructive" /></span>
-                  <h3 className="font-display text-base font-bold text-foreground">Lives Diárias</h3>
+                  <h3 className="font-display text-base font-bold text-foreground">{t('landing.dailyLives')}</h3>
                 </div>
               </div>
               <div className="p-6">
@@ -509,11 +514,11 @@ const Landing = () => {
                     <Youtube className="w-7 h-7 text-destructive" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground">Seg a Sex</p>
-                    <p className="text-2xl font-display font-black text-primary">20h</p>
+                    <p className="text-sm font-bold text-foreground">{t('landing.monToFri')}</p>
+                    <p className="text-2xl font-display font-black text-primary">{isEn ? '8pm' : '20h'}</p>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mb-4 leading-relaxed">Operações ao vivo com análise técnica, gerenciamento e disciplina em tempo real.</p>
+                <p className="text-xs text-muted-foreground mb-4 leading-relaxed">{t('landing.liveOpsDesc')}</p>
                 <div className="flex gap-3">
                   <a href="https://www.youtube.com/@TechnicalGirlan" target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-display font-bold text-destructive hover:bg-destructive/20 transition-all">
                     <Youtube className="h-5 w-5" /> YouTube
@@ -529,7 +534,7 @@ const Landing = () => {
             <motion.div variants={fadeUp} className="bg-card border border-border rounded-2xl overflow-hidden">
               <div className="px-5 py-3 bg-gradient-to-r from-primary/10 to-transparent border-b border-border/50">
                 <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-primary" /> Placar Semanal
+                  <BarChart3 className="w-4 h-4 text-primary" /> {t('landing.weeklyScoreboard')}
                 </h3>
               </div>
               <div className="p-6">
@@ -553,7 +558,7 @@ const Landing = () => {
                     const winPct = total > 0 ? (w / total) * 100 : 50;
                     return (
                       <div key={dayIdx} className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30">
-                        <span className="text-xs text-muted-foreground font-display font-bold w-8">{DAY_LABELS_PT[dayIdx]}</span>
+                        <span className="text-xs text-muted-foreground font-display font-bold w-8">{dayLabels[dayIdx]}</span>
                         <div className="flex-1 h-2 rounded-full bg-border/30 overflow-hidden">
                           <div className="h-full rounded-full bg-gradient-to-r from-success to-success/60" style={{ width: `${winPct}%` }} />
                         </div>
@@ -573,13 +578,13 @@ const Landing = () => {
             <motion.div variants={fadeUp} className="bg-card border border-border rounded-2xl overflow-hidden">
               <div className="px-5 py-3 bg-gradient-to-r from-primary/10 to-transparent border-b border-border/50">
                 <h3 className="font-display text-base font-bold text-foreground flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" /> Resultado Mensal
+                  <Calendar className="w-4 h-4 text-primary" /> {t('landing.monthlyResult')}
                 </h3>
               </div>
               <div className="p-6">
                 <div className="text-center mb-4">
                   <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-display uppercase tracking-widest text-primary">
-                    {MONTH_LABELS_PT[new Date().getMonth()]} {new Date().getFullYear()}
+                    {monthLabels[new Date().getMonth()]} {new Date().getFullYear()}
                   </span>
                 </div>
                 <div className="flex items-center gap-4 mb-2">
@@ -607,7 +612,7 @@ const Landing = () => {
                   <div className="border-t border-border/30 pt-3">
                     <button onClick={() => setShowPastMonths(!showPastMonths)} className="w-full flex items-center justify-center gap-2 text-xs font-display text-primary hover:text-primary/80 transition-colors py-1.5">
                       {showPastMonths ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      {showPastMonths ? 'Ocultar' : 'Ver meses anteriores'}
+                      {showPastMonths ? t('landing.hide') : t('landing.viewPastMonths')}
                     </button>
                     <AnimatePresence>
                       {showPastMonths && (
@@ -619,7 +624,7 @@ const Landing = () => {
                               const mWinPct = mTotal > 0 ? (m.wins / mTotal) * 100 : 0;
                               return (
                                 <div key={m.month_start} className="flex items-center gap-3 p-2.5 rounded-lg bg-secondary/30">
-                                  <span className="text-xs text-muted-foreground font-display w-20 truncate">{MONTH_LABELS_PT[d.getMonth()].slice(0, 3)} {d.getFullYear()}</span>
+                                  <span className="text-xs text-muted-foreground font-display w-20 truncate">{monthLabels[d.getMonth()].slice(0, 3)} {d.getFullYear()}</span>
                                   <div className="flex-1 h-1.5 rounded-full bg-border/30 overflow-hidden">
                                     <div className="h-full rounded-full bg-gradient-to-r from-success to-success/60" style={{ width: `${mWinPct}%` }} />
                                   </div>
@@ -656,19 +661,19 @@ const Landing = () => {
         <div className="relative max-w-3xl mx-auto px-4 sm:px-8 text-center">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
             <motion.p variants={fadeUp} className="text-sm text-primary font-display italic mb-6">
-              "O mercado mostra o preço. A Horus IA mostra seus padrões."
+              {t('landing.finalQuote')}
             </motion.p>
             <motion.h2 variants={fadeUp} className="font-display text-2xl sm:text-4xl lg:text-5xl font-black text-foreground leading-tight mb-6">
-              Sua banca não quebra por estratégia.
+              {t('landing.finalTitle1')}
               <br />
-              <span className="text-primary text-glow-strong">Ela quebra quando o emocional assume o controle.</span>
+              <span className="text-primary text-glow-strong">{t('landing.finalTitle2')}</span>
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground text-base sm:text-lg mb-10 max-w-xl mx-auto">
-              Junte-se à comunidade de traders que escolheram proteger sua banca com inteligência artificial.
+              {t('landing.finalDesc')}
             </motion.p>
             <motion.div variants={fadeUp}>
               <button onClick={() => navigate("/register")} className="group inline-flex items-center gap-3 rounded-xl px-10 py-5 font-display text-sm sm:text-lg font-bold uppercase tracking-wider text-primary-foreground gradient-gold box-glow-strong transition-all hover:scale-105 hover:shadow-[0_0_60px_hsla(45,100%,50%,0.5)]">
-                🟡 Criar Conta Gratuitamente
+                {t('landing.createAccountFree')}
                 <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
               </button>
             </motion.div>
@@ -679,8 +684,8 @@ const Landing = () => {
       {/* FOOTER */}
       <footer className="border-t border-border py-8 bg-card/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-display text-xs font-bold text-primary tracking-wider">TECHNICAL GIRLAN</span>
-          <p className="text-xs text-muted-foreground">Plataforma de disciplina e gestão de banca para traders • Powered by Horus IA</p>
+          <span className="font-display text-xs font-bold text-primary tracking-wider">{t('nav.brand')}</span>
+          <p className="text-xs text-muted-foreground">{t('landing.footerDesc')}</p>
           <div className="flex items-center gap-4">
             <a href="https://www.youtube.com/@TechnicalGirlan" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-destructive transition-colors"><Youtube className="w-5 h-5" /></a>
             <a href="https://t.me/girlananalyst" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-ring transition-colors"><Send className="w-5 h-5" /></a>

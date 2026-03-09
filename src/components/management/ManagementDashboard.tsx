@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,10 @@ interface Props {
 }
 
 export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: Props) {
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  const currency = isEn ? '$' : 'R$';
+
   const mgmt = useManagement2x();
   const { state } = mgmt;
   const { user } = useAuth();
@@ -94,21 +99,21 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
 
   const handleIniciar = (model: ManagementModel) => {
     if (profileBalance <= 0) {
-      toast({ title: 'Banca insuficiente', description: 'Faça um depósito primeiro.', variant: 'destructive' });
+      toast({ title: t('management.insufficientBank'), description: t('management.depositFirst'), variant: 'destructive' });
       return;
     }
     const pct = Number(setupPercentual) || 5;
     mgmt.iniciar({ model, banca: profileBalance, percentual: pct });
     const entrada = +(profileBalance * (pct / 100)).toFixed(2);
     setAmountInput(String(entrada));
-    toast({ title: `Gerenciamento ${model.toUpperCase()} ativado!`, description: `Entrada recomendada: R$ ${entrada.toFixed(2)}` });
+    toast({ title: t('management.activated', { model: model.toUpperCase() }), description: t('management.entryRecommended', { value: entrada.toFixed(2) }) });
   };
 
   const handleRegistrar = async (result: 'win' | 'loss') => {
     if (!pair.trim() || !amountInput || !user) return;
     const amt = Number(amountInput);
     if (amt <= 0) {
-      toast({ title: 'Valor inválido', variant: 'destructive' });
+      toast({ title: t('management.invalidValue'), variant: 'destructive' });
       return;
     }
     setSubmitting(true);
@@ -163,8 +168,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     }
 
     toast({
-      title: result === 'win' ? '✅ Win registrado!' : '❌ Loss registrado!',
-      description: `${pair.trim().toUpperCase()} — ${payout}% | R$ ${profit.toFixed(2)}`,
+      title: result === 'win' ? t('management.winRegistered') : t('management.lossRegistered'),
+      description: `${pair.trim().toUpperCase()} — ${payout}% | ${currency} ${profit.toFixed(2)}`,
     });
 
     setPair('');
@@ -192,7 +197,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     setPair('');
     setObservation('');
     setAmountInput('');
-    toast({ title: 'Novo ciclo iniciado!' });
+    toast({ title: t('management.newCycleStarted') });
   };
 
   const handleSair = async () => {
@@ -200,7 +205,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
     if (user) {
       await supabase.from('profiles').update({ active_management_mode: null }).eq('user_id', user.id);
     }
-    toast({ title: 'Gerenciamento desativado' });
+    toast({ title: t('management.deactivated') });
   };
 
   // ============ RENDER ============
@@ -211,8 +216,8 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       <div className={`space-y-6 ${fullscreen ? 'p-6' : ''}`}>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-display font-bold text-primary text-glow">Gerenciamento de Banca</h2>
-            <p className="text-xs text-muted-foreground">Escolha um modelo e opere com disciplina.</p>
+            <h2 className="text-xl font-display font-bold text-primary text-glow">{t('management.title')}</h2>
+            <p className="text-xs text-muted-foreground">{t('management.subtitle')}</p>
           </div>
           {onToggleFullscreen && (
             <Button variant="outline" size="sm" onClick={onToggleFullscreen} className="border-border gap-1">
@@ -226,11 +231,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-muted-foreground">Sua banca atual</p>
-                <p className="text-2xl font-display font-bold text-foreground">R$ {profileBalance.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">{t('management.currentBank')}</p>
+                <p className="text-2xl font-display font-bold text-foreground">{currency} {profileBalance.toFixed(2)}</p>
               </div>
               <div>
-                <Label className="text-xs">Percentual por operação (%)</Label>
+                <Label className="text-xs">{t('management.percentPerOp')}</Label>
                 <Input
                   type="number"
                   value={setupPercentual}
@@ -242,7 +247,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Entrada recomendada: <span className="text-primary font-bold">R$ {(profileBalance * (Number(setupPercentual) || 5) / 100).toFixed(2)}</span>
+              {t('management.recommendedEntry')}: <span className="text-primary font-bold">{currency} {(profileBalance * (Number(setupPercentual) || 5) / 100).toFixed(2)}</span>
             </p>
           </CardContent>
         </Card>
@@ -257,24 +262,24 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
                   <Shield className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-lg text-foreground">Gerenciamento 2x0</h3>
-                  <p className="text-xs text-muted-foreground">Conservador — Alta assertividade</p>
+                  <h3 className="font-display font-bold text-lg text-foreground">{t('management.model2x0')}</h3>
+                  <p className="text-xs text-muted-foreground">{t('management.model2x0Desc')}</p>
                 </div>
               </div>
               <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-3.5 h-3.5 text-success" />
-                  <span>Meta: <strong className="text-foreground">2 Wins</strong></span>
+                  <span>{t('management.goal')}: <strong className="text-foreground">2 Wins</strong></span>
                 </div>
                 <div className="flex items-center gap-2">
                   <XCircle className="w-3.5 h-3.5 text-destructive" />
-                  <span>Tolerância: <strong className="text-foreground">0 Loss</strong></span>
+                  <span>{t('management.tolerance')}: <strong className="text-foreground">0 Loss</strong></span>
                 </div>
-                <p className="text-muted-foreground italic">Se houver 1 loss, o ciclo termina.</p>
+                <p className="text-muted-foreground italic">{t('management.loss2x0Rule')}</p>
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => handleIniciar('2x0')} className="flex-1 gradient-gold text-primary-foreground font-display gap-2">
-                  <Play className="w-4 h-4" /> Iniciar 2x0
+                  <Play className="w-4 h-4" /> {t('management.start2x0')}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => { setInfoModel('2x0'); setShowInfo(true); }}>
                   <Info className="w-4 h-4" />
@@ -291,24 +296,24 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
                   <Zap className="w-6 h-6 text-accent-foreground" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-lg text-foreground">Gerenciamento 2x1</h3>
-                  <p className="text-xs text-muted-foreground">Equilibrado — Flexibilidade controlada</p>
+                  <h3 className="font-display font-bold text-lg text-foreground">{t('management.model2x1')}</h3>
+                  <p className="text-xs text-muted-foreground">{t('management.model2x1Desc')}</p>
                 </div>
               </div>
               <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="w-3.5 h-3.5 text-success" />
-                  <span>Meta: <strong className="text-foreground">2 Wins</strong></span>
+                  <span>{t('management.goal')}: <strong className="text-foreground">2 Wins</strong></span>
                 </div>
                 <div className="flex items-center gap-2">
                   <XCircle className="w-3.5 h-3.5 text-destructive" />
-                  <span>Tolerância: <strong className="text-foreground">1 Loss</strong></span>
+                  <span>{t('management.tolerance')}: <strong className="text-foreground">1 Loss</strong></span>
                 </div>
-                <p className="text-muted-foreground italic">Este gerenciamento permite até 1 loss durante o ciclo.</p>
+                <p className="text-muted-foreground italic">{t('management.loss2x1Rule')}</p>
               </div>
               <div className="flex gap-2">
                 <Button onClick={() => handleIniciar('2x1')} className="flex-1 gradient-gold text-primary-foreground font-display gap-2">
-                  <Play className="w-4 h-4" /> Iniciar 2x1
+                  <Play className="w-4 h-4" /> {t('management.start2x1')}
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => { setInfoModel('2x1'); setShowInfo(true); }}>
                   <Info className="w-4 h-4" />
@@ -323,7 +328,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           <Card className="border-border">
             <CardContent className="p-4">
               <h3 className="font-display text-sm font-bold text-foreground mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary" /> Histórico de Ciclos
+                <Clock className="w-4 h-4 text-primary" /> {t('management.cycleHistory')}
               </h3>
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {state.historicoCiclos.map((c, i) => (
@@ -336,9 +341,9 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={c.lucroTotal >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
-                        R$ {c.lucroTotal.toFixed(2)}
+                        {currency} {c.lucroTotal.toFixed(2)}
                       </span>
-                      <span className="text-muted-foreground">{new Date(c.timestamp).toLocaleDateString('pt-BR')}</span>
+                      <span className="text-muted-foreground">{new Date(c.timestamp).toLocaleDateString(isEn ? 'en-US' : 'pt-BR')}</span>
                     </div>
                   </div>
                 ))}
@@ -352,15 +357,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           <DialogContent className="bg-card border-border max-w-md">
             <DialogHeader>
               <DialogTitle className="font-display text-primary">
-                {infoModel === '2x0' ? 'Como usar o Gerenciamento 2x0' : 'Como usar o Gerenciamento 2x1'}
+                {infoModel === '2x0' ? t('management.info2x0Title') : t('management.info2x1Title')}
               </DialogTitle>
             </DialogHeader>
             <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
-              {infoModel === '2x0' ? (
-                <p>Este modelo foi criado para quem busca mais controle e disciplina nas operações. No gerenciamento 2x0, o objetivo é conquistar 2 operações vencedoras sem aceitar loss dentro do ciclo. Se ocorrer 1 loss antes da meta, o ciclo é encerrado. Informe sua banca, confira o valor recomendado por operação e registre cada entrada com atenção. Esse modelo é ideal para quem prefere uma abordagem mais conservadora e focada em assertividade.</p>
-              ) : (
-                <p>Este modelo foi desenvolvido para quem deseja mais flexibilidade sem perder o controle da banca. No gerenciamento 2x1, o objetivo é alcançar 2 wins, aceitando no máximo 1 loss durante o ciclo. Caso aconteça um segundo loss, o ciclo será encerrado. Informe sua banca, utilize o valor recomendado por operação e registre cada entrada corretamente. Esse modelo é indicado para quem busca equilíbrio entre segurança e tolerância operacional.</p>
-              )}
+              <p>{infoModel === '2x0' ? t('management.info2x0Desc') : t('management.info2x1Desc')}</p>
             </div>
           </DialogContent>
         </Dialog>
@@ -375,10 +376,10 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
   const isEnded = state.cicloStatus !== 'active';
 
   const statusMessage = state.cicloStatus === 'won'
-    ? '🎯 Ciclo concluído com sucesso!'
+    ? t('management.cycleCompleted')
     : state.cicloStatus === 'lost'
-    ? '🚫 Ciclo encerrado por loss'
-    : '⏳ Ciclo em andamento';
+    ? t('management.cycleLost')
+    : t('management.cycleInProgress');
 
   const statusColor = state.cicloStatus === 'won'
     ? 'text-success'
@@ -391,10 +392,10 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-display font-bold text-primary text-glow">Gerenciamento de Banca</h2>
+          <h2 className="text-xl font-display font-bold text-primary text-glow">{t('management.title')}</h2>
           <div className="flex items-center gap-2 mt-1">
             <Badge className="gradient-gold text-primary-foreground font-display text-xs">
-              Ativo: {state.model?.toUpperCase()}
+              {t('management.active')}: {state.model?.toUpperCase()}
             </Badge>
             <span className={`text-xs font-bold ${statusColor}`}>{statusMessage}</span>
           </div>
@@ -412,19 +413,19 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="border-border">
           <CardContent className="p-3 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Banca</p>
-            <p className="text-lg font-display font-bold text-foreground">R$ {state.banca.toFixed(2)}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('management.bank')}</p>
+            <p className="text-lg font-display font-bold text-foreground">{currency} {state.banca.toFixed(2)}</p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="p-3 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Entrada</p>
-            <p className="text-lg font-display font-bold text-primary">R$ {mgmt.getEntradaAtual().toFixed(2)}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('management.entry')}</p>
+            <p className="text-lg font-display font-bold text-primary">{currency} {mgmt.getEntradaAtual().toFixed(2)}</p>
           </CardContent>
         </Card>
         <Card className="border-border">
           <CardContent className="p-3 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Placar</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('management.scoreboard')}</p>
             <p className="text-lg font-display font-bold">
               <span className="text-success">{state.cicloWins}</span>
               <span className="text-muted-foreground"> x </span>
@@ -434,9 +435,9 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         </Card>
         <Card className="border-border">
           <CardContent className="p-3 text-center">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Lucro Ciclo</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('management.cycleProfit')}</p>
             <p className={`text-lg font-display font-bold ${state.cicloLucro >= 0 ? 'text-success' : 'text-destructive'}`}>
-              R$ {state.cicloLucro.toFixed(2)}
+              {currency} {state.cicloLucro.toFixed(2)}
             </p>
           </CardContent>
         </Card>
@@ -446,7 +447,7 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       <Card className="border-border">
         <CardContent className="p-4 space-y-3">
           <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
-            <Target className="w-4 h-4 text-primary" /> Progresso do Ciclo
+            <Target className="w-4 h-4 text-primary" /> {t('management.cycleProgress')}
           </h3>
           <div>
             <div className="flex items-center justify-between text-xs mb-1">
@@ -457,15 +458,13 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
           </div>
           <div>
             <div className="flex items-center justify-between text-xs mb-1">
-              <span className="text-destructive font-medium">Losses: {state.cicloLosses}/{maxLosses} permitido</span>
+              <span className="text-destructive font-medium">Losses: {state.cicloLosses}/{maxLosses} {t('management.allowed')}</span>
               <span className="text-destructive font-bold">{lossProgress.toFixed(0)}%</span>
             </div>
             <Progress value={lossProgress} className="h-3 [&>div]:bg-destructive" />
           </div>
           <p className="text-xs text-muted-foreground italic">
-            {state.model === '2x0'
-              ? 'Se houver 1 loss, o ciclo termina.'
-              : 'Este gerenciamento permite até 1 loss durante o ciclo.'}
+            {state.model === '2x0' ? t('management.loss2x0Rule') : t('management.loss2x1Rule')}
           </p>
         </CardContent>
       </Card>
@@ -475,12 +474,12 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         <Card className="border-primary/30">
           <CardContent className="p-4 space-y-3">
             <h3 className="font-display text-sm font-bold text-primary flex items-center gap-2">
-              Registrar Operação
-              <FieldHelp text="Registre cada operação do ciclo. O valor recomendado é calculado automaticamente mas pode ser alterado." />
+              {t('management.registerOp')}
+              <FieldHelp text={t('management.registerOpHelp')} />
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <div className="relative">
-                <Label className="text-xs">Par</Label>
+                <Label className="text-xs">{t('management.pairLabel')}</Label>
                 <Input
                   value={pair}
                   onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
@@ -506,17 +505,17 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
                 )}
               </div>
               <div>
-                <Label className="text-xs">Payout (%)</Label>
+                <Label className="text-xs">{t('management.payoutLabel')}</Label>
                 <Input type="number" value={payoutInput} onChange={e => setPayoutInput(e.target.value)} className="bg-secondary" />
               </div>
               <div>
-                <Label className="text-xs">Valor da operação (R$)</Label>
+                <Label className="text-xs">{t('management.opValue')}</Label>
                 <Input type="number" value={amountInput} onChange={e => setAmountInput(e.target.value)} className="bg-secondary" />
-                <p className="text-[10px] text-muted-foreground mt-0.5">Recomendado: R$ {state.entradaRecomendada.toFixed(2)}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{t('management.recommended')}: {currency} {state.entradaRecomendada.toFixed(2)}</p>
               </div>
               <div>
-                <Label className="text-xs">Observação (opcional)</Label>
-                <Input value={observation} onChange={e => setObservation(e.target.value)} placeholder="ex: tendência alta" className="bg-secondary" />
+                <Label className="text-xs">{t('management.observationLabel')}</Label>
+                <Input value={observation} onChange={e => setObservation(e.target.value)} placeholder={t('management.observationPlaceholder')} className="bg-secondary" />
               </div>
             </div>
             <div className="flex gap-3">
@@ -543,19 +542,19 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       {state.cicloTrades.length > 0 && (
         <Card className="border-border">
           <CardContent className="p-4">
-            <h3 className="font-display text-sm font-bold text-foreground mb-3">Operações do Ciclo</h3>
+            <h3 className="font-display text-sm font-bold text-foreground mb-3">{t('management.cycleTrades')}</h3>
             <div className="space-y-2">
-              {state.cicloTrades.map((t) => (
-                <div key={t.id} className={`flex items-center justify-between p-2 rounded-lg text-xs ${t.result === 'win' ? 'bg-success/10' : 'bg-destructive/10'}`}>
+              {state.cicloTrades.map((tr) => (
+                <div key={tr.id} className={`flex items-center justify-between p-2 rounded-lg text-xs ${tr.result === 'win' ? 'bg-success/10' : 'bg-destructive/10'}`}>
                   <div className="flex items-center gap-2">
-                    {t.result === 'win' ? <CheckCircle className="w-3.5 h-3.5 text-success" /> : <XCircle className="w-3.5 h-3.5 text-destructive" />}
-                    <span className="font-medium text-foreground">{t.pair}</span>
-                    <span className="text-muted-foreground">{t.payout}%</span>
+                    {tr.result === 'win' ? <CheckCircle className="w-3.5 h-3.5 text-success" /> : <XCircle className="w-3.5 h-3.5 text-destructive" />}
+                    <span className="font-medium text-foreground">{tr.pair}</span>
+                    <span className="text-muted-foreground">{tr.payout}%</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">R$ {t.amount.toFixed(2)}</span>
-                    <span className={t.profit >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
-                      {t.profit >= 0 ? '+' : ''}R$ {t.profit.toFixed(2)}
+                    <span className="text-muted-foreground">{currency} {tr.amount.toFixed(2)}</span>
+                    <span className={tr.profit >= 0 ? 'text-success font-bold' : 'text-destructive font-bold'}>
+                      {tr.profit >= 0 ? '+' : ''}{currency} {tr.profit.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -569,14 +568,14 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
       <div className="flex gap-2">
         {isEnded && (
           <Button onClick={handleNovoCiclo} className="flex-1 gradient-gold text-primary-foreground font-display gap-2">
-            <RotateCcw className="w-4 h-4" /> Novo Ciclo
+            <RotateCcw className="w-4 h-4" /> {t('management.newCycle')}
           </Button>
         )}
         <Button variant="outline" onClick={() => { setInfoModel(state.model === '2x0' ? '2x1' : '2x0'); mgmt.trocar(); }} className="gap-2">
-          <ArrowLeftRight className="w-4 h-4" /> Trocar
+          <ArrowLeftRight className="w-4 h-4" /> {t('management.switch')}
         </Button>
         <Button variant="destructive" onClick={handleSair} className="gap-2">
-          <LogOut className="w-4 h-4" /> Sair
+          <LogOut className="w-4 h-4" /> {t('management.exit')}
         </Button>
       </div>
 
@@ -585,15 +584,11 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         <DialogContent className="bg-card border-border max-w-md">
           <DialogHeader>
             <DialogTitle className="font-display text-primary">
-              {infoModel === '2x0' ? 'Como usar o Gerenciamento 2x0' : 'Como usar o Gerenciamento 2x1'}
+              {infoModel === '2x0' ? t('management.info2x0Title') : t('management.info2x1Title')}
             </DialogTitle>
           </DialogHeader>
           <div className="text-sm text-muted-foreground leading-relaxed">
-            {infoModel === '2x0' ? (
-              <p>Este modelo foi criado para quem busca mais controle e disciplina nas operações. No gerenciamento 2x0, o objetivo é conquistar 2 operações vencedoras sem aceitar loss dentro do ciclo. Se ocorrer 1 loss antes da meta, o ciclo é encerrado. Informe sua banca, confira o valor recomendado por operação e registre cada entrada com atenção. Esse modelo é ideal para quem prefere uma abordagem mais conservadora e focada em assertividade.</p>
-            ) : (
-              <p>Este modelo foi desenvolvido para quem deseja mais flexibilidade sem perder o controle da banca. No gerenciamento 2x1, o objetivo é alcançar 2 wins, aceitando no máximo 1 loss durante o ciclo. Caso aconteça um segundo loss, o ciclo será encerrado. Informe sua banca, utilize o valor recomendado por operação e registre cada entrada corretamente. Esse modelo é indicado para quem busca equilíbrio entre segurança e tolerância operacional.</p>
-            )}
+            <p>{infoModel === '2x0' ? t('management.info2x0Desc') : t('management.info2x1Desc')}</p>
           </div>
         </DialogContent>
       </Dialog>
@@ -603,16 +598,16 @@ export default function ManagementDashboard({ fullscreen, onToggleFullscreen }: 
         <DialogContent className="bg-card border-primary/30 max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-display text-primary text-center">
-              Você seguiu seu plano nessa operação?
+              {t('management.followedPlanQuestion')}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-xs text-muted-foreground text-center">Isso cria consciência de disciplina e alimenta seu Score de Disciplina.</p>
+          <p className="text-xs text-muted-foreground text-center">{t('management.followedPlanDesc')}</p>
           <div className="flex gap-3">
             <Button onClick={() => handleFollowedPlan(true)} className="flex-1 bg-success/20 text-success hover:bg-success/30 border border-success/30 font-display gap-2">
-              <CheckCircle className="w-4 h-4" /> Sim
+              <CheckCircle className="w-4 h-4" /> {t('management.yes')}
             </Button>
             <Button onClick={() => handleFollowedPlan(false)} className="flex-1 bg-destructive/20 text-destructive hover:bg-destructive/30 border border-destructive/30 font-display gap-2">
-              <XCircle className="w-4 h-4" /> Não
+              <XCircle className="w-4 h-4" /> {t('management.no')}
             </Button>
           </div>
         </DialogContent>

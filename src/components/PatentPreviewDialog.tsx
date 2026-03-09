@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Download, Share2 } from 'lucide-react';
 import { TraderRank } from '@/lib/traderRanks';
+import { toast } from 'sonner';
 
 interface PatentPreviewDialogProps {
   open: boolean;
@@ -15,148 +16,61 @@ interface PatentPreviewDialogProps {
 }
 
 function generatePatentCanvas(rank: TraderRank, totalProfit: number, displayName: string, daysTrading: number, isEn: boolean): HTMLCanvasElement {
+  const W = 1080, H = 1920;
   const canvas = document.createElement('canvas');
-  canvas.width = 1080;
-  canvas.height = 1920;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d')!;
 
-  // Rich gradient background
-  const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1920);
-  bgGrad.addColorStop(0, '#0a0014');
-  bgGrad.addColorStop(0.25, '#0d1b2a');
-  bgGrad.addColorStop(0.5, '#1b0a2e');
-  bgGrad.addColorStop(0.75, '#0d1b2a');
-  bgGrad.addColorStop(1, '#000000');
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, 1080, 1920);
+  // ── Rich background ───────────────────────────────
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#050c18');
+  bg.addColorStop(0.3, '#080f1f');
+  bg.addColorStop(0.6, '#0b1428');
+  bg.addColorStop(1, '#030810');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
 
-  // Particle-like dots
-  for (let i = 0; i < 80; i++) {
-    const x = Math.random() * 1080;
-    const y = Math.random() * 1920;
-    const r = Math.random() * 2 + 0.5;
+  // Radial glow
+  const glow = ctx.createRadialGradient(W / 2, H * 0.35, 0, W / 2, H * 0.35, 500);
+  glow.addColorStop(0, rank.color + '1a');
+  glow.addColorStop(0.6, rank.color + '06');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // Candlestick background
+  ctx.globalAlpha = 0.05;
+  for (let i = 0; i < 20; i++) {
+    const x = 40 + i * 52;
+    const open = 1600 + Math.random() * 500;
+    const close = 1600 + Math.random() * 500;
+    const color = close < open ? '#22c55e' : '#ef4444';
+    ctx.fillStyle = color;
+    ctx.fillRect(x - 1, Math.min(open, close) - 50, 2, Math.abs(close - open) + 100);
+    ctx.fillRect(x - 10, Math.min(open, close), 20, Math.abs(close - open) || 4);
+  }
+  ctx.globalAlpha = 0.07;
+  ctx.strokeStyle = rank.color;
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  [0.92, 0.89, 0.91, 0.86, 0.83, 0.79, 0.76, 0.73, 0.69, 0.65].forEach((p, i, arr) => {
+    const x = (i / (arr.length - 1)) * W;
+    i === 0 ? ctx.moveTo(x, H * p) : ctx.lineTo(x, H * p);
+  });
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // Stars/particles
+  for (let i = 0; i < 100; i++) {
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fillStyle = rank.color + '22';
+    ctx.arc(Math.random() * W, Math.random() * H, Math.random() * 1.5 + 0.3, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.5 + 0.1})`;
     ctx.fill();
   }
 
-  // Ornate double border
-  ctx.strokeStyle = rank.color + '88';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(25, 25, 1030, 1870);
-  ctx.strokeStyle = rank.color + '33';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(40, 40, 1000, 1840);
-
-  // Corner decorations
-  const cornerSize = 40;
-  [
-    [45, 45], [1035, 45], [45, 1875], [1035, 1875]
-  ].forEach(([cx, cy], i) => {
-    ctx.strokeStyle = rank.color + '66';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    const dx = i % 2 === 0 ? 1 : -1;
-    const dy = i < 2 ? 1 : -1;
-    ctx.moveTo(cx, cy + dy * cornerSize);
-    ctx.lineTo(cx, cy);
-    ctx.lineTo(cx + dx * cornerSize, cy);
-    ctx.stroke();
-  });
-
-  // Top: "TECHNICAL" brand with glow
-  ctx.shadowColor = rank.color;
-  ctx.shadowBlur = 30;
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 56px Arial, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('TECHNICAL', 540, 140);
-  ctx.shadowBlur = 0;
-
-  // Gradient separator line
-  const lineGrad = ctx.createLinearGradient(150, 0, 930, 0);
-  lineGrad.addColorStop(0, 'transparent');
-  lineGrad.addColorStop(0.2, rank.color + '88');
-  lineGrad.addColorStop(0.5, rank.color);
-  lineGrad.addColorStop(0.8, rank.color + '88');
-  lineGrad.addColorStop(1, 'transparent');
-  ctx.strokeStyle = lineGrad;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(150, 170);
-  ctx.lineTo(930, 170);
-  ctx.stroke();
-
-  // User name
-  ctx.fillStyle = rank.color;
-  ctx.font = 'bold 42px Arial, sans-serif';
-  ctx.shadowColor = rank.color;
-  ctx.shadowBlur = 15;
-  ctx.fillText(displayName.toUpperCase(), 540, 230);
-  ctx.shadowBlur = 0;
-
-  // Large hexagon-like circle with multi-layer glow
-  const centerY = 560;
-
-  // Outer glow rings
-  for (let i = 3; i >= 0; i--) {
-    ctx.beginPath();
-    ctx.arc(540, centerY, 180 + i * 15, 0, Math.PI * 2);
-    ctx.strokeStyle = rank.color + (10 + i * 5).toString(16).padStart(2, '0');
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-
-  // Main circle with gradient fill
-  const circGrad = ctx.createRadialGradient(540, centerY, 0, 540, centerY, 170);
-  circGrad.addColorStop(0, rank.color + '30');
-  circGrad.addColorStop(0.7, rank.color + '10');
-  circGrad.addColorStop(1, 'transparent');
-  ctx.beginPath();
-  ctx.arc(540, centerY, 170, 0, Math.PI * 2);
-  ctx.fillStyle = circGrad;
-  ctx.fill();
-  ctx.strokeStyle = rank.color;
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
-  // Inner circle
-  ctx.beginPath();
-  ctx.arc(540, centerY, 145, 0, Math.PI * 2);
-  ctx.fillStyle = rank.color + '15';
-  ctx.fill();
-  ctx.strokeStyle = rank.color + '66';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Emoji with shadow
-  ctx.shadowColor = rank.color;
-  ctx.shadowBlur = 40;
-  ctx.font = '150px Arial, sans-serif';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(rank.emoji, 540, centerY);
-  ctx.textBaseline = 'alphabetic';
-  ctx.shadowBlur = 0;
-
-  // Rank name with heavy glow
-  ctx.fillStyle = rank.color;
-  ctx.font = 'bold 64px Arial, sans-serif';
-  ctx.shadowColor = rank.color;
-  ctx.shadowBlur = 30;
-  ctx.fillText((isEn ? rank.nameEn : rank.name).toUpperCase(), 540, 800);
-  ctx.shadowBlur = 0;
-
-  // Subtitle
-  ctx.fillStyle = '#9ca3af';
-  ctx.font = '30px Arial, sans-serif';
-  ctx.fillText(isEn ? '★ PATENT ACHIEVED ★' : '★ PATENTE CONQUISTADA ★', 540, 860);
-
-  // Stats section with gradient backgrounds
-  const statsY = 960;
-
-  // Helper for rounded rects
-  const drawRoundRect = (x: number, y: number, w: number, h: number, r: number) => {
+  // Helper: rounded rect
+  const drawRoundRect = (x: number, y: number, w: number, h: number, r: number, fill?: string, stroke?: string, lw = 2) => {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.lineTo(x + w - r, y);
@@ -168,99 +82,199 @@ function generatePatentCanvas(rank: TraderRank, totalProfit: number, displayName
     ctx.lineTo(x, y + r);
     ctx.quadraticCurveTo(x, y, x + r, y);
     ctx.closePath();
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
   };
 
-  // Profit box
-  const boxGrad1 = ctx.createLinearGradient(100, statsY, 980, statsY);
-  boxGrad1.addColorStop(0, '#0a1628');
-  boxGrad1.addColorStop(1, '#0d1f3c');
-  drawRoundRect(100, statsY, 880, 130, 20);
-  ctx.fillStyle = boxGrad1;
-  ctx.fill();
-  ctx.strokeStyle = '#22c55e44';
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  // Borders
+  drawRoundRect(20, 20, W - 40, H - 40, 28, undefined, rank.color + '55', 3);
+  drawRoundRect(34, 34, W - 68, H - 68, 20, undefined, rank.color + '1a', 1);
 
-  ctx.fillStyle = '#9ca3af';
-  ctx.font = '26px Arial, sans-serif';
-  ctx.fillText(isEn ? '💰 TOTAL PROFIT' : '💰 LUCRO TOTAL', 540, statsY + 45);
+  // Corner accents
+  [[40, 40], [W - 40, 40], [40, H - 40], [W - 40, H - 40]].forEach(([cx, cy], i) => {
+    const dx = i % 2 === 0 ? 1 : -1, dy = i < 2 ? 1 : -1;
+    ctx.strokeStyle = rank.color + '77';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + dy * 45);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx + dx * 45, cy);
+    ctx.stroke();
+    ctx.fillStyle = rank.color;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
 
-  ctx.fillStyle = '#22c55e';
-  ctx.font = 'bold 52px Arial, sans-serif';
-  ctx.shadowColor = '#22c55e';
-  ctx.shadowBlur = 20;
-  ctx.fillText(`R$ ${totalProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 540, statsY + 105);
+  // ── TECHNICAL header ──────────────────────────────
+  ctx.textAlign = 'center';
+  ctx.shadowColor = rank.color;
+  ctx.shadowBlur = 35;
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 64px Arial, sans-serif';
+  ctx.fillText('TECHNICAL', W / 2, 135);
   ctx.shadowBlur = 0;
 
-  // Days box
-  const boxGrad2 = ctx.createLinearGradient(100, statsY + 160, 980, statsY + 160);
-  boxGrad2.addColorStop(0, '#1a0f28');
-  boxGrad2.addColorStop(1, '#0d1f3c');
-  drawRoundRect(100, statsY + 160, 880, 130, 20);
-  ctx.fillStyle = boxGrad2;
-  ctx.fill();
-  ctx.strokeStyle = '#f59e0b44';
+  // Separator
+  const sep = ctx.createLinearGradient(100, 0, W - 100, 0);
+  sep.addColorStop(0, 'transparent');
+  sep.addColorStop(0.2, rank.color + '66');
+  sep.addColorStop(0.5, rank.color);
+  sep.addColorStop(0.8, rank.color + '66');
+  sep.addColorStop(1, 'transparent');
+  ctx.strokeStyle = sep;
   ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(100, 165);
+  ctx.lineTo(W - 100, 165);
   ctx.stroke();
 
-  ctx.fillStyle = '#9ca3af';
-  ctx.font = '26px Arial, sans-serif';
-  ctx.fillText(isEn ? '📅 DAYS TRADING' : '📅 DIAS OPERANDO', 540, statsY + 205);
-
-  ctx.fillStyle = '#f59e0b';
-  ctx.font = 'bold 52px Arial, sans-serif';
-  ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 20;
-  ctx.fillText(`${daysTrading} ${isEn ? 'days' : 'dias'}`, 540, statsY + 265);
+  // User name
+  ctx.fillStyle = rank.color;
+  ctx.font = 'bold 46px Arial, sans-serif';
+  ctx.shadowColor = rank.color;
+  ctx.shadowBlur = 18;
+  ctx.fillText(displayName.toUpperCase(), W / 2, 225);
   ctx.shadowBlur = 0;
 
-  // Rank requirement box
-  drawRoundRect(100, statsY + 320, 880, 110, 20);
-  ctx.fillStyle = '#0d1528';
+  // ── Badge circle ──────────────────────────────────
+  const cY = 560;
+  for (let i = 4; i >= 0; i--) {
+    ctx.beginPath();
+    ctx.arc(W / 2, cY, 190 + i * 16, 0, Math.PI * 2);
+    ctx.strokeStyle = rank.color + ((5 - i) * 5).toString(16).padStart(2, '0');
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+  const cGrad = ctx.createRadialGradient(W / 2, cY, 0, W / 2, cY, 185);
+  cGrad.addColorStop(0, rank.color + '35');
+  cGrad.addColorStop(0.7, rank.color + '10');
+  cGrad.addColorStop(1, 'transparent');
+  ctx.beginPath();
+  ctx.arc(W / 2, cY, 185, 0, Math.PI * 2);
+  ctx.fillStyle = cGrad;
   ctx.fill();
+  ctx.strokeStyle = rank.color;
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(W / 2, cY, 155, 0, Math.PI * 2);
   ctx.strokeStyle = rank.color + '44';
   ctx.lineWidth = 2;
   ctx.stroke();
+  // Tick marks
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * Math.PI * 2 - Math.PI / 2;
+    const r1 = 170, r2 = i % 6 === 0 ? 150 : 162;
+    ctx.strokeStyle = rank.color + (i % 6 === 0 ? 'bb' : '33');
+    ctx.lineWidth = i % 6 === 0 ? 2 : 1;
+    ctx.beginPath();
+    ctx.moveTo(W / 2 + r1 * Math.cos(a), cY + r1 * Math.sin(a));
+    ctx.lineTo(W / 2 + r2 * Math.cos(a), cY + r2 * Math.sin(a));
+    ctx.stroke();
+  }
+  // Emoji
+  ctx.shadowColor = rank.color;
+  ctx.shadowBlur = 55;
+  ctx.font = '170px Arial, sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(rank.emoji, W / 2, cY);
+  ctx.textBaseline = 'alphabetic';
+  ctx.shadowBlur = 0;
+
+  // Rank name
+  ctx.fillStyle = rank.color;
+  ctx.font = 'bold 72px Arial, sans-serif';
+  ctx.shadowColor = rank.color;
+  ctx.shadowBlur = 35;
+  ctx.fillText((isEn ? rank.nameEn : rank.name).toUpperCase(), W / 2, 840);
+  ctx.shadowBlur = 0;
 
   ctx.fillStyle = '#9ca3af';
+  ctx.font = '30px Arial, sans-serif';
+  ctx.fillText(isEn ? '★ PATENT ACHIEVED ★' : '★ PATENTE CONQUISTADA ★', W / 2, 895);
+
+  // ── Stats ─────────────────────────────────────────
+  const sY = 960;
+  // Profit
+  drawRoundRect(80, sY, W - 160, 130, 20, '#051a0a', '#22c55e33', 2);
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '26px Arial, sans-serif';
+  ctx.fillText(isEn ? '💰 TOTAL PROFIT' : '💰 LUCRO TOTAL', W / 2, sY + 48);
+  ctx.fillStyle = '#22c55e';
+  ctx.font = 'bold 56px Arial, sans-serif';
+  ctx.shadowColor = '#22c55e';
+  ctx.shadowBlur = 22;
+  ctx.fillText(`R$ ${totalProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, W / 2, sY + 108);
+  ctx.shadowBlur = 0;
+
+  // Days
+  drawRoundRect(80, sY + 155, W - 160, 130, 20, '#100a00', '#f59e0b33', 2);
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '26px Arial, sans-serif';
+  ctx.fillText(isEn ? '📅 DAYS TRADING' : '📅 DIAS OPERANDO', W / 2, sY + 203);
+  ctx.fillStyle = '#f59e0b';
+  ctx.font = 'bold 56px Arial, sans-serif';
+  ctx.shadowColor = '#f59e0b';
+  ctx.shadowBlur = 22;
+  ctx.fillText(`${daysTrading} ${isEn ? 'days' : 'dias'}`, W / 2, sY + 263);
+  ctx.shadowBlur = 0;
+
+  // Requirement
+  drawRoundRect(80, sY + 310, W - 160, 110, 20, '#0d0520', rank.color + '44', 2);
+  ctx.fillStyle = '#9ca3af';
   ctx.font = '24px Arial, sans-serif';
-  ctx.fillText(isEn ? 'RANK REQUIREMENT' : 'REQUISITO DA PATENTE', 540, statsY + 365);
-
+  ctx.fillText(isEn ? 'RANK REQUIREMENT' : 'REQUISITO DA PATENTE', W / 2, sY + 355);
   ctx.fillStyle = rank.color;
-  ctx.font = 'bold 40px Arial, sans-serif';
-  ctx.fillText(`R$ ${rank.minProfit.toLocaleString('pt-BR')}+`, 540, statsY + 410);
+  ctx.font = 'bold 42px Arial, sans-serif';
+  ctx.fillText(`R$ ${rank.minProfit.toLocaleString('pt-BR')}+`, W / 2, sY + 400);
 
-  // Decorative stars row
+  // Stars
   ctx.fillStyle = rank.color + '66';
-  ctx.font = '36px Arial, sans-serif';
-  ctx.fillText('★  ★  ★  ★  ★', 540, statsY + 490);
+  ctx.font = '34px Arial, sans-serif';
+  ctx.fillText('★  ★  ★  ★  ★', W / 2, sY + 468);
 
-  // Footer separator with gold gradient
-  const footGrad = ctx.createLinearGradient(150, 0, 930, 0);
-  footGrad.addColorStop(0, 'transparent');
-  footGrad.addColorStop(0.2, '#ffd70088');
-  footGrad.addColorStop(0.5, '#ffd700');
-  footGrad.addColorStop(0.8, '#ffd70088');
-  footGrad.addColorStop(1, 'transparent');
-  ctx.strokeStyle = footGrad;
+  // ── Quote ──────────────────────────────────────────
+  const quotes = [
+    isEn ? '"Discipline builds consistency."' : '"Disciplina constrói consistência."',
+    isEn ? '"Every achievement is the result of control."' : '"Cada conquista é resultado de controle."',
+    isEn ? '"The disciplined trader always evolves."' : '"O trader disciplinado sempre evolui."',
+  ];
+  const q = quotes[Math.floor(Math.random() * quotes.length)];
+  drawRoundRect(80, sY + 500, W - 160, 90, 16, rank.color + '0d', rank.color + '33', 1);
+  ctx.fillStyle = '#d1d5db';
+  ctx.font = 'italic 28px Arial, sans-serif';
+  ctx.fillText(q, W / 2, sY + 552);
+
+  // ── Footer ────────────────────────────────────────
+  const fY = H - 195;
+  const fg = ctx.createLinearGradient(100, 0, W - 100, 0);
+  fg.addColorStop(0, 'transparent');
+  fg.addColorStop(0.2, '#ffd70088');
+  fg.addColorStop(0.5, '#ffd700');
+  fg.addColorStop(0.8, '#ffd70088');
+  fg.addColorStop(1, 'transparent');
+  ctx.strokeStyle = fg;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(150, 1700);
-  ctx.lineTo(930, 1700);
+  ctx.moveTo(100, fY);
+  ctx.lineTo(W - 100, fY);
   ctx.stroke();
 
-  // "ACESSE NOSSO SITE"
   ctx.fillStyle = '#d4d4d4';
   ctx.font = '28px Arial, sans-serif';
-  ctx.fillText(isEn ? 'VISIT OUR WEBSITE' : 'ACESSE NOSSO SITE', 540, 1760);
+  ctx.fillText(isEn ? 'VISIT OUR WEBSITE' : 'PLATAFORMA OFICIAL', W / 2, fY + 52);
 
-  // Website URL with glow
   ctx.fillStyle = '#ffd700';
-  ctx.font = 'bold 38px Arial, sans-serif';
+  ctx.font = 'bold 42px Arial, sans-serif';
   ctx.shadowColor = '#ffd700';
-  ctx.shadowBlur = 25;
-  ctx.fillText('WWW.GIRLANBARRETO.COM.BR', 540, 1815);
+  ctx.shadowBlur = 28;
+  ctx.fillText('WWW.GIRLANBARRETO.COM.BR', W / 2, fY + 105);
   ctx.shadowBlur = 0;
+
+  ctx.fillStyle = rank.color + '22';
+  ctx.font = '22px Arial, sans-serif';
+  ctx.fillText(`${rank.emoji}  ${(isEn ? rank.nameEn : rank.name).toUpperCase()}  ${rank.emoji}`, W / 2, fY + 150);
 
   return canvas;
 }
@@ -283,6 +297,22 @@ export default function PatentPreviewDialog({ open, onOpenChange, rank, totalPro
     link.download = `patente-${rank.name.toLowerCase().replace(/\s+/g, '-')}.png`;
     link.href = canvasRef.current.toDataURL('image/png');
     link.click();
+    toast.success('📥 Imagem baixada! Poste no seu Story 🚀');
+  };
+
+  const handleShare = async () => {
+    if (!canvasRef.current) return;
+    try {
+      canvasRef.current.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `patente-${rank.name}.png`, { type: 'image/png' });
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: `Patente ${rank.name} - TECHNICAL`, text: `Conquistei a patente ${rank.name}! 🎯 www.girlanbarreto.com.br` });
+        } else {
+          handleDownload();
+        }
+      });
+    } catch { handleDownload(); }
   };
 
   return (
@@ -301,10 +331,16 @@ export default function PatentPreviewDialog({ open, onOpenChange, rank, totalPro
             <img src={imageUrl} alt={rank.name} className="w-full h-auto" />
           </div>
         )}
-        <Button onClick={handleDownload} className="w-full gradient-gold text-primary-foreground font-display gap-2">
-          <Download className="w-4 h-4" />
-          {isEn ? 'Download Image' : 'Baixar Imagem'}
-        </Button>
+        <div className="grid grid-cols-2 gap-3">
+          <Button onClick={handleDownload} className="w-full gradient-gold text-primary-foreground font-display gap-2">
+            <Download className="w-4 h-4" />
+            {isEn ? 'Download' : 'Baixar'}
+          </Button>
+          <Button onClick={handleShare} variant="outline" className="w-full font-display gap-2 border-primary/30 text-primary hover:bg-primary/10">
+            <Share2 className="w-4 h-4" />
+            {isEn ? 'Share' : 'Compartilhar'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,8 +16,9 @@ import {
   ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
   Trash2, RotateCcw
 } from 'lucide-react';
-import { getRankForProfit, getNextRankForProfit, TRADER_RANKS } from '@/lib/traderRanks';
+import { getRankForProfit, getNextRankForProfit, TRADER_RANKS, TraderRank } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
+import RankAchievementModal from '@/components/RankAchievementModal';
 import { useManagement2x } from '@/hooks/useManagement2x';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
@@ -78,6 +79,12 @@ const DashboardHome = () => {
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
 
+  // Achievement modal (auto-triggered on rank up)
+  const [achievementOpen, setAchievementOpen] = useState(false);
+  const [achievedRank, setAchievedRank] = useState<TraderRank | null>(null);
+  const lastRankRef = useRef<string>('');
+  const hasInitialized = useRef(false);
+
   // Emotional check-in modal on page load
   const [emotionalState, setEmotionalState] = useState<string | null>(null);
   const [showEmotionalModal, setShowEmotionalModal] = useState(false);
@@ -129,20 +136,36 @@ const DashboardHome = () => {
     }
   };
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (checkRankUp = false) => {
     if (!user) return;
     const [profileRes, tradesRes] = await Promise.all([
       supabase.from('profiles').select('balance, total_profit, display_name, created_at, discipline_score').eq('user_id', user.id).single(),
       supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
     ]);
     if (profileRes.data) {
+      const newProfit = Number(profileRes.data.total_profit) || 0;
       setBalance(Number(profileRes.data.balance) || 0);
-      setTotalProfit(Number(profileRes.data.total_profit) || 0);
+      setTotalProfit(newProfit);
       setDisplayName(profileRes.data.display_name || 'Trader');
       setDisciplineRate(Number(profileRes.data.discipline_score) || 100);
       if (profileRes.data.created_at) {
         const created = new Date(profileRes.data.created_at);
         setDaysTrading(Math.max(1, Math.floor((Date.now() - created.getTime()) / 86400000)));
+      }
+
+      // Rank-up detection: compare new rank to last known rank
+      if (checkRankUp && hasInitialized.current) {
+        const newRank = getRankForProfit(newProfit);
+        if (lastRankRef.current && newRank.name !== lastRankRef.current) {
+          const oldRankObj = TRADER_RANKS.find(r => r.name === lastRankRef.current);
+          if (!oldRankObj || newRank.minProfit > oldRankObj.minProfit) {
+            // Genuine rank-up!
+            setAchievedRank(newRank);
+            setAchievementOpen(true);
+            toast.success(`🏆 Parabéns! Você conquistou a patente ${newRank.emoji} ${newRank.name}!`, { duration: 6000 });
+          }
+        }
+        lastRankRef.current = newRank.name;
       }
     }
     if (tradesRes.data) {
@@ -201,7 +224,20 @@ const DashboardHome = () => {
     }
   }, [user]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  // Initial load: set the baseline rank without triggering achievement
+  useEffect(() => {
+    if (user && !hasInitialized.current) {
+      loadData(false).then(() => {
+        hasInitialized.current = true;
+        // Set initial rank ref from profile
+        supabase.from('profiles').select('total_profit').eq('user_id', user.id).single().then(({ data }) => {
+          if (data) lastRankRef.current = getRankForProfit(Number(data.total_profit) || 0).name;
+        });
+      });
+    }
+  }, [user, loadData]);
+
+  useEffect(() => { if (hasInitialized.current) loadData(false); }, [loadData]);
 
   useEffect(() => {
     if (!user) return;
@@ -320,7 +356,7 @@ const DashboardHome = () => {
       if (!savedPairs.includes(pair.trim().toUpperCase())) setSavedPairs(prev => [...prev, pair.trim().toUpperCase()].sort());
       setPair(''); setAmount('');
       window.dispatchEvent(new Event('balance-updated'));
-      loadData();
+      loadData(true); // true = check for rank-up
     }
     setSubmitting(false);
   };
@@ -848,6 +884,19 @@ const DashboardHome = () => {
 
       <PatentPreviewDialog open={patentDialogOpen} onOpenChange={setPatentDialogOpen} rank={selectedPatentRank}
         totalProfit={totalProfit} displayName={displayName} daysTrading={daysTrading} isEn={isEn} />
+
+      {/* Auto-triggered achievement modal when user levels up */}
+      {achievedRank && (
+        <RankAchievementModal
+          open={achievementOpen}
+          onClose={() => setAchievementOpen(false)}
+          rank={achievedRank}
+          totalProfit={totalProfit}
+          displayName={displayName}
+          daysTrading={daysTrading}
+          totalTrades={wins + losses}
+        />
+      )}
     </div>
   );
 };

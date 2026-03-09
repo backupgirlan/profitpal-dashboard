@@ -56,6 +56,7 @@ const AdminPanel = () => {
       case 'users': return <AdminUsers />;
       case 'plans': return <AdminPlans />;
       case 'horus': return <AdminHorusIA />;
+      case 'horus-flows': return <AdminHorusFlows />;
       case 'integrations': return <AdminIntegrations />;
       case 'payments': return <AdminPayments />;
       case 'analytics': return <AdminAnalytics />;

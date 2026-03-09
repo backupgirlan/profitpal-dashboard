@@ -51,7 +51,9 @@ export default function AdminSidebar({ activeSection, onSectionChange }: AdminSi
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 relative group ${
                 isActive
                   ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                  : (item as any).highlight
+                    ? 'text-primary bg-primary/5 border border-primary/20 hover:bg-primary/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
               }`}
             >
               {isActive && (
@@ -61,8 +63,9 @@ export default function AdminSidebar({ activeSection, onSectionChange }: AdminSi
                   transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                 />
               )}
-              <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : ''}`} />
+              <item.icon className={`w-4 h-4 shrink-0 ${isActive || (item as any).highlight ? 'text-primary' : ''}`} />
               <span className="truncate">{item.label}</span>
+              {(item as any).highlight && !isActive && <span className="ml-auto text-[9px] font-bold text-primary opacity-80">NOVO</span>}
             </button>
           );
         })}

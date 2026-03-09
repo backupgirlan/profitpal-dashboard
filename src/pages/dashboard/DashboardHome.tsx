@@ -711,9 +711,9 @@ const DashboardHome = () => {
               )}
             </div>
             <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-success inline-block" /> Alta (WIN)</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-destructive inline-block" /> Baixa (LOSS)</span>
-              <span className="flex items-center gap-1">--- Escala R$30</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-success inline-block" /> WIN (+R$30)</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-destructive inline-block" /> LOSS (-R$30)</span>
+              <span>Nível: R${candleData.length > 0 ? candleData[candleData.length - 1].close : 0}</span>
             </div>
           </CardContent>
         </Card>

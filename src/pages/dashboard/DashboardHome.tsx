@@ -603,117 +603,78 @@ const DashboardHome = () => {
               </h3>
               <span className="text-[10px] text-muted-foreground">Cada candle = R$30 • 1 operação</span>
             </div>
-            <div className="h-64">
+            <div className="h-64 overflow-x-auto">
               {candleData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={candleData} barCategoryGap="15%">
-                    <XAxis dataKey="day" tick={{ fontSize: 9, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} interval={Math.max(0, Math.floor(candleData.length / 10))} />
-                    <YAxis
-                      tick={{ fontSize: 10, fill: CHART_COLORS.muted }}
-                      axisLine={false}
-                      tickLine={false}
-                      tickFormatter={(v: number) => `R$${v}`}
-                      domain={[(dataMin: number) => Math.floor(dataMin / 30) * 30 - 30, (dataMax: number) => Math.ceil(dataMax / 30) * 30 + 30]}
-                      ticks={(() => {
-                        const allVals = candleData.flatMap(d => [d.open, d.close]);
-                        const minV = Math.min(...allVals);
-                        const maxV = Math.max(...allVals);
-                        const start = Math.floor(minV / 30) * 30 - 30;
-                        const end = Math.ceil(maxV / 30) * 30 + 30;
-                        const t = [];
-                        for (let v = start; v <= end; v += 30) t.push(v);
-                        return t;
-                      })()}
-                    />
-                    <Tooltip
-                      contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '11px' }}
-                      labelStyle={{ color: '#F9FAFB', fontWeight: 'bold' }}
-                      formatter={(value: number, name: string) => {
-                        const labels: Record<string, string> = { open: 'Abertura', close: 'Fechamento', high: 'Máxima', low: 'Mínima' };
-                        return [`R$ ${value.toFixed(2)}`, labels[name] || name];
-                      }}
-                    />
-                    {/* R$30 grid lines */}
-                    {(() => {
-                      const allVals = candleData.flatMap(d => [d.open, d.close]);
-                      const minV = Math.min(...allVals);
-                      const maxV = Math.max(...allVals);
-                      const start = Math.floor(minV / 30) * 30 - 30;
-                      const end = Math.ceil(maxV / 30) * 30 + 30;
-                      const lines = [];
-                      for (let v = start; v <= end; v += 30) {
-                        lines.push(
-                          <ReferenceArea key={v} y1={v} y2={v} stroke={CHART_COLORS.border} strokeDasharray="3 3" strokeOpacity={0.4} />
-                        );
-                      }
-                      return lines;
-                    })()}
-                    {/* Candle bodies */}
-                    <Bar
-                      dataKey="close"
-                      barSize={14}
-                      shape={(props: any) => {
-                        const { x, width, payload } = props;
-                        if (!payload) return null;
-                        const { open, close } = payload;
-                        const bullish = close >= open;
-                        const color = bullish ? CHART_COLORS.green : CHART_COLORS.red;
+                (() => {
+                  const allVals = candleData.flatMap(d => [d.open, d.close]);
+                  const minVal = Math.floor(Math.min(...allVals) / 30) * 30 - 30;
+                  const maxVal = Math.ceil(Math.max(...allVals) / 30) * 30 + 60;
+                  const range = maxVal - minVal || 60;
+                  const paddingLeft = 50;
+                  const paddingTop = 10;
+                  const paddingBottom = 20;
+                  const candleWidth = 16;
+                  const candleGap = 6;
+                  const chartWidth = Math.max(candleData.length * (candleWidth + candleGap) + paddingLeft + 20, 300);
+                  const chartHeight = 240;
+                  const plotHeight = chartHeight - paddingTop - paddingBottom;
+                  const priceToY = (price: number) => paddingTop + plotHeight - ((price - minVal) / range) * plotHeight;
 
-                        // Use the YAxis scale from Recharts internal props
-                        const yAxisMap = (props as any).yAxisMap || {};
-                        const allVals = candleData.flatMap(d => [d.open, d.close]);
-                        const minDomain = Math.floor(Math.min(...allVals) / 30) * 30 - 30;
-                        const maxDomain = Math.ceil(Math.max(...allVals) / 30) * 30 + 30;
-                        const range = maxDomain - minDomain || 1;
-                        const chartTop = 5;
-                        const chartBottom = 240;
-                        const scale = (v: number) => chartTop + ((maxDomain - v) / range) * (chartBottom - chartTop);
+                  // Grid lines every R$30
+                  const gridLines: number[] = [];
+                  for (let v = minVal; v <= maxVal; v += 30) gridLines.push(v);
 
-                        const yOpen = scale(open);
-                        const yClose = scale(close);
+                  return (
+                    <svg width={chartWidth} height={chartHeight} className="min-w-full">
+                      {/* Grid lines */}
+                      {gridLines.map((val, i) => (
+                        <g key={i}>
+                          <line x1={paddingLeft} y1={priceToY(val)} x2={chartWidth - 5} y2={priceToY(val)} stroke="hsl(var(--border))" strokeOpacity={0.3} strokeDasharray="4 4" />
+                          <text x={4} y={priceToY(val) + 3} fill="hsl(var(--muted-foreground))" fontSize={9} fontFamily="monospace">R${val}</text>
+                        </g>
+                      ))}
+                      {/* Zero line */}
+                      {minVal <= 0 && maxVal >= 0 && (
+                        <line x1={paddingLeft} y1={priceToY(0)} x2={chartWidth - 5} y2={priceToY(0)} stroke="hsl(var(--muted-foreground))" strokeOpacity={0.5} strokeWidth={1} />
+                      )}
+                      {/* Candles */}
+                      {candleData.map((c, i) => {
+                        const x = paddingLeft + i * (candleWidth + candleGap);
+                        const bullish = c.close >= c.open;
+                        const yOpen = priceToY(c.open);
+                        const yClose = priceToY(c.close);
                         const bodyTop = Math.min(yOpen, yClose);
-                        const bodyHeight = Math.max(Math.abs(yOpen - yClose), 2);
-                        const centerX = x + width / 2;
+                        const bodyHeight = Math.max(Math.abs(yOpen - yClose), 3);
+                        const cx = x + candleWidth / 2;
+                        const wickTop = priceToY(c.high);
+                        const wickBottom = priceToY(c.low);
+                        const fillColor = bullish ? 'hsl(142, 71%, 45%)' : 'hsl(0, 84%, 60%)';
+                        const wickColor = bullish ? 'hsl(142, 71%, 55%)' : 'hsl(0, 84%, 70%)';
 
                         return (
-                          <g>
-                            {/* Wick line */}
-                            <line x1={centerX} y1={bodyTop} x2={centerX} y2={bodyTop + bodyHeight} stroke={color} strokeWidth={1} />
-                            {/* Candle body */}
-                            <rect
-                              x={x + 1}
-                              y={bodyTop}
-                              width={Math.max(width - 2, 6)}
-                              height={bodyHeight}
-                              fill={color}
-                              stroke={color}
-                              strokeWidth={0.5}
-                              rx={1.5}
-                              opacity={0.9}
-                            />
-                            {/* Small glow effect */}
-                            <rect
-                              x={x + 2}
-                              y={bodyTop + 1}
-                              width={Math.max(width - 4, 4)}
-                              height={Math.max(bodyHeight - 2, 1)}
-                              fill={bullish ? 'rgba(74,222,128,0.3)' : 'rgba(248,113,113,0.3)'}
-                              rx={1}
-                            />
+                          <g key={i}>
+                            {/* Upper wick */}
+                            <line x1={cx} y1={wickTop} x2={cx} y2={bodyTop} stroke={wickColor} strokeWidth={1.5} />
+                            {/* Lower wick */}
+                            <line x1={cx} y1={bodyTop + bodyHeight} x2={cx} y2={wickBottom} stroke={wickColor} strokeWidth={1.5} />
+                            {/* Body */}
+                            <rect x={x} y={bodyTop} width={candleWidth} height={bodyHeight} fill={fillColor} rx={1.5} />
+                            {/* Subtle highlight */}
+                            <rect x={x + 1} y={bodyTop + 1} width={candleWidth - 2} height={Math.max(bodyHeight - 2, 1)} fill={bullish ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.15)'} rx={1} />
                           </g>
                         );
-                      }}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
+                      })}
+                    </svg>
+                  );
+                })()
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('home.noTrades')}</div>
               )}
             </div>
             <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-success inline-block" /> WIN (+R$30)</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-destructive inline-block" /> LOSS (-R$30)</span>
-              <span>Nível: R${candleData.length > 0 ? candleData[candleData.length - 1].close : 0}</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: 'hsl(142, 71%, 45%)' }} /> WIN (+R$30)</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: 'hsl(0, 84%, 60%)' }} /> LOSS (-R$30)</span>
+              <span className="font-mono">Nível: R${candleData.length > 0 ? candleData[candleData.length - 1].close : 0}</span>
             </div>
           </CardContent>
         </Card>

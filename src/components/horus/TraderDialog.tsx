@@ -125,7 +125,7 @@ export default function TraderDialog() {
 
   const autoResize = (el: HTMLTextAreaElement) => {
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   };
 
   const formatTime = (dateStr: string) =>
@@ -157,55 +157,54 @@ export default function TraderDialog() {
   const groups = groupByDate(messages);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)] min-h-[500px] max-h-[800px] rounded-2xl overflow-hidden border border-border/50 bg-[hsl(var(--secondary)/0.3)]">
+    <div className="flex flex-col h-[calc(100vh-280px)] min-h-[550px] max-h-[850px] rounded-2xl overflow-hidden border border-border/50 bg-[hsl(var(--secondary)/0.3)]">
       {/* WhatsApp-style Header */}
-      <div className="bg-card border-b border-border/50 px-4 py-3 flex items-center gap-3 shrink-0">
-        <div className="w-11 h-11 rounded-full gradient-gold flex items-center justify-center shadow-lg">
-          <Eye className="w-5 h-5 text-primary-foreground" />
+      <div className="bg-card border-b border-border/50 px-5 py-4 flex items-center gap-4 shrink-0">
+        <div className="w-13 h-13 rounded-full gradient-gold flex items-center justify-center shadow-lg" style={{ width: 52, height: 52 }}>
+          <Eye className="w-6 h-6 text-primary-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-display font-bold text-foreground leading-tight">Horus IA</h2>
-          <p className="text-xs text-muted-foreground">
+          <h2 className="text-xl font-display font-bold text-foreground leading-tight">Horus IA</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
             {loading ? (
               <span className="text-primary animate-pulse">digitando...</span>
             ) : 'Assistente de performance do trader'}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Tone selector */}
+        <div className="flex items-center gap-3">
           <Select value={tone} onValueChange={setTone}>
-            <SelectTrigger className="bg-secondary/80 h-8 text-xs w-28 border-border/30">
+            <SelectTrigger className="bg-secondary/80 h-10 text-sm w-36 border-border/30">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="acolhedor">🤝 Acolhedor</SelectItem>
-              <SelectItem value="equilibrado">⚖️ Equilibrado</SelectItem>
-              <SelectItem value="firme">💪 Firme</SelectItem>
-              <SelectItem value="verdade_dura">🔥 Verdade Dura</SelectItem>
+              <SelectItem value="acolhedor" className="text-sm">🤝 Acolhedor</SelectItem>
+              <SelectItem value="equilibrado" className="text-sm">⚖️ Equilibrado</SelectItem>
+              <SelectItem value="firme" className="text-sm">💪 Firme</SelectItem>
+              <SelectItem value="verdade_dura" className="text-sm">🔥 Verdade Dura</SelectItem>
             </SelectContent>
           </Select>
           {messages.length > 0 && (
-            <Button variant="ghost" size="icon" onClick={clearHistory} className="h-8 w-8 text-muted-foreground hover:text-destructive">
-              <Trash2 className="w-4 h-4" />
+            <Button variant="ghost" size="icon" onClick={clearHistory} className="h-10 w-10 text-muted-foreground hover:text-destructive">
+              <Trash2 className="w-5 h-5" />
             </Button>
           )}
         </div>
       </div>
 
       {/* Settings Bar */}
-      <div className="bg-card/60 border-b border-border/30 px-4 py-2 flex items-center justify-between shrink-0">
+      <div className="bg-card/60 border-b border-border/30 px-5 py-2.5 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <Switch checked={useContext} onCheckedChange={setUseContext} className="scale-[0.7]" />
-            <span className="text-[11px] text-muted-foreground">Usar dados da conta</span>
+          <div className="flex items-center gap-2">
+            <Switch checked={useContext} onCheckedChange={setUseContext} className="scale-[0.85]" />
+            <span className="text-sm text-muted-foreground">Usar dados da conta</span>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           {HISTORY_FILTERS.map(f => (
             <button
               key={f.value}
               onClick={() => setHistoryTab(f.value)}
-              className={`text-[11px] px-2.5 py-1 rounded-full transition-colors ${
+              className={`text-sm px-3.5 py-1.5 rounded-full transition-colors ${
                 historyTab === f.value
                   ? 'bg-primary/20 text-primary font-semibold'
                   : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
@@ -217,28 +216,28 @@ export default function TraderDialog() {
         </div>
       </div>
 
-      {/* Chat Messages Area - WhatsApp wallpaper style */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1" style={{
+      {/* Chat Messages Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1" style={{
         backgroundImage: 'radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
       }}>
         {messages.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center h-full py-8 space-y-5">
+          <div className="flex flex-col items-center justify-center h-full py-10 space-y-6">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="w-20 h-20 rounded-full gradient-gold flex items-center justify-center shadow-xl"
+              className="w-24 h-24 rounded-full gradient-gold flex items-center justify-center shadow-xl"
             >
-              <Eye className="w-10 h-10 text-primary-foreground" />
+              <Eye className="w-12 h-12 text-primary-foreground" />
             </motion.div>
-            <div className="text-center space-y-2">
-              <h3 className="text-lg font-display font-bold text-foreground">Diálogo do Trader</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
+            <div className="text-center space-y-3">
+              <h3 className="text-2xl font-display font-bold text-foreground">Diálogo do Trader</h3>
+              <p className="text-base text-muted-foreground max-w-md">
                 Converse com a Horus IA sobre emocional, disciplina, gerenciamento e mercado.
               </p>
             </div>
-            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-3 max-w-md w-full">
-              <p className="text-[11px] text-muted-foreground mb-2.5 font-display text-center">SUGESTÕES RÁPIDAS</p>
-              <div className="grid grid-cols-1 gap-1.5">
+            <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/30 p-4 max-w-lg w-full">
+              <p className="text-xs text-muted-foreground mb-3 font-display text-center tracking-wider">SUGESTÕES RÁPIDAS</p>
+              <div className="grid grid-cols-1 gap-2">
                 {SUGGESTIONS.map((s, i) => (
                   <motion.button
                     key={i}
@@ -246,9 +245,9 @@ export default function TraderDialog() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.06 }}
                     onClick={() => sendMessage(s)}
-                    className="text-left text-[13px] px-3 py-2.5 rounded-lg bg-secondary/40 hover:bg-primary/10 hover:text-primary transition-all text-foreground flex items-center gap-2"
+                    className="text-left text-[15px] px-4 py-3 rounded-xl bg-secondary/40 hover:bg-primary/10 hover:text-primary transition-all text-foreground flex items-center gap-3"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <Sparkles className="w-4 h-4 text-primary shrink-0" />
                     {s}
                   </motion.button>
                 ))}
@@ -260,8 +259,8 @@ export default function TraderDialog() {
         {groups.map((group) => (
           <div key={group.date}>
             {/* Date separator */}
-            <div className="flex justify-center my-3">
-              <span className="text-[11px] bg-card/90 backdrop-blur-sm text-muted-foreground px-3 py-1 rounded-lg shadow-sm border border-border/20">
+            <div className="flex justify-center my-4">
+              <span className="text-xs bg-card/90 backdrop-blur-sm text-muted-foreground px-4 py-1.5 rounded-lg shadow-sm border border-border/20 font-medium">
                 {dateLabel(group.date)}
               </span>
             </div>
@@ -271,49 +270,49 @@ export default function TraderDialog() {
                 initial={{ opacity: 0, y: 8, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.2 }}
-                className={`flex mb-1.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex mb-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {/* Bot avatar */}
                 {msg.role !== 'user' && (
-                  <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center shrink-0 mr-1.5 mt-auto mb-1 shadow-md">
-                    <Eye className="w-4 h-4 text-primary-foreground" />
+                  <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center shrink-0 mr-2 mt-auto mb-1 shadow-md">
+                    <Eye className="w-5 h-5 text-primary-foreground" />
                   </div>
                 )}
 
                 {/* Message bubble */}
-                <div className={`relative max-w-[78%] rounded-2xl px-3.5 py-2.5 shadow-sm ${
+                <div className={`relative max-w-[78%] rounded-2xl px-4 py-3 shadow-sm ${
                   msg.role === 'user'
                     ? 'bg-primary/20 border border-primary/15 rounded-br-md'
                     : 'bg-card border border-border/40 rounded-bl-md'
                 }`}>
                   {/* Sender label */}
                   {msg.role !== 'user' && (
-                    <p className="text-[10px] font-display font-bold text-primary mb-1">Horus IA</p>
+                    <p className="text-xs font-display font-bold text-primary mb-1.5">Horus IA</p>
                   )}
 
                   {/* Content */}
                   {msg.role === 'user' ? (
-                    <p className="text-[14px] text-foreground whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                    <p className="text-base text-foreground whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                   ) : (
-                    <div className="text-[14px] text-foreground leading-relaxed prose prose-sm prose-invert max-w-none
-                      prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-headings:my-2 prose-strong:text-primary">
+                    <div className="text-base text-foreground leading-relaxed prose prose-sm prose-invert max-w-none
+                      prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-headings:my-2.5 prose-strong:text-primary">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   )}
 
                   {/* Time + read ticks */}
-                  <div className={`flex items-center gap-1 mt-1 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <span className="text-[10px] text-muted-foreground/70">{formatTime(msg.created_at)}</span>
+                  <div className={`flex items-center gap-1.5 mt-1.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <span className="text-[11px] text-muted-foreground/70">{formatTime(msg.created_at)}</span>
                     {msg.role === 'user' && (
-                      <CheckCheck className="w-3.5 h-3.5 text-primary/60" />
+                      <CheckCheck className="w-4 h-4 text-primary/60" />
                     )}
                   </div>
                 </div>
 
                 {/* User avatar */}
                 {msg.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center shrink-0 ml-1.5 mt-auto mb-1 shadow-md border border-border/30">
-                    <User className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center shrink-0 ml-2 mt-auto mb-1 shadow-md border border-border/30">
+                    <User className="w-5 h-5 text-muted-foreground" />
                   </div>
                 )}
               </motion.div>
@@ -328,23 +327,23 @@ export default function TraderDialog() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="flex justify-start mb-1.5"
+              className="flex justify-start mb-2"
             >
-              <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center shrink-0 mr-1.5 mt-auto mb-1 shadow-md">
-                <Eye className="w-4 h-4 text-primary-foreground" />
+              <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center shrink-0 mr-2 mt-auto mb-1 shadow-md">
+                <Eye className="w-5 h-5 text-primary-foreground" />
               </div>
-              <div className="bg-card border border-border/40 rounded-2xl rounded-bl-md px-4 py-3 shadow-sm">
-                <p className="text-[10px] font-display font-bold text-primary mb-1.5">Horus IA</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
+              <div className="bg-card border border-border/40 rounded-2xl rounded-bl-md px-5 py-3.5 shadow-sm">
+                <p className="text-xs font-display font-bold text-primary mb-2">Horus IA</p>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-1.5">
                     <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
-                      className="w-2 h-2 rounded-full bg-primary/60" />
+                      className="w-2.5 h-2.5 rounded-full bg-primary/60" />
                     <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
-                      className="w-2 h-2 rounded-full bg-primary/60" />
+                      className="w-2.5 h-2.5 rounded-full bg-primary/60" />
                     <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
-                      className="w-2 h-2 rounded-full bg-primary/60" />
+                      className="w-2.5 h-2.5 rounded-full bg-primary/60" />
                   </div>
-                  <span className="text-[11px] text-muted-foreground italic ml-1">{loadingMsg}</span>
+                  <span className="text-sm text-muted-foreground italic">{loadingMsg}</span>
                 </div>
               </div>
             </motion.div>
@@ -356,10 +355,10 @@ export default function TraderDialog() {
 
       {/* Quick suggestions bar */}
       {messages.length > 0 && !loading && (
-        <div className="bg-card/60 border-t border-border/20 px-3 py-2 flex gap-1.5 overflow-x-auto scrollbar-hide shrink-0">
+        <div className="bg-card/60 border-t border-border/20 px-4 py-2.5 flex gap-2 overflow-x-auto scrollbar-hide shrink-0">
           {SUGGESTIONS.slice(0, 3).map((s, i) => (
             <button key={i} onClick={() => sendMessage(s)}
-              className="text-[11px] px-3 py-1.5 rounded-full border border-border/30 bg-secondary/40 hover:bg-primary/10 hover:border-primary/30 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap shrink-0">
+              className="text-sm px-4 py-2 rounded-full border border-border/30 bg-secondary/40 hover:bg-primary/10 hover:border-primary/30 text-muted-foreground hover:text-primary transition-colors whitespace-nowrap shrink-0">
               {s}
             </button>
           ))}
@@ -367,8 +366,8 @@ export default function TraderDialog() {
       )}
 
       {/* WhatsApp-style Input Bar */}
-      <div className="bg-card border-t border-border/50 px-3 py-2.5 flex items-end gap-2 shrink-0">
-        <div className="flex-1 bg-secondary/60 rounded-2xl border border-border/30 px-4 py-1">
+      <div className="bg-card border-t border-border/50 px-4 py-3 flex items-end gap-3 shrink-0">
+        <div className="flex-1 bg-secondary/60 rounded-2xl border border-border/30 px-5 py-1.5">
           <textarea
             ref={inputRef}
             value={input}
@@ -378,17 +377,17 @@ export default function TraderDialog() {
             }}
             onKeyDown={handleKeyDown}
             placeholder="Mensagem..."
-            className="w-full bg-transparent text-[14px] text-foreground placeholder:text-muted-foreground/60 resize-none focus:outline-none py-2 leading-relaxed"
+            className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground/60 resize-none focus:outline-none py-2.5 leading-relaxed"
             rows={1}
-            style={{ maxHeight: 120 }}
+            style={{ maxHeight: 140 }}
           />
         </div>
         <Button
           onClick={() => sendMessage()}
           disabled={loading || !input.trim()}
-          className="gradient-gold text-primary-foreground shrink-0 h-10 w-10 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow"
+          className="gradient-gold text-primary-foreground shrink-0 h-12 w-12 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow"
         >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
         </Button>
       </div>
     </div>

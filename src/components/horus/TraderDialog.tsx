@@ -203,6 +203,36 @@ export default function TraderDialog() {
               <SelectItem value="verdade_dura" className="text-sm">🔥 Verdade Dura</SelectItem>
             </SelectContent>
           </Select>
+          <div className="relative">
+            <Button variant="ghost" size="icon" onClick={() => setShowBgPicker(!showBgPicker)} className="h-10 w-10 text-muted-foreground hover:text-primary">
+              <Palette className="w-5 h-5" />
+            </Button>
+            <AnimatePresence>
+              {showBgPicker && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute right-0 top-12 z-50 bg-card border border-border/50 rounded-xl p-3 shadow-xl min-w-[200px]"
+                >
+                  <p className="text-xs text-muted-foreground mb-2 font-display tracking-wider">COR DO FUNDO</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {CHAT_BG_OPTIONS.map(opt => (
+                      <button
+                        key={opt.id}
+                        onClick={() => { handleBgChange(opt.id); setShowBgPicker(false); }}
+                        className={`w-10 h-10 rounded-lg border-2 transition-all hover:scale-110 ${
+                          chatBg === opt.id ? 'border-primary ring-2 ring-primary/30' : 'border-border/30'
+                        }`}
+                        style={{ backgroundColor: opt.bg }}
+                        title={opt.label}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           {messages.length > 0 && (
             <Button variant="ghost" size="icon" onClick={clearHistory} className="h-10 w-10 text-muted-foreground hover:text-destructive">
               <Trash2 className="w-5 h-5" />

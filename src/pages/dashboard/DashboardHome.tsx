@@ -57,6 +57,7 @@ const DashboardHome = () => {
   const [displayName, setDisplayName] = useState('Trader');
   const [daysTrading, setDaysTrading] = useState(0);
   const [evolutionData, setEvolutionData] = useState<{ day: string; balance: number }[]>([]);
+  const [candleData, setCandleData] = useState<{ day: string; open: number; close: number; high: number; low: number }[]>([]);
   const [consistencyData, setConsistencyData] = useState<{ day: string; profit: number }[]>([]);
 
   const [pair, setPair] = useState('');

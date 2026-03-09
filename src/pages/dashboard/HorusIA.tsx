@@ -585,30 +585,30 @@ const HorusIA = () => {
         </TabsContent>
 
         {/* Print Analysis */}
-        <TabsContent value="print" className="space-y-5 mt-5">
+        <TabsContent value="print" className="space-y-6 mt-5">
           <Card className="border-primary/10 bg-card/80">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-display text-foreground flex items-center gap-3">
-                <ImageIcon className="w-6 h-6 text-blue-400" /> Análise de Print do Gráfico
+            <CardHeader className="pb-5">
+              <CardTitle className="text-2xl font-display text-foreground flex items-center gap-3">
+                <ImageIcon className="w-7 h-7 text-blue-400" /> Análise de Print do Gráfico
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Envie um print do gráfico para receber análise probabilística de cenário.</p>
+              <p className="text-base text-muted-foreground mt-2">Envie um print do gráfico para receber análise probabilística de cenário.</p>
             </CardHeader>
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-6">
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Timeframe</label>
+                <label className="text-base font-medium text-muted-foreground mb-2.5 block">Timeframe</label>
                 <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-                  <SelectTrigger className="bg-secondary w-36 h-11 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-secondary w-40 h-12 text-base"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="M5">M5</SelectItem>
-                    <SelectItem value="M15">M15</SelectItem>
+                    <SelectItem value="M5" className="text-base">M5</SelectItem>
+                    <SelectItem value="M15" className="text-base">M15</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Upload Tips */}
-              <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 space-y-2">
-                <p className="text-sm font-display text-primary flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Dicas para melhor leitura</p>
-                <ul className="text-sm text-muted-foreground space-y-1 ml-5 list-disc">
+              <div className="bg-primary/5 border border-primary/10 rounded-xl p-5 space-y-3">
+                <p className="text-base font-display text-primary flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Dicas para melhor leitura</p>
+                <ul className="text-base text-muted-foreground space-y-2 ml-5 list-disc">
                   <li><strong className="text-primary">⏱ Envie o print nos últimos 30 segundos do candle</strong> para maior precisão da leitura</li>
                   <li>Inclua a <strong>régua de preço</strong> (lateral) e <strong>régua de tempo</strong> (inferior)</li>
                   <li>Confirme que o timeframe ({selectedTimeframe}) está visível no canto do gráfico</li>
@@ -622,27 +622,27 @@ const HorusIA = () => {
                 onClick={() => fileInputRef.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={e => e.preventDefault()}
-                className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/30 transition-colors cursor-pointer"
+                className="border-2 border-dashed border-border/60 rounded-xl p-10 text-center hover:border-primary/30 transition-colors cursor-pointer"
               >
               {previewUrl ? (
                   <div className="space-y-4">
-                    <img src={previewUrl} alt="Preview" className="max-h-56 mx-auto rounded-lg border border-border/50" />
-                    <p className="text-sm text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
-                    <p className="text-xs text-primary font-display animate-pulse">✨ Print pronto! Pressione Enter ou clique em Analisar Print</p>
+                    <img src={previewUrl} alt="Preview" className="max-h-64 mx-auto rounded-lg border border-border/50" />
+                    <p className="text-base text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
+                    <p className="text-sm text-primary font-display animate-pulse">✨ Print pronto! Pressione Enter ou clique em Analisar Print</p>
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-base text-foreground font-medium">Arraste, clique ou cole (Ctrl+V) para enviar o print</p>
-                    <p className="text-sm text-muted-foreground mt-1.5">PNG, JPG, WEBP até 5MB</p>
-                    <p className="text-xs text-primary/60 mt-2">💡 Dica: Cole o print com Ctrl+V e pressione Enter para análise automática</p>
+                    <Upload className="w-14 h-14 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-lg text-foreground font-medium">Arraste, clique ou cole (Ctrl+V) para enviar o print</p>
+                    <p className="text-base text-muted-foreground mt-2">PNG, JPG, WEBP até 5MB</p>
+                    <p className="text-sm text-primary/60 mt-3">💡 Dica: Cole o print com Ctrl+V e pressione Enter para análise automática</p>
                   </>
                 )}
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <p className="text-xs text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-11 px-6 text-sm" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
+                <p className="text-sm text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-12 px-8 text-base" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
                   {chartLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
                   {chartLoading ? 'Analisando...' : 'Analisar Print'}
                 </Button>
@@ -652,13 +652,13 @@ const HorusIA = () => {
               <AnimatePresence>
                 {chartLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-primary/5 p-6 text-center space-y-3">
+                    className="border border-primary/20 rounded-xl bg-primary/5 p-8 text-center space-y-4">
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                      className="w-12 h-12 mx-auto rounded-xl gradient-gold flex items-center justify-center">
-                      <Eye className="w-6 h-6 text-primary-foreground" />
+                      className="w-14 h-14 mx-auto rounded-xl gradient-gold flex items-center justify-center">
+                      <Eye className="w-7 h-7 text-primary-foreground" />
                     </motion.div>
-                    <p className="text-sm text-primary font-display">{loadingMsg}</p>
-                    <Skeleton className="h-20 w-full" />
+                    <p className="text-base text-primary font-display">{loadingMsg}</p>
+                    <Skeleton className="h-24 w-full" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -667,70 +667,70 @@ const HorusIA = () => {
               <AnimatePresence>
                 {chartResult && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className={`border rounded-xl p-5 space-y-3 ${chartResult.cenario === 'compra' ? 'border-success/30 bg-success/5' : chartResult.cenario === 'venda' ? 'border-destructive/30 bg-destructive/5' : 'border-border/50 bg-card'}`}>
-                    <p className="text-sm font-display text-primary flex items-center gap-2"><Eye className="w-4 h-4" /> RESULTADO DA LEITURA</p>
-                    <div className="grid grid-cols-2 gap-5">
+                    className={`border rounded-xl p-6 space-y-4 ${chartResult.cenario === 'compra' ? 'border-success/30 bg-success/5' : chartResult.cenario === 'venda' ? 'border-destructive/30 bg-destructive/5' : 'border-border/50 bg-card'}`}>
+                    <p className="text-base font-display text-primary flex items-center gap-2"><Eye className="w-5 h-5" /> RESULTADO DA LEITURA</p>
+                    <div className="grid grid-cols-2 gap-6">
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Cenário</p>
-                        <p className={`text-2xl font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        <p className="text-base text-muted-foreground mb-1.5">Cenário</p>
+                        <p className={`text-3xl font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
                           {chartResult.cenario === 'compra' ? '🟢 COMPRA' : chartResult.cenario === 'venda' ? '🔴 VENDA' : '⚪ INCONCLUSIVO'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Confiança</p>
-                        <p className="text-2xl font-display font-bold text-primary">{chartResult.confianca}%</p>
+                        <p className="text-base text-muted-foreground mb-1.5">Confiança</p>
+                        <p className="text-3xl font-display font-bold text-primary">{chartResult.confianca}%</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Entrada estimada</p>
-                        <p className="text-xl font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
+                        <p className="text-base text-muted-foreground mb-1.5">Entrada estimada</p>
+                        <p className="text-2xl font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Saída estimada</p>
-                        <p className="text-xl font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
+                        <p className="text-base text-muted-foreground mb-1.5">Saída estimada</p>
+                        <p className="text-2xl font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
                       </div>
                     </div>
                     {(chartResult as any)._horario_expirado && (
-                      <div className="flex items-center gap-2 p-2 rounded-lg bg-destructive/10 border border-destructive/20">
-                        <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
-                        <p className="text-xs text-destructive font-medium">Horário de entrada já expirou. Aguarde o próximo candle ou envie um print atualizado.</p>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
+                        <p className="text-sm text-destructive font-medium">Horário de entrada já expirou. Aguarde o próximo candle ou envie um print atualizado.</p>
                       </div>
                     )}
                     {/* Feedback Win/Loss - MANDATORY */}
                     {chartResult.analysis_id && (
-                      <div className="border-t border-border/30 pt-3 space-y-2">
+                      <div className="border-t border-border/30 pt-4 space-y-3">
                         {feedbackSent ? (
-                          <div className="flex items-center gap-2 justify-center py-2">
-                            <CheckCircle className="w-4 h-4 text-success" />
-                            <p className="text-sm text-muted-foreground font-display">Feedback registrado! A Horus IA irá calibrar futuras análises.</p>
+                          <div className="flex items-center gap-3 justify-center py-3">
+                            <CheckCircle className="w-5 h-5 text-success" />
+                            <p className="text-base text-muted-foreground font-display">Feedback registrado! A Horus IA irá calibrar futuras análises.</p>
                           </div>
                         ) : (
                           <>
                             <div className="flex items-center gap-2 justify-center">
-                              <AlertTriangle className="w-4 h-4 text-orange-400" />
-                              <p className="text-xs text-orange-400 text-center font-display font-bold">
+                              <AlertTriangle className="w-5 h-5 text-orange-400" />
+                              <p className="text-sm text-orange-400 text-center font-display font-bold">
                                 OBRIGATÓRIO: Informe o resultado após a operação
                               </p>
                             </div>
-                            <p className="text-[10px] text-muted-foreground text-center">
+                            <p className="text-xs text-muted-foreground text-center">
                               A Horus IA aguarda seu feedback para calibrar futuras análises. Você pode preencher depois na aba Print.
                             </p>
-                            <div className="flex gap-3 justify-center">
+                            <div className="flex gap-4 justify-center">
                               <Button
                                 variant="outline"
                                 onClick={() => sendFeedback('win')}
                                 disabled={feedbackLoading}
-                                className="gap-2 border-success/30 bg-success/10 text-success hover:bg-success/20 font-display"
+                                className="gap-2 border-success/30 bg-success/10 text-success hover:bg-success/20 font-display text-base h-11 px-6"
                               >
-                                {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                                {feedbackLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
                                 WIN
                               </Button>
                               <Button
                                 variant="outline"
                                 onClick={() => sendFeedback('loss')}
                                 disabled={feedbackLoading}
-                                className="gap-2 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 font-display"
+                                className="gap-2 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 font-display text-base h-11 px-6"
                               >
-                                {feedbackLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                                {feedbackLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
                                 LOSS
                               </Button>
                             </div>
@@ -738,9 +738,9 @@ const HorusIA = () => {
                         )}
                       </div>
                     )}
-                    <div className="flex items-center gap-2 pt-2 border-t border-border/30">
-                      <Badge variant="outline" className="text-xs">{chartResult.timeframe}</Badge>
-                      <p className="text-[10px] text-muted-foreground italic">Análise probabilística. Não representa garantia de resultado.</p>
+                    <div className="flex items-center gap-3 pt-3 border-t border-border/30">
+                      <Badge variant="outline" className="text-sm">{chartResult.timeframe}</Badge>
+                      <p className="text-xs text-muted-foreground italic">Análise probabilística. Não representa garantia de resultado.</p>
                     </div>
                   </motion.div>
                 )}
@@ -750,62 +750,62 @@ const HorusIA = () => {
         </TabsContent>
 
         {/* Account Analysis */}
-        <TabsContent value="account" className="mt-4">
+        <TabsContent value="account" className="mt-5">
           <AccountAnalysis />
         </TabsContent>
 
         {/* Trader Dialog */}
-        <TabsContent value="dialog" className="mt-4">
+        <TabsContent value="dialog" className="mt-5">
           <TraderDialog />
         </TabsContent>
 
         {/* History */}
         <TabsContent value="history" className="space-y-5 mt-5">
           <Card className="border-border/50 bg-card/80">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-display text-foreground flex items-center gap-3">
-                <Clock className="w-6 h-6 text-primary" /> Histórico de Análises
+            <CardHeader className="pb-5">
+              <CardTitle className="text-2xl font-display text-foreground flex items-center gap-3">
+                <Clock className="w-7 h-7 text-primary" /> Histórico de Análises
               </CardTitle>
             </CardHeader>
             <CardContent>
               {analyses.length === 0 && printAnalyses.length === 0 ? (
-                <div className="text-center py-8">
-                  <BarChart3 className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">Nenhuma análise realizada ainda.</p>
-                  <p className="text-xs text-muted-foreground mt-1">Use a aba Análise Comportamental ou Leitura de Print para começar.</p>
+                <div className="text-center py-10">
+                  <BarChart3 className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-base text-muted-foreground">Nenhuma análise realizada ainda.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Use a aba Análise Comportamental ou Leitura de Print para começar.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {[...analyses.map(a => ({ ...a, _type: 'behavioral' })), ...printAnalyses.map(p => ({ ...p, _type: 'print' }))]
                     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                     .map((item) => (
-                      <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30 border border-border/30">
+                      <div key={item.id} className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30">
                         {item._type === 'behavioral' ? (
-                          <Brain className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <Brain className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         ) : (
-                          <ImageIcon className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                          <ImageIcon className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-[10px]">{item._type === 'behavioral' ? 'Comportamental' : `Print ${item.timeframe}`}</Badge>
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                            <Badge variant="outline" className="text-xs">{item._type === 'behavioral' ? 'Comportamental' : `Print ${item.timeframe}`}</Badge>
                             {item._type === 'print' && item.result && (
-                              <Badge variant="outline" className={`text-[10px] ${item.result === 'win' ? 'border-success/30 text-success' : 'border-destructive/30 text-destructive'}`}>
+                              <Badge variant="outline" className={`text-xs ${item.result === 'win' ? 'border-success/30 text-success' : 'border-destructive/30 text-destructive'}`}>
                                 {item.result === 'win' ? '✅ WIN' : '❌ LOSS'}
                               </Badge>
                             )}
                             {item._type === 'print' && !item.result && (
-                              <Badge variant="outline" className="text-[10px] border-orange-400/30 text-orange-400 animate-pulse">
+                              <Badge variant="outline" className="text-xs border-orange-400/30 text-orange-400 animate-pulse">
                                 ⏳ Aguardando resultado
                               </Badge>
                             )}
-                            <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleString('pt-BR')}</span>
+                            <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString('pt-BR')}</span>
                           </div>
                           {item._type === 'behavioral' ? (
-                            <p className="text-xs text-muted-foreground line-clamp-2">
+                            <p className="text-sm text-muted-foreground line-clamp-2">
                               {(() => { try { return JSON.parse(item.response)?.resumo; } catch { return item.response; } })()}
                             </p>
                           ) : (
-                            <div className="flex items-center gap-3 text-xs">
+                            <div className="flex items-center gap-4 text-sm">
                               <span className={item.scenario === 'compra' ? 'text-success font-bold' : 'text-destructive font-bold'}>
                                 {item.scenario === 'compra' ? '🟢 Compra' : '🔴 Venda'}
                               </span>

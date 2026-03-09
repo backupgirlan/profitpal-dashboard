@@ -80,6 +80,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [installOpen, setInstallOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+
+  // Horus IA behavioral system
+  const [showCheckin, setShowCheckin] = useState(false);
+  const [showProtection, setShowProtection] = useState(false);
+  const [consecutiveLosses, setConsecutiveLosses] = useState(0);
+  const [protectionThreshold, setProtectionThreshold] = useState(2);
+  const [lockoutMinutes, setLockoutMinutes] = useState(15);
+  const [checkinEnabled, setCheckinEnabled] = useState(true);
   const [resetLoading, setResetLoading] = useState(false);
 
   const allNavItems = NAV_SECTIONS.flatMap(s => s.items);

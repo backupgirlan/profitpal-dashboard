@@ -22,7 +22,7 @@ import PatentPreviewDialog from '@/components/PatentPreviewDialog';
 import RankAchievementModal from '@/components/RankAchievementModal';
 import { useManagement2x } from '@/hooks/useManagement2x';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ComposedChart, Line, ReferenceArea } from 'recharts';
 
 const MOTIVATIONAL_QUOTES = [
   "A maioria quebra após o segundo loss. A Horus IA observa isso.",
@@ -57,6 +57,7 @@ const DashboardHome = () => {
   const [displayName, setDisplayName] = useState('Trader');
   const [daysTrading, setDaysTrading] = useState(0);
   const [evolutionData, setEvolutionData] = useState<{ day: string; balance: number }[]>([]);
+  const [candleData, setCandleData] = useState<{ day: string; open: number; close: number; high: number; low: number }[]>([]);
   const [consistencyData, setConsistencyData] = useState<{ day: string; profit: number }[]>([]);
 
   const [pair, setPair] = useState('');
@@ -168,6 +169,10 @@ const DashboardHome = () => {
       let cumBalance = 0, peak = 0, mdd = 0;
       const evoMap: Record<string, number> = {};
       const dailyProfitMap: Record<string, number> = {};
+      // For candles: track daily open/high/low/close
+      const dailyOHLC: Record<string, { open: number; high: number; low: number; close: number; started: boolean }> = {};
+      let runningBalance = 0;
+
       tradesRes.data.forEach(trade => {
         const profit = Number(trade.profit);
         if (trade.result === 'win') w++; else l++;
@@ -181,6 +186,23 @@ const DashboardHome = () => {
         if (dd > mdd) mdd = dd;
         evoMap[tradeDate] = cumBalance;
         dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
+
+        // Build OHLC per day
+        const prevBalance = runningBalance;
+        runningBalance += profit;
+        if (!dailyOHLC[tradeDate]) {
+          dailyOHLC[tradeDate] = {
+            open: prevBalance,
+            high: Math.max(prevBalance, runningBalance),
+            low: Math.min(prevBalance, runningBalance),
+            close: runningBalance,
+            started: true,
+          };
+        } else {
+          dailyOHLC[tradeDate].high = Math.max(dailyOHLC[tradeDate].high, runningBalance);
+          dailyOHLC[tradeDate].low = Math.min(dailyOHLC[tradeDate].low, runningBalance);
+          dailyOHLC[tradeDate].close = runningBalance;
+        }
       });
       for (let i = tradesRes.data.length - 1; i >= 0; i--) {
         if (tradesRes.data[i].result === 'win') { if (currentLossStreak > 0) break; currentWinStreak++; }
@@ -196,6 +218,16 @@ const DashboardHome = () => {
       setEvolutionData(evoEntries.map(([day, balance]) => ({ day: day.slice(5), balance })));
       const consistencyEntries = Object.entries(dailyProfitMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
+
+      // Build candle data (each candle = 1 day, value scale R$30 per unit)
+      const candleEntries = Object.entries(dailyOHLC).sort((a, b) => a[0].localeCompare(b[0]));
+      setCandleData(candleEntries.map(([day, ohlc]) => ({
+        day: day.slice(5),
+        open: +ohlc.open.toFixed(2),
+        close: +ohlc.close.toFixed(2),
+        high: +ohlc.high.toFixed(2),
+        low: +ohlc.low.toFixed(2),
+      })));
     }
 
   }, [user]);
@@ -575,23 +607,112 @@ const DashboardHome = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="border-border bg-card lg:col-span-2">
           <CardContent className="p-5 sm:p-6">
-            <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
-              <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
-            </h3>
-            <div className="h-60">
-              {evolutionData.length > 0 ? (
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
+                <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
+              </h3>
+              <span className="text-[10px] text-muted-foreground">Cada candle = 1 dia • Escala R$30</span>
+            </div>
+            <div className="h-64">
+              {candleData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={evolutionData}>
-                    <defs><linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={CHART_COLORS.gold} stopOpacity={0.25} /><stop offset="95%" stopColor={CHART_COLORS.gold} stopOpacity={0} /></linearGradient></defs>
-                    <XAxis dataKey="day" tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} labelStyle={{ color: '#F9FAFB' }} />
-                    <Area type="monotone" dataKey="balance" stroke={CHART_COLORS.gold} strokeWidth={2.5} fill="url(#balanceGrad)" dot={{ r: 3, fill: CHART_COLORS.gold, strokeWidth: 0 }} />
-                  </AreaChart>
+                  <ComposedChart data={candleData} barCategoryGap="20%">
+                    <XAxis dataKey="day" tick={{ fontSize: 10, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: CHART_COLORS.muted }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v: number) => `R$${v}`}
+                      domain={['auto', 'auto']}
+                    />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '11px' }}
+                      labelStyle={{ color: '#F9FAFB', fontWeight: 'bold' }}
+                      formatter={(value: number, name: string) => {
+                        const labels: Record<string, string> = { open: 'Abertura', close: 'Fechamento', high: 'Máxima', low: 'Mínima' };
+                        return [`R$ ${value.toFixed(2)}`, labels[name] || name];
+                      }}
+                    />
+                    {/* Wick (high-low line) */}
+                    <Bar dataKey="high" fill="transparent" barSize={2}>
+                      {candleData.map((entry, idx) => {
+                        const bullish = entry.close >= entry.open;
+                        return (
+                          <Cell key={idx} fill="transparent" />
+                        );
+                      })}
+                    </Bar>
+                    {/* Candle body rendered via custom shapes */}
+                    <Bar
+                      dataKey="close"
+                      barSize={16}
+                      shape={(props: any) => {
+                        const { x, y, width, payload, index } = props;
+                        if (!payload) return null;
+                        const { open, close, high, low } = payload;
+                        const bullish = close >= open;
+                        const color = bullish ? CHART_COLORS.green : CHART_COLORS.red;
+
+                        // Calculate y positions from the chart's coordinate system
+                        const yAxis = props.background;
+                        const chartHeight = 256; // approximate
+                        const allValues = candleData.flatMap(d => [d.open, d.close, d.high, d.low]);
+                        const minVal = Math.min(...allValues);
+                        const maxVal = Math.max(...allValues);
+                        const range = maxVal - minVal || 1;
+                        const scale = (v: number) => 16 + (1 - (v - minVal) / range) * (chartHeight - 40);
+
+                        const bodyTop = scale(Math.max(open, close));
+                        const bodyBottom = scale(Math.min(open, close));
+                        const bodyHeight = Math.max(bodyBottom - bodyTop, 2);
+                        const wickTop = scale(high);
+                        const wickBottom = scale(low);
+                        const centerX = x + width / 2;
+
+                        return (
+                          <g>
+                            {/* Wick */}
+                            <line x1={centerX} y1={wickTop} x2={centerX} y2={wickBottom} stroke={color} strokeWidth={1.5} />
+                            {/* Body */}
+                            <rect
+                              x={x + 2}
+                              y={bodyTop}
+                              width={width - 4}
+                              height={bodyHeight}
+                              fill={bullish ? color : color}
+                              stroke={color}
+                              strokeWidth={1}
+                              rx={2}
+                              opacity={bullish ? 1 : 0.85}
+                            />
+                          </g>
+                        );
+                      }}
+                    />
+                    {/* R$30 reference lines */}
+                    {(() => {
+                      const allVals = candleData.flatMap(d => [d.open, d.close, d.high, d.low]);
+                      const minV = Math.min(...allVals);
+                      const maxV = Math.max(...allVals);
+                      const startLine = Math.floor(minV / 30) * 30;
+                      const lines = [];
+                      for (let v = startLine; v <= maxV + 30; v += 30) {
+                        lines.push(
+                          <ReferenceArea key={v} y1={v} y2={v} stroke={CHART_COLORS.border} strokeDasharray="3 3" strokeOpacity={0.5} />
+                        );
+                      }
+                      return lines;
+                    })()}
+                  </ComposedChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('home.noTrades')}</div>
               )}
+            </div>
+            <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
+              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-success inline-block" /> Alta (WIN)</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-destructive inline-block" /> Baixa (LOSS)</span>
+              <span className="flex items-center gap-1">--- Escala R$30</span>
             </div>
           </CardContent>
         </Card>

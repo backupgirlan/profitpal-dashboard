@@ -336,40 +336,40 @@ const HorusIA = () => {
         {pendingPrints.length > 0 && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <Card className="border-orange-400/30 bg-orange-400/5">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="w-6 h-6 text-orange-400" />
-                  <p className="text-base font-display font-bold text-orange-400">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-orange-400" />
+                  <p className="text-xs font-display font-bold text-orange-400">
                     {pendingPrints.length} {pendingPrints.length === 1 ? 'análise aguardando' : 'análises aguardando'} resultado
                   </p>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Preencha o resultado (WIN/LOSS) de cada print analisado para que a Horus IA aprenda com seus dados.
+                <p className="text-[11px] text-muted-foreground">
+                  Preencha o resultado (WIN/LOSS) para que a Horus IA aprenda com seus dados.
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {pendingPrints.map(p => (
-                    <div key={p.id} className="flex items-center justify-between gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <ImageIcon className="w-5 h-5 text-blue-400 shrink-0" />
+                    <div key={p.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-secondary/30 border border-border/30">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ImageIcon className="w-4 h-4 text-blue-400 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-sm font-display text-foreground truncate">
+                          <p className="text-xs font-display text-foreground truncate">
                             {p.scenario === 'compra' ? '🟢 Compra' : p.scenario === 'venda' ? '🔴 Venda' : '⚪ Inconclusivo'}
                             {' '} — Confiança: {p.confidence}%
                           </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
                             {new Date(p.created_at).toLocaleString('pt-BR')} • {p.timeframe}
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-2 shrink-0">
+                      <div className="flex gap-1.5 shrink-0">
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => sendPendingFeedback(p.id, 'win')}
                           disabled={pendingFeedbackLoading === p.id}
-                          className="gap-1.5 border-success/30 bg-success/10 text-success hover:bg-success/20 text-sm h-9 px-4"
+                          className="gap-1 border-success/30 bg-success/10 text-success hover:bg-success/20 text-xs h-7 px-2.5"
                         >
-                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
                           WIN
                         </Button>
                         <Button
@@ -377,9 +377,9 @@ const HorusIA = () => {
                           variant="outline"
                           onClick={() => sendPendingFeedback(p.id, 'loss')}
                           disabled={pendingFeedbackLoading === p.id}
-                          className="gap-1.5 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-sm h-9 px-4"
+                          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs h-7 px-2.5"
                         >
-                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
                           LOSS
                         </Button>
                       </div>

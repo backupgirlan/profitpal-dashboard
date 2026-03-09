@@ -884,6 +884,19 @@ const DashboardHome = () => {
 
       <PatentPreviewDialog open={patentDialogOpen} onOpenChange={setPatentDialogOpen} rank={selectedPatentRank}
         totalProfit={totalProfit} displayName={displayName} daysTrading={daysTrading} isEn={isEn} />
+
+      {/* Auto-triggered achievement modal when user levels up */}
+      {achievedRank && (
+        <RankAchievementModal
+          open={achievementOpen}
+          onClose={() => setAchievementOpen(false)}
+          rank={achievedRank}
+          totalProfit={totalProfit}
+          displayName={displayName}
+          daysTrading={daysTrading}
+          totalTrades={wins + losses}
+        />
+      )}
     </div>
   );
 };

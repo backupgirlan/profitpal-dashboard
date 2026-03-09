@@ -401,6 +401,94 @@ const DashboardHome = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Motivational Quote */}
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 px-5 py-3 rounded-xl bg-primary/5 border border-primary/10">
+        <Quote className="w-4 h-4 text-primary shrink-0" />
+        <p className="text-sm text-muted-foreground italic">"{MOTIVATIONAL_QUOTES[quoteIndex]}"</p>
+      </motion.div>
+
+      {/* Management Summary */}
+      {mgmtActive && (
+        <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm">
+          <CardContent className="p-5">
+            <h3 className="font-display text-xs font-bold text-primary mb-3 flex items-center gap-2 uppercase tracking-wider">
+              <ClipboardList className="w-4 h-4" /> Gerenciamento em Andamento
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div><p className="text-muted-foreground text-xs">Modelo</p><p className="font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p></div>
+              <div><p className="text-muted-foreground text-xs">Banca</p><p className="font-bold text-foreground">R$ {mgmtState.banca.toFixed(2)}</p></div>
+              <div><p className="text-muted-foreground text-xs">Entrada</p><p className="font-bold text-primary">R$ {mgmtState.entradaRecomendada.toFixed(2)}</p></div>
+              <div><p className="text-muted-foreground text-xs">Placar</p><p className="font-bold"><span className="win-text">{mgmtState.cicloWins}W</span> / <span className="loss-text">{mgmtState.cicloLosses}L</span></p></div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ═══════ BANCA ATUAL ═══════ */}
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}>
+        <Card className="border-primary/20 bg-card box-glow-strong relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+          <CardContent className="p-6 sm:p-8 relative">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Banca Atual</span>
+              <div className="flex items-center gap-3">
+                <span className={`text-lg ${isEmotionalRisky ? 'animate-pulse-loss' : ''}`} title={emotionalState || 'Humor'}>{emotionalEmoji}</span>
+                <Wallet className="w-5 h-5 text-primary" />
+                <button onClick={() => setShowDepositInput(!showDepositInput)} className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" title="Depositar na banca">
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+            <div className="flex items-center gap-2 mt-3">
+              {totalProfit >= 0 ? <ArrowUpRight className="w-4 h-4 text-success" /> : <ArrowDownRight className="w-4 h-4 text-destructive" />}
+              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>{totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total</span>
+            </div>
+            <AnimatePresence>
+              {showDepositInput && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                  <div className="mt-4 pt-4 border-t border-border space-y-3">
+                    {editBalanceMode ? (
+                      <div className="flex gap-3">
+                        <Input type="number" value={editBalanceValue} onChange={e => setEditBalanceValue(e.target.value)} placeholder="Novo valor da banca" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
+                        <Button disabled={!editBalanceValue && editBalanceValue !== '0'} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleEditBalance}>Salvar</Button>
+                        <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}><X className="w-4 h-4" /></Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-3">
+                        <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="Valor do depósito" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
+                        <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleDeposit}>
+                          <PiggyBank className="w-4 h-4 mr-2" /> Depositar
+                        </Button>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      {!editBalanceMode && (
+                        <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary" onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}>
+                          <Pencil className="w-3.5 h-3.5" /> Editar Banca
+                        </Button>
+                      )}
+                      {!showResetConfirm ? (
+                        <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive" onClick={() => setShowResetConfirm(true)}>
+                          <RotateCcw className="w-3.5 h-3.5" /> Resetar Dados
+                        </Button>
+                      ) : (
+                        <div className="flex-1 flex gap-2">
+                          <Button variant="destructive" className="flex-1 h-9 text-xs gap-2" onClick={handleResetAccount} disabled={resetLoading}>
+                            <Trash2 className="w-3.5 h-3.5" /> {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
+                          </Button>
+                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>Cancelar</Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* ═══════ PAINEL HORUS IA — HERO SECTION ═══════ */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card box-glow-strong relative overflow-hidden">
@@ -497,95 +585,8 @@ const DashboardHome = () => {
         </Card>
       </motion.div>
 
-      {/* Motivational Quote */}
-      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 px-5 py-3 rounded-xl bg-primary/5 border border-primary/10">
-        <Quote className="w-4 h-4 text-primary shrink-0" />
-        <p className="text-sm text-muted-foreground italic">"{MOTIVATIONAL_QUOTES[quoteIndex]}"</p>
-      </motion.div>
-
-      {/* Management Summary */}
-      {mgmtActive && (
-        <Card className="border-primary/20 bg-primary/5 backdrop-blur-sm">
-          <CardContent className="p-5">
-            <h3 className="font-display text-xs font-bold text-primary mb-3 flex items-center gap-2 uppercase tracking-wider">
-              <ClipboardList className="w-4 h-4" /> Gerenciamento em Andamento
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div><p className="text-muted-foreground text-xs">Modelo</p><p className="font-bold text-foreground">{mgmtState.model?.toUpperCase()}</p></div>
-              <div><p className="text-muted-foreground text-xs">Banca</p><p className="font-bold text-foreground">R$ {mgmtState.banca.toFixed(2)}</p></div>
-              <div><p className="text-muted-foreground text-xs">Entrada</p><p className="font-bold text-primary">R$ {mgmtState.entradaRecomendada.toFixed(2)}</p></div>
-              <div><p className="text-muted-foreground text-xs">Placar</p><p className="font-bold"><span className="win-text">{mgmtState.cicloWins}W</span> / <span className="loss-text">{mgmtState.cicloLosses}L</span></p></div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ═══════ BANCA ATUAL ═══════ */}
-      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}>
-        <Card className="border-primary/20 bg-card box-glow-strong relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
-          <CardContent className="p-6 sm:p-8 relative">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Banca Atual</span>
-              <div className="flex items-center gap-3">
-                <span className={`text-lg ${isEmotionalRisky ? 'animate-pulse-loss' : ''}`} title={emotionalState || 'Humor'}>{emotionalEmoji}</span>
-                <Wallet className="w-5 h-5 text-primary" />
-                <button onClick={() => setShowDepositInput(!showDepositInput)} className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" title="Depositar na banca">
-                  <Pencil className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-            <div className="flex items-center gap-2 mt-3">
-              {totalProfit >= 0 ? <ArrowUpRight className="w-4 h-4 text-success" /> : <ArrowDownRight className="w-4 h-4 text-destructive" />}
-              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>{totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total</span>
-            </div>
-            <AnimatePresence>
-              {showDepositInput && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                  <div className="mt-4 pt-4 border-t border-border space-y-3">
-                    {editBalanceMode ? (
-                      <div className="flex gap-3">
-                        <Input type="number" value={editBalanceValue} onChange={e => setEditBalanceValue(e.target.value)} placeholder="Novo valor da banca" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
-                        <Button disabled={!editBalanceValue && editBalanceValue !== '0'} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleEditBalance}>Salvar</Button>
-                        <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}><X className="w-4 h-4" /></Button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-3">
-                        <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="Valor do depósito" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
-                        <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleDeposit}>
-                          <PiggyBank className="w-4 h-4 mr-2" /> Depositar
-                        </Button>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      {!editBalanceMode && (
-                        <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary" onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}>
-                          <Pencil className="w-3.5 h-3.5" /> Editar Banca
-                        </Button>
-                      )}
-                      {!showResetConfirm ? (
-                        <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive" onClick={() => setShowResetConfirm(true)}>
-                          <RotateCcw className="w-3.5 h-3.5" /> Resetar Dados
-                        </Button>
-                      ) : (
-                        <div className="flex-1 flex gap-2">
-                          <Button variant="destructive" className="flex-1 h-9 text-xs gap-2" onClick={handleResetAccount} disabled={resetLoading}>
-                            <Trash2 className="w-3.5 h-3.5" /> {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
-                          </Button>
-                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>Cancelar</Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </CardContent>
-        </Card>
-      </motion.div>
-
       {/* ═══════ Stat Cards Grid ═══════ */}
+
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: TrendingUp, label: 'Lucro do Dia', value: formatCurrency(todayProfit), positive: todayProfit >= 0 },

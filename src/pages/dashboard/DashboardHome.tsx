@@ -15,7 +15,7 @@ import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
   Pencil, X, Target, ClipboardList, Activity, Calendar, Quote,
   ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
-  Trash2, RotateCcw, Brain, Eye, MessageSquare, Sparkles, Lock
+  Trash2, RotateCcw
 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS, TraderRank } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
@@ -98,11 +98,6 @@ const DashboardHome = () => {
   const [negativeDays, setNegativeDays] = useState(0);
   const [disciplineRate, setDisciplineRate] = useState(100);
 
-  // Horus IA state
-  const [isVip, setIsVip] = useState(false);
-  const [isSuperVip, setIsSuperVip] = useState(false);
-  const [lastAnalysis, setLastAnalysis] = useState<string | null>(null);
-  const [consecutiveLosses, setConsecutiveLosses] = useState(0);
 
   const quoteIndex = useMemo(() => Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length), []);
 
@@ -147,9 +142,6 @@ const DashboardHome = () => {
       setTotalProfit(newProfit);
       setDisplayName(profileRes.data.display_name || 'Trader');
       setDisciplineRate(Number(profileRes.data.discipline_score) || 100);
-      setIsVip(!!profileRes.data.is_vip);
-      setIsSuperVip(!!profileRes.data.is_super_vip);
-      setConsecutiveLosses(Number(profileRes.data.consecutive_losses) || 0);
       if (profileRes.data.created_at) {
         const created = new Date(profileRes.data.created_at);
         setDaysTrading(Math.max(1, Math.floor((Date.now() - created.getTime()) / 86400000)));
@@ -206,9 +198,6 @@ const DashboardHome = () => {
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
     }
 
-    // Last analysis
-    const { data: analysisData } = await supabase.from('account_analyses').select('summary, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
-    if (analysisData?.summary) setLastAnalysis(analysisData.summary);
   }, [user]);
 
   useEffect(() => {
@@ -360,8 +349,8 @@ const DashboardHome = () => {
   const emotionalEmoji = emotionalState ? emotionalOptions.find(o => o.key === emotionalState)?.label.split(' ')[0] || '😊' : '😊';
   const isEmotionalRisky = emotionalState ? !emotionalOptions.find(o => o.key === emotionalState)?.safe : false;
 
-  const riskLevel = consecutiveLosses >= 2 ? 'Alto' : isEmotionalRisky ? 'Médio' : 'Baixo';
-  const riskColor = riskLevel === 'Alto' ? 'text-destructive' : riskLevel === 'Médio' ? 'text-primary' : 'text-success';
+  const riskLevel = isEmotionalRisky ? 'Médio' : 'Baixo';
+  const riskColor = riskLevel === 'Médio' ? 'text-primary' : 'text-success';
   const stateLabel = isEmotionalRisky ? 'Atenção' : 'Estável';
 
   return (
@@ -581,94 +570,6 @@ const DashboardHome = () => {
         </CardContent>
       </Card>
 
-      {/* ═══════ PAINEL HORUS IA ═══════ */}
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card box-glow-strong relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-60 h-60 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-          <CardContent className="p-6 sm:p-8 relative">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h2 className="font-display text-sm font-bold text-primary uppercase tracking-wider">Painel Horus IA</h2>
-                  <p className="text-xs text-muted-foreground">Monitoramento inteligente do trader</p>
-                </div>
-              </div>
-              {(isVip || isSuperVip) ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-display text-success border border-success/20 bg-success/10 px-3 py-1 rounded-full">
-                  <CheckCircle className="w-3 h-3" /> Ativa
-                </span>
-              ) : (
-                <Button size="sm" onClick={() => navigate('/dashboard/super-vip')} className="gradient-gold text-primary-foreground font-display text-xs gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" /> Ativar
-                </Button>
-              )}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
-                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Estado</p>
-                <p className={`text-lg font-bold ${isEmotionalRisky ? 'text-destructive' : 'text-success'}`}>{stateLabel}</p>
-                <p className="text-lg">{emotionalEmoji}</p>
-              </div>
-              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
-                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Risco Emocional</p>
-                <p className={`text-lg font-bold ${riskColor}`}>{riskLevel}</p>
-              </div>
-              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
-                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Score</p>
-                <p className="text-2xl font-display font-black text-primary">{disciplineRate}</p>
-                <p className="text-[10px] text-muted-foreground">/ 100</p>
-              </div>
-              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
-                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Losses Seguidos</p>
-                <p className={`text-2xl font-display font-black ${consecutiveLosses >= 2 ? 'text-destructive' : 'text-foreground'}`}>{consecutiveLosses}</p>
-              </div>
-            </div>
-            {consecutiveLosses >= 2 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-bold text-destructive">Alerta da Horus IA</p>
-                  <p className="text-xs text-muted-foreground mt-1">{consecutiveLosses} losses consecutivos detectados. Seu risco de impulsividade aumentou. Considere encerrar o dia.</p>
-                </div>
-              </motion.div>
-            )}
-            {lastAnalysis && (
-              <div className="mb-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                <p className="text-xs text-primary font-display uppercase tracking-wider mb-1">Última Análise da Conta</p>
-                <p className="text-sm text-muted-foreground line-clamp-2">{lastAnalysis}</p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {(isVip || isSuperVip) ? (
-                <>
-                  <Button variant="outline" onClick={() => navigate('/dashboard/horus')} className="h-12 border-primary/20 hover:bg-primary/10 text-primary font-display text-xs gap-2 uppercase tracking-wider">
-                    <BarChart3 className="w-4 h-4" /> Analisar minha conta
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate('/dashboard/horus')} className="h-12 border-primary/20 hover:bg-primary/10 text-primary font-display text-xs gap-2 uppercase tracking-wider">
-                    <Eye className="w-4 h-4" /> Enviar print para análise
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate('/dashboard/horus')} className="h-12 border-primary/20 hover:bg-primary/10 text-primary font-display text-xs gap-2 uppercase tracking-wider">
-                    <MessageSquare className="w-4 h-4" /> Conversar com Horus IA
-                  </Button>
-                </>
-              ) : (
-                <div className="sm:col-span-3 text-center py-4">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <Lock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Horus IA não ativa</span>
-                  </div>
-                  <Button onClick={() => navigate('/dashboard/super-vip')} className="gradient-gold text-primary-foreground font-display text-sm gap-2">
-                    <Sparkles className="w-4 h-4" /> Ativar agora — R$ 29,90/mês
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
 
       {/* ═══════ Charts Row ═══════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

@@ -23,47 +23,6 @@ import { Separator } from '@/components/ui/separator';
 import HorusCheckinModal from '@/components/horus/HorusCheckinModal';
 import ProtectionModeOverlay from '@/components/horus/ProtectionModeOverlay';
 
-const NAV_SECTIONS = [
-  {
-    title: 'Principal',
-    items: [
-      { path: '/dashboard', label: 'Dashboard', icon: Home },
-      { path: '/dashboard/management', label: 'Registrar Operação', icon: ClipboardList },
-      { path: '/dashboard/report', label: 'Relatórios', icon: FileText },
-    ],
-  },
-  {
-    title: 'Mentalidade',
-    items: [
-      { path: '/dashboard/psychology', label: 'Psicologia', icon: Brain },
-      { path: '/dashboard/breathing', label: 'Respiração', icon: Wind },
-      { path: '/dashboard/mental', label: 'Modo Disciplina', icon: Shield },
-      { path: '/dashboard/diary', label: 'Diário Emocional', icon: BookOpen },
-    ],
-  },
-  {
-    title: 'Progressão',
-    items: [
-      { path: '/dashboard/rankings', label: 'Conquistas', icon: Award },
-      { path: '/dashboard/evolution', label: 'Evolução', icon: TrendingUp },
-    ],
-  },
-  {
-    title: 'Premium',
-    items: [
-      { path: '/dashboard/horus', label: 'Horus IA', icon: Eye },
-      { path: '/dashboard/super-vip', label: 'Comprar Super VIP', icon: Award },
-    ],
-  },
-  {
-    title: 'Aprendizado',
-    items: [
-      { path: '/dashboard/videos', label: 'Vídeos', icon: Youtube },
-      { path: '/dashboard/courses', label: 'Cursos', icon: GraduationCap },
-    ],
-  },
-];
-
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { signOut, user } = useAuth();
   const location = useLocation();
@@ -81,7 +40,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [installOpen, setInstallOpen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
 
-  // Horus IA behavioral system
   const [showCheckin, setShowCheckin] = useState(false);
   const [showProtection, setShowProtection] = useState(false);
   const [consecutiveLosses, setConsecutiveLosses] = useState(0);
@@ -89,6 +47,47 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [lockoutMinutes, setLockoutMinutes] = useState(15);
   const [checkinEnabled, setCheckinEnabled] = useState(true);
   const [resetLoading, setResetLoading] = useState(false);
+
+  const NAV_SECTIONS = [
+    {
+      title: t('sidebar.principal'),
+      items: [
+        { path: '/dashboard', label: t('sidebar.dashboard'), icon: Home },
+        { path: '/dashboard/management', label: t('sidebar.registerOp'), icon: ClipboardList },
+        { path: '/dashboard/report', label: t('sidebar.reports'), icon: FileText },
+      ],
+    },
+    {
+      title: t('sidebar.mindset'),
+      items: [
+        { path: '/dashboard/psychology', label: t('sidebar.psychology'), icon: Brain },
+        { path: '/dashboard/breathing', label: t('sidebar.breathing'), icon: Wind },
+        { path: '/dashboard/mental', label: t('sidebar.disciplineMode'), icon: Shield },
+        { path: '/dashboard/diary', label: t('sidebar.emotionalDiary'), icon: BookOpen },
+      ],
+    },
+    {
+      title: t('sidebar.progression'),
+      items: [
+        { path: '/dashboard/rankings', label: t('sidebar.achievements'), icon: Award },
+        { path: '/dashboard/evolution', label: t('sidebar.evolution'), icon: TrendingUp },
+      ],
+    },
+    {
+      title: t('sidebar.premium'),
+      items: [
+        { path: '/dashboard/horus', label: 'Horus IA', icon: Eye },
+        { path: '/dashboard/super-vip', label: t('sidebar.buySuperVip'), icon: Award },
+      ],
+    },
+    {
+      title: t('sidebar.learning'),
+      items: [
+        { path: '/dashboard/videos', label: t('sidebar.videos'), icon: Youtube },
+        { path: '/dashboard/courses', label: t('sidebar.courses'), icon: GraduationCap },
+      ],
+    },
+  ];
 
   const allNavItems = NAV_SECTIONS.flatMap(s => s.items);
 
@@ -112,7 +111,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  // Load settings + check-in status + consecutive losses
   useEffect(() => {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
@@ -125,7 +123,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         else setUserLevel('common');
       });
 
-    // Load Horus flow settings
     supabase.from('horus_settings')
       .select('setting_key, setting_value')
       .in('setting_key', ['checkin_enabled', 'protection_enabled', 'protection_loss_threshold', 'protection_lockout_minutes'])
@@ -139,7 +136,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         }
       });
 
-    // Check if today's check-in already done
     const today = new Date().toISOString().split('T')[0];
     supabase.from('emotional_checkins')
       .select('id')
@@ -148,12 +144,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       .limit(1)
       .then(({ data }) => {
         if (!data || data.length === 0) {
-          // No check-in today — show after a short delay
           setTimeout(() => setShowCheckin(true), 1200);
         }
       });
 
-    // Check consecutive losses from recent trades
     supabase.from('trades')
       .select('result')
       .eq('user_id', user.id)
@@ -170,13 +164,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       });
   }, [user]);
 
-  // Listen for real-time trade events to trigger protection mode
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel('trades-monitor')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trades', filter: `user_id=eq.${user.id}` }, async () => {
-        // Re-fetch consecutive losses
         const { data: trades } = await supabase
           .from('trades')
           .select('result')
@@ -198,14 +190,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     return () => { supabase.removeChannel(channel); };
   }, [user, protectionThreshold]);
 
-  // Show protection if consecutive losses already at threshold
   useEffect(() => {
     if (consecutiveLosses >= protectionThreshold && consecutiveLosses > 0) {
       setShowProtection(true);
     }
   }, [consecutiveLosses, protectionThreshold]);
-
-
 
   const handleSignOut = async () => { await signOut(); navigate('/'); };
 
@@ -238,7 +227,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Mobile toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="fixed top-4 left-4 z-50 lg:hidden bg-card border border-border rounded-xl p-2.5 text-primary shadow-lg backdrop-blur-sm"
@@ -246,10 +234,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
-      {/* ═══════ Sidebar ═══════ */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-40 ${sidebarWidth} bg-sidebar flex flex-col transition-all duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        
-        {/* Brand Header */}
         <div className="h-16 px-4 flex items-center justify-between border-b border-sidebar-border">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-3">
@@ -257,9 +242,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <span className="text-primary-foreground font-bold text-xs">TG</span>
               </div>
               <div>
-                <h2 className="font-display text-xs font-bold text-foreground tracking-wider leading-none">
-                  TECHNICAL
-                </h2>
+                <h2 className="font-display text-xs font-bold text-foreground tracking-wider leading-none">TECHNICAL</h2>
                 <span className="text-[10px] text-primary font-semibold tracking-widest">GIRLAN</span>
               </div>
             </div>
@@ -268,15 +251,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <span className="text-primary-foreground font-bold text-xs">TG</span>
             </div>
           )}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="hidden lg:flex items-center justify-center w-6 h-6 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
-          >
+          <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="hidden lg:flex items-center justify-center w-6 h-6 rounded-md hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors">
             {sidebarCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </button>
         </div>
 
-        {/* User Info */}
         {!sidebarCollapsed && (
           <div className="px-4 py-3 border-b border-sidebar-border">
             <div className="flex items-center gap-3">
@@ -307,7 +286,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         )}
 
-        {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-4">
           {NAV_SECTIONS.map((section) => (
             <div key={section.title}>
@@ -320,7 +298,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <div className="space-y-0.5">
                 {section.items
                   .filter((item) => {
-                    // Hide "Comprar Super VIP" if user is already super_vip
                     if (item.path === '/dashboard/super-vip' && userLevel === 'super_vip') return false;
                     return true;
                   })
@@ -362,11 +339,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </div>
           ))}
 
-          {/* Settings */}
           <div>
             {!sidebarCollapsed && (
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] px-3 mb-1.5">
-                Sistema
+                {t('sidebar.system')}
               </p>
             )}
             {sidebarCollapsed && <Separator className="my-1.5 bg-sidebar-border" />}
@@ -374,7 +350,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Link
                 to="/dashboard/settings"
                 onClick={() => setSidebarOpen(false)}
-                title={sidebarCollapsed ? 'Configurações' : undefined}
+                title={sidebarCollapsed ? t('sidebar.settings') : undefined}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 group relative ${
                   location.pathname === '/dashboard/settings'
                     ? 'bg-primary/10 text-primary'
@@ -389,7 +365,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                   />
                 )}
                 <Settings className={`w-[18px] h-[18px] shrink-0 ${location.pathname === '/dashboard/settings' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`} />
-                {!sidebarCollapsed && <span>Configurações</span>}
+                {!sidebarCollapsed && <span>{t('sidebar.settings')}</span>}
               </Link>
 
               {isAdmin && (
@@ -418,7 +394,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </nav>
 
-        {/* Bottom Actions */}
         <div className="p-3 border-t border-sidebar-border">
           {!sidebarCollapsed ? (
             <div className="space-y-0.5">
@@ -449,10 +424,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile overlay */}
       {sidebarOpen && <div className="fixed inset-0 z-30 bg-background/60 backdrop-blur-sm lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Dialogs */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
@@ -506,14 +479,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
 
-      {/* ═══ Horus IA Behavioral Overlays ═══ */}
       <AnimatePresence>
         {showCheckin && checkinEnabled && (
           <HorusCheckinModal
             onComplete={(riskLevel) => {
               setShowCheckin(false);
               if (riskLevel === 'paused') {
-                toast({ title: '🛑 Banca protegida', description: 'Você escolheu pausar hoje. Boa decisão.' });
+                toast({ title: t('dashboard.bankProtected'), description: t('dashboard.bankProtectedDesc') });
               }
             }}
           />
@@ -537,7 +509,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* ═══════ Topbar + Main ═══════ */}
       <div className="flex-1 flex flex-col min-h-screen">
         <header className="sticky top-0 z-20 h-14 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 lg:px-8">
           <div className="flex items-center gap-3">
@@ -563,4 +534,3 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-

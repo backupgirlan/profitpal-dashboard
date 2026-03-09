@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Radar, AlertTriangle, Brain, RefreshCw, MessageCircle, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface RadarCategory {
   key: string;
@@ -23,6 +24,7 @@ interface RadarAnalysis {
 
 export default function BehaviorRadar() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [analysis, setAnalysis] = useState<RadarAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -43,29 +45,22 @@ export default function BehaviorRadar() {
       const wins = trades?.filter(t => t.result === 'win').length || 0;
       const followedPlan = trades?.filter(t => t.followed_plan).length || 0;
 
-      // Calculate each category (0-100)
-      // 1. Disciplina - baseado em seguir o plano
       const disciplina = totalTrades > 0 ? Math.round((followedPlan / totalTrades) * 100) : 80;
 
-      // 2. Controle Emocional - baseado em checkins
       const riskyCheckins = checkins?.filter(c => c.is_risky).length || 0;
       const totalCheckins = checkins?.length || 1;
       const controleEmocional = Math.max(20, Math.round(100 - (riskyCheckins / totalCheckins) * 80));
 
-      // 3. Consistência - baseado na variação de resultados
       const winRate = totalTrades > 0 ? (wins / totalTrades) * 100 : 50;
       const consistencia = Math.min(100, Math.round(50 + (winRate - 50) * 0.8));
 
-      // 4. Gestão de Risco - baseado em perdas consecutivas e drawdown
       const consecutiveLosses = profile?.consecutive_losses || 0;
       const gestaoRisco = Math.max(20, 100 - (consecutiveLosses * 15));
 
-      // 5. Respeito ao Plano - similar à disciplina mas considera diary
       const diaryFollowed = diary?.filter(d => d.followed_plan).length || 0;
       const totalDiary = diary?.length || 1;
       const respeitoPlano = totalTrades > 0 ? Math.round(((followedPlan / totalTrades) * 0.6 + (diaryFollowed / totalDiary) * 0.4) * 100) : 75;
 
-      // 6. Controle Após Loss - baseado em padrão após perdas
       let postLossControl = 80;
       if (trades && trades.length > 2) {
         let badAfterLoss = 0;
@@ -73,7 +68,6 @@ export default function BehaviorRadar() {
         for (let i = 1; i < trades.length; i++) {
           if (trades[i].result === 'loss') {
             lossCount++;
-            // Check if next trade was impulsive (higher amount or quick)
             if (i > 0 && trades[i - 1].result === 'loss') badAfterLoss++;
           }
         }
@@ -81,39 +75,37 @@ export default function BehaviorRadar() {
       }
 
       const categories: RadarCategory[] = [
-        { key: 'disciplina', label: 'Disciplina', value: disciplina, color: 'hsl(48, 96%, 53%)' },
-        { key: 'controle_emocional', label: 'Controle Emocional', value: controleEmocional, color: 'hsl(142, 71%, 45%)' },
-        { key: 'consistencia', label: 'Consistência', value: consistencia, color: 'hsl(221, 83%, 53%)' },
-        { key: 'gestao_risco', label: 'Gestão de Risco', value: gestaoRisco, color: 'hsl(280, 70%, 55%)' },
-        { key: 'respeito_plano', label: 'Respeito ao Plano', value: respeitoPlano, color: 'hsl(25, 95%, 53%)' },
-        { key: 'controle_pos_loss', label: 'Controle Após Loss', value: Math.round(postLossControl), color: 'hsl(0, 84%, 60%)' },
+        { key: 'disciplina', label: t('horus.discipline'), value: disciplina, color: 'hsl(48, 96%, 53%)' },
+        { key: 'controle_emocional', label: t('horus.emotionalControl'), value: controleEmocional, color: 'hsl(142, 71%, 45%)' },
+        { key: 'consistencia', label: t('horus.consistency'), value: consistencia, color: 'hsl(221, 83%, 53%)' },
+        { key: 'gestao_risco', label: t('horus.riskManagement'), value: gestaoRisco, color: 'hsl(280, 70%, 55%)' },
+        { key: 'respeito_plano', label: t('horus.planRespect'), value: respeitoPlano, color: 'hsl(25, 95%, 53%)' },
+        { key: 'controle_pos_loss', label: t('horus.postLossControl'), value: Math.round(postLossControl), color: 'hsl(0, 84%, 60%)' },
       ];
 
-      // Generate alerts
       const alerts: string[] = [];
       categories.forEach(cat => {
         if (cat.value < 40) {
-          alerts.push(`⚠️ ${cat.label} em nível crítico (${cat.value}%)`);
+          alerts.push(t('horus.criticalLevel', { label: cat.label, value: cat.value }));
         }
       });
 
-      // Generate insight based on data
       const weakestCategory = categories.reduce((min, cat) => cat.value < min.value ? cat : min);
       const strongestCategory = categories.reduce((max, cat) => cat.value > max.value ? cat : max);
 
       let insight = '';
       if (weakestCategory.value < 50) {
-        insight = `Seu ponto mais fraco é ${weakestCategory.label.toLowerCase()} (${weakestCategory.value}%). Foque em melhorar esse aspecto antes de aumentar o volume de operações.`;
+        insight = t('horus.weakestPoint', { label: weakestCategory.label.toLowerCase(), value: weakestCategory.value });
       } else if (strongestCategory.value > 80) {
-        insight = `Seu radar mostra boa ${strongestCategory.label.toLowerCase()} (${strongestCategory.value}%). Continue mantendo esse padrão.`;
+        insight = t('horus.strongestPoint', { label: strongestCategory.label.toLowerCase(), value: strongestCategory.value });
       } else {
-        insight = `Seu comportamento está equilibrado. Mantenha a consistência e foque em evitar desvios emocionais.`;
+        insight = t('horus.balanced');
       }
 
       setAnalysis({ categories, insight, alerts });
       setLastUpdate(new Date());
     } catch (err: any) {
-      toast.error('Erro ao calcular radar: ' + err.message);
+      toast.error(t('horus.radarError') + ': ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -123,113 +115,43 @@ export default function BehaviorRadar() {
     calculateRadarData();
   }, [user]);
 
-  // Radar chart SVG rendering
   const renderRadarChart = () => {
     if (!analysis) return null;
-
     const centerX = 140;
     const centerY = 140;
     const maxRadius = 100;
     const levels = 5;
     const categories = analysis.categories;
     const angleStep = (2 * Math.PI) / categories.length;
-
-    // Generate polygon points for data
     const dataPoints = categories.map((cat, i) => {
       const angle = i * angleStep - Math.PI / 2;
       const radius = (cat.value / 100) * maxRadius;
-      return {
-        x: centerX + radius * Math.cos(angle),
-        y: centerY + radius * Math.sin(angle),
-      };
+      return { x: centerX + radius * Math.cos(angle), y: centerY + radius * Math.sin(angle) };
     });
-
     const polygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
 
     return (
       <svg width="280" height="280" className="mx-auto">
-        {/* Background circles */}
         {Array.from({ length: levels }).map((_, i) => (
-          <circle
-            key={i}
-            cx={centerX}
-            cy={centerY}
-            r={(maxRadius / levels) * (i + 1)}
-            fill="none"
-            stroke="hsl(var(--border))"
-            strokeOpacity={0.3}
-            strokeWidth={1}
-          />
+          <circle key={i} cx={centerX} cy={centerY} r={(maxRadius / levels) * (i + 1)} fill="none" stroke="hsl(var(--border))" strokeOpacity={0.3} strokeWidth={1} />
         ))}
-
-        {/* Axis lines */}
         {categories.map((cat, i) => {
           const angle = i * angleStep - Math.PI / 2;
           const endX = centerX + maxRadius * Math.cos(angle);
           const endY = centerY + maxRadius * Math.sin(angle);
-          return (
-            <line
-              key={i}
-              x1={centerX}
-              y1={centerY}
-              x2={endX}
-              y2={endY}
-              stroke="hsl(var(--border))"
-              strokeOpacity={0.4}
-              strokeWidth={1}
-            />
-          );
+          return <line key={i} x1={centerX} y1={centerY} x2={endX} y2={endY} stroke="hsl(var(--border))" strokeOpacity={0.4} strokeWidth={1} />;
         })}
-
-        {/* Data polygon */}
-        <motion.polygon
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          points={polygonPoints}
-          fill="hsl(48, 96%, 53%)"
-          fillOpacity={0.2}
-          stroke="hsl(48, 96%, 53%)"
-          strokeWidth={2}
-        />
-
-        {/* Data points */}
+        <motion.polygon initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6, ease: 'easeOut' }} points={polygonPoints} fill="hsl(48, 96%, 53%)" fillOpacity={0.2} stroke="hsl(48, 96%, 53%)" strokeWidth={2} />
         {dataPoints.map((point, i) => (
-          <motion.circle
-            key={i}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3 + i * 0.1 }}
-            cx={point.x}
-            cy={point.y}
-            r={5}
-            fill={categories[i].color}
-            stroke="hsl(var(--background))"
-            strokeWidth={2}
-          />
+          <motion.circle key={i} initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.3 + i * 0.1 }} cx={point.x} cy={point.y} r={5} fill={categories[i].color} stroke="hsl(var(--background))" strokeWidth={2} />
         ))}
-
-        {/* Labels */}
         {categories.map((cat, i) => {
           const angle = i * angleStep - Math.PI / 2;
           const labelRadius = maxRadius + 25;
           const x = centerX + labelRadius * Math.cos(angle);
           const y = centerY + labelRadius * Math.sin(angle);
           const isLeft = x < centerX;
-          return (
-            <text
-              key={i}
-              x={x}
-              y={y}
-              textAnchor={isLeft ? 'end' : 'start'}
-              dominantBaseline="middle"
-              fontSize={9}
-              fontWeight={500}
-              fill="hsl(var(--muted-foreground))"
-            >
-              {cat.label.split(' ')[0]}
-            </text>
-          );
+          return <text key={i} x={x} y={y} textAnchor={isLeft ? 'end' : 'start'} dominantBaseline="middle" fontSize={9} fontWeight={500} fill="hsl(var(--muted-foreground))">{cat.label.split(' ')[0]}</text>;
         })}
       </svg>
     );
@@ -244,21 +166,13 @@ export default function BehaviorRadar() {
               <Radar className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h3 className="font-display text-sm font-bold text-foreground uppercase tracking-wider">
-                Radar de Comportamento
-              </h3>
-              <p className="text-[10px] text-muted-foreground">Análise em tempo real do seu padrão operacional</p>
+              <h3 className="font-display text-sm font-bold text-foreground uppercase tracking-wider">{t('horus.behaviorRadar')}</h3>
+              <p className="text-[10px] text-muted-foreground">{t('horus.behaviorRadarDesc')}</p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={calculateRadarData}
-            disabled={loading}
-            className="text-xs gap-1.5"
-          >
+          <Button variant="outline" size="sm" onClick={calculateRadarData} disabled={loading} className="text-xs gap-1.5">
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
+            {t('horus.update')}
           </Button>
         </div>
 
@@ -268,46 +182,22 @@ export default function BehaviorRadar() {
           </div>
         ) : analysis ? (
           <div className="space-y-4">
-            {/* Radar Chart */}
-            <div className="flex justify-center">
-              {renderRadarChart()}
-            </div>
-
-            {/* Category Scores */}
+            <div className="flex justify-center">{renderRadarChart()}</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {analysis.categories.map(cat => (
-                <div
-                  key={cat.key}
-                  className="flex items-center justify-between p-2 rounded-lg bg-secondary/50"
-                >
+                <div key={cat.key} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
                   <span className="text-[10px] text-muted-foreground truncate">{cat.label}</span>
-                  <Badge
-                    variant="outline"
-                    className={`text-[10px] font-mono ${
-                      cat.value >= 70 ? 'border-success/50 text-success' :
-                      cat.value >= 40 ? 'border-primary/50 text-primary' :
-                      'border-destructive/50 text-destructive'
-                    }`}
-                  >
-                    {cat.value}
-                  </Badge>
+                  <Badge variant="outline" className={`text-[10px] font-mono ${cat.value >= 70 ? 'border-success/50 text-success' : cat.value >= 40 ? 'border-primary/50 text-primary' : 'border-destructive/50 text-destructive'}`}>{cat.value}</Badge>
                 </div>
               ))}
             </div>
-
-            {/* Alerts */}
             <AnimatePresence>
               {analysis.alerts.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="bg-destructive/10 border border-destructive/20 rounded-lg p-3"
-                >
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
                   <div className="flex items-start gap-2">
                     <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-destructive">Alerta Comportamental</p>
+                      <p className="text-xs font-bold text-destructive">{t('horus.behavioralAlert')}</p>
                       {analysis.alerts.map((alert, i) => (
                         <p key={i} className="text-[11px] text-muted-foreground">{alert}</p>
                       ))}
@@ -316,28 +206,23 @@ export default function BehaviorRadar() {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* AI Insight */}
             <div className="bg-primary/5 border border-primary/10 rounded-lg p-3">
               <div className="flex items-start gap-2">
                 <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-bold text-primary mb-1">Análise Horus IA</p>
+                  <p className="text-xs font-bold text-primary mb-1">{t('horus.horusAnalysis')}</p>
                   <p className="text-[11px] text-muted-foreground leading-relaxed">{analysis.insight}</p>
                 </div>
               </div>
             </div>
-
             {lastUpdate && (
               <p className="text-[9px] text-muted-foreground text-right">
-                Última atualização: {lastUpdate.toLocaleTimeString('pt-BR')}
+                {t('horus.lastUpdate')}: {lastUpdate.toLocaleTimeString()}
               </p>
             )}
           </div>
         ) : (
-          <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
-            Nenhum dado disponível
-          </div>
+          <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">{t('horus.noData')}</div>
         )}
       </CardContent>
     </Card>

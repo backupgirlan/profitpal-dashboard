@@ -330,29 +330,6 @@ const HorusIA = () => {
 
   return (
     <div className="space-y-6">
-      {/* Hero Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-8 md:p-10">
-        <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-5">
-            <div className="w-14 h-14 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
-              <Eye className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-display font-bold text-primary text-glow">HORUS IA</h1>
-              <p className="text-base text-muted-foreground font-medium tracking-wider mt-1">ASSISTENTE INTELIGENTE DE PERFORMANCE</p>
-            </div>
-            <Badge className="ml-auto gradient-gold text-primary-foreground border-0 font-display text-sm px-4 py-1.5">
-              <Star className="w-4 h-4 mr-1.5" /> SUPER VIP
-            </Badge>
-          </div>
-          <motion.p key={phraseIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="text-lg text-muted-foreground italic max-w-2xl">
-            "{POSITIONING_PHRASES[phraseIdx]}"
-          </motion.p>
-        </div>
-      </motion.div>
 
       {/* Pending Prints Alert */}
       <AnimatePresence>
@@ -416,7 +393,7 @@ const HorusIA = () => {
       </AnimatePresence>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { icon: Brain, label: 'Análises', value: analyses.length, color: 'text-primary' },
           { icon: ImageIcon, label: 'Prints', value: printAnalyses.length, color: 'text-blue-400' },
@@ -426,13 +403,13 @@ const HorusIA = () => {
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/20 transition-colors">
-              <CardContent className="p-6 flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-secondary/80 flex items-center justify-center shrink-0">
-                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-secondary/80 flex items-center justify-center shrink-0">
+                  <stat.icon className={`w-4 h-4 ${stat.color}`} />
                 </div>
                 <div>
-                  <p className="text-base text-muted-foreground">{stat.label}</p>
-                  <p className="text-3xl font-display font-bold text-foreground">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="text-xl font-display font-bold text-foreground">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -442,71 +419,71 @@ const HorusIA = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-2 p-2">
-          <TabsTrigger value="behavioral" className="gap-2 font-display text-base py-3 px-5"><Brain className="w-5 h-5" /> Comportamental</TabsTrigger>
-          <TabsTrigger value="print" className="gap-2 font-display text-base py-3 px-5 relative">
-            <ImageIcon className="w-5 h-5" /> Print
+        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-1.5 p-1.5">
+          <TabsTrigger value="behavioral" className="gap-1.5 font-display text-xs py-2 px-3"><Brain className="w-4 h-4" /> Comportamental</TabsTrigger>
+          <TabsTrigger value="print" className="gap-1.5 font-display text-xs py-2 px-3 relative">
+            <ImageIcon className="w-4 h-4" /> Print
             {pendingPrints.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-orange-400 text-[10px] text-white flex items-center justify-center font-bold animate-pulse">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-400 text-[9px] text-white flex items-center justify-center font-bold animate-pulse">
                 {pendingPrints.length}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="account" className="gap-2 font-display text-base py-3 px-5"><BarChart3 className="w-5 h-5" /> Análise da Conta</TabsTrigger>
-          <TabsTrigger value="dialog" className="gap-2 font-display text-base py-3 px-5"><MessageSquare className="w-5 h-5" /> Diálogo do Trader</TabsTrigger>
-          <TabsTrigger value="history" className="gap-2 font-display text-base py-3 px-5"><Clock className="w-5 h-5" /> Histórico</TabsTrigger>
+          <TabsTrigger value="account" className="gap-1.5 font-display text-xs py-2 px-3"><BarChart3 className="w-4 h-4" /> Análise da Conta</TabsTrigger>
+          <TabsTrigger value="dialog" className="gap-1.5 font-display text-xs py-2 px-3"><MessageSquare className="w-4 h-4" /> Diálogo do Trader</TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5 font-display text-xs py-2 px-3"><Clock className="w-4 h-4" /> Histórico</TabsTrigger>
         </TabsList>
 
         {/* Behavioral Analysis */}
-        <TabsContent value="behavioral" className="space-y-5 mt-5">
+        <TabsContent value="behavioral" className="space-y-4 mt-4">
           <Card className="border-primary/10 bg-card/80">
-            <CardHeader className="pb-5">
-              <CardTitle className="text-2xl font-display text-foreground flex items-center gap-3">
-                <Brain className="w-7 h-7 text-primary" /> Análise Comportamental do Trader
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-display text-foreground flex items-center gap-2">
+                <Brain className="w-4 h-4 text-primary" /> Análise Comportamental do Trader
               </CardTitle>
-              <p className="text-base text-muted-foreground mt-2">
+              <p className="text-xs text-muted-foreground mt-1">
                 A Horus IA analisa seus dados de operações, gestão, diário emocional e padrões de comportamento.
               </p>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-base font-medium text-muted-foreground mb-2.5 block">Tom da IA</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Tom da IA</label>
                   <Select value={tone} onValueChange={setTone}>
-                    <SelectTrigger className="bg-secondary h-12 text-base"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-secondary h-9 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="acolhedor" className="text-base">🤝 Acolhedor</SelectItem>
-                      <SelectItem value="equilibrado" className="text-base">⚖️ Equilibrado</SelectItem>
-                      <SelectItem value="firme" className="text-base">💪 Firme</SelectItem>
-                      <SelectItem value="verdade_dura" className="text-base">🔥 Verdade Dura</SelectItem>
+                      <SelectItem value="acolhedor" className="text-xs">🤝 Acolhedor</SelectItem>
+                      <SelectItem value="equilibrado" className="text-xs">⚖️ Equilibrado</SelectItem>
+                      <SelectItem value="firme" className="text-xs">💪 Firme</SelectItem>
+                      <SelectItem value="verdade_dura" className="text-xs">🔥 Verdade Dura</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-base font-medium text-muted-foreground mb-2.5 block">Foco da Análise</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foco da Análise</label>
                   <Select value={focus} onValueChange={setFocus}>
-                    <SelectTrigger className="bg-secondary h-12 text-base"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-secondary h-9 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="geral" className="text-base">Visão Geral</SelectItem>
-                      <SelectItem value="emocional" className="text-base">Padrão Emocional</SelectItem>
-                      <SelectItem value="gestao" className="text-base">Gestão de Banca</SelectItem>
-                      <SelectItem value="disciplina" className="text-base">Disciplina</SelectItem>
-                      <SelectItem value="tilt" className="text-base">Detecção de Tilt</SelectItem>
-                      <SelectItem value="horarios" className="text-base">Horários de Operação</SelectItem>
+                      <SelectItem value="geral" className="text-xs">Visão Geral</SelectItem>
+                      <SelectItem value="emocional" className="text-xs">Padrão Emocional</SelectItem>
+                      <SelectItem value="gestao" className="text-xs">Gestão de Banca</SelectItem>
+                      <SelectItem value="disciplina" className="text-xs">Disciplina</SelectItem>
+                      <SelectItem value="tilt" className="text-xs">Detecção de Tilt</SelectItem>
+                      <SelectItem value="horarios" className="text-xs">Horários de Operação</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div>
-                <label className="text-base font-medium text-muted-foreground mb-2.5 block">Pergunta ou contexto adicional (opcional)</label>
-                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[110px] text-base" />
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Pergunta ou contexto adicional (opcional)</label>
+                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[90px] text-xs" />
               </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-sm text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-12 px-8 text-base" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
-                  {behaviorLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-1.5 h-9 px-5 text-xs" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
+                  {behaviorLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                   {behaviorLoading ? 'Analisando...' : 'Analisar'}
                 </Button>
               </div>
@@ -515,16 +492,16 @@ const HorusIA = () => {
               <AnimatePresence>
                 {behaviorLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-primary/5 p-8 text-center space-y-4">
+                    className="border border-primary/20 rounded-xl bg-primary/5 p-5 text-center space-y-3">
                     <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-                      className="w-14 h-14 mx-auto rounded-xl gradient-gold flex items-center justify-center">
-                      <Eye className="w-7 h-7 text-primary-foreground" />
+                      className="w-10 h-10 mx-auto rounded-lg gradient-gold flex items-center justify-center">
+                      <Eye className="w-5 h-5 text-primary-foreground" />
                     </motion.div>
-                    <p className="text-base text-primary font-display">{loadingMsg}</p>
-                    <div className="space-y-2.5">
-                      <Skeleton className="h-5 w-3/4 mx-auto" />
-                      <Skeleton className="h-5 w-1/2 mx-auto" />
-                      <Skeleton className="h-5 w-2/3 mx-auto" />
+                    <p className="text-xs text-primary font-display">{loadingMsg}</p>
+                    <div className="space-y-2">
+                      <Skeleton className="h-3 w-3/4 mx-auto" />
+                      <Skeleton className="h-3 w-1/2 mx-auto" />
+                      <Skeleton className="h-3 w-2/3 mx-auto" />
                     </div>
                   </motion.div>
                 )}
@@ -534,30 +511,30 @@ const HorusIA = () => {
               <AnimatePresence>
                 {behaviorResult && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-card p-7 space-y-5">
+                    className="border border-primary/20 rounded-xl bg-card p-5 space-y-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-base font-display text-primary flex items-center gap-2"><Eye className="w-5 h-5" /> RESULTADO DA ANÁLISE</p>
-                      <Badge variant="outline" className={`text-base px-4 py-1.5 ${riskColor(behaviorResult.nivel_risco)}`}>
+                      <p className="text-xs font-display text-primary flex items-center gap-1.5"><Eye className="w-4 h-4" /> RESULTADO DA ANÁLISE</p>
+                      <Badge variant="outline" className={`text-xs px-2.5 py-1 ${riskColor(behaviorResult.nivel_risco)}`}>
                         Risco: {behaviorResult.nivel_risco.toUpperCase()}
                       </Badge>
                     </div>
-                    <p className="text-lg text-foreground leading-relaxed">{behaviorResult.resumo}</p>
+                    <p className="text-sm text-foreground leading-relaxed">{behaviorResult.resumo}</p>
                     {behaviorResult.padroes_detectados.length > 0 && (
                       <div>
-                        <p className="text-base text-muted-foreground mb-3 font-display">PADRÕES DETECTADOS</p>
-                        <div className="space-y-3">
+                        <p className="text-xs text-muted-foreground mb-2 font-display">PADRÕES DETECTADOS</p>
+                        <div className="space-y-2">
                           {behaviorResult.padroes_detectados.map((p, i) => (
-                            <div key={i} className="flex items-start gap-3 text-base text-foreground leading-relaxed">
-                              <div className="w-2.5 h-2.5 rounded-full bg-primary mt-2 shrink-0" />
+                            <div key={i} className="flex items-start gap-2 text-sm text-foreground leading-relaxed">
+                              <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
                               {p}
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-                    <div className="border-t border-border/50 pt-5">
-                      <p className="text-base text-muted-foreground mb-3 font-display">RECOMENDAÇÃO</p>
-                      <p className="text-lg text-foreground font-medium leading-relaxed">{behaviorResult.recomendacao}</p>
+                    <div className="border-t border-border/50 pt-4">
+                      <p className="text-xs text-muted-foreground mb-2 font-display">RECOMENDAÇÃO</p>
+                      <p className="text-sm text-foreground font-medium leading-relaxed">{behaviorResult.recomendacao}</p>
                     </div>
                   </motion.div>
                 )}
@@ -565,16 +542,16 @@ const HorusIA = () => {
 
               {/* Data Sources */}
               <Card className="border-border/50 bg-card/60">
-                <CardContent className="p-6">
-                  <p className="text-base font-display text-muted-foreground mb-4">FONTES DE DADOS ANALISADAS</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <CardContent className="p-4">
+                  <p className="text-xs font-display text-muted-foreground mb-3">FONTES DE DADOS ANALISADAS</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
                     {['Gestão de Banca', 'Registro de Operações', 'Diário Emocional', 'Checklist',
                       'Modo Disciplina', 'Score Consistência', 'Histórico W/L', 'Horários',
                       'Overtrading', 'Sinais de Tilt', 'Patentes', 'Evolução da Banca',
                       'Pós-Loss', 'Pós-Win', 'Fora do Plano', 'Relatórios'
                     ].map(src => (
-                      <div key={src} className="flex items-center gap-2.5 text-base text-muted-foreground">
-                        <div className="w-2.5 h-2.5 rounded-full bg-primary/60" /> {src}
+                      <div key={src} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60" /> {src}
                       </div>
                     ))}
                   </div>
@@ -585,31 +562,31 @@ const HorusIA = () => {
         </TabsContent>
 
         {/* Print Analysis */}
-        <TabsContent value="print" className="space-y-6 mt-5">
+        <TabsContent value="print" className="space-y-4 mt-4">
           <Card className="border-primary/10 bg-card/80">
-            <CardHeader className="pb-5">
-              <CardTitle className="text-2xl font-display text-foreground flex items-center gap-3">
-                <ImageIcon className="w-7 h-7 text-blue-400" /> Análise de Print do Gráfico
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-display text-foreground flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-blue-400" /> Análise de Print do Gráfico
               </CardTitle>
-              <p className="text-base text-muted-foreground mt-2">Envie um print do gráfico para receber análise probabilística de cenário.</p>
+              <p className="text-xs text-muted-foreground mt-1">Envie um print do gráfico para receber análise probabilística de cenário.</p>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               <div>
-                <label className="text-base font-medium text-muted-foreground mb-2.5 block">Timeframe</label>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Timeframe</label>
                 <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-                  <SelectTrigger className="bg-secondary w-40 h-12 text-base"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-secondary w-36 h-9 text-xs"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="M5" className="text-base">M5</SelectItem>
-                    <SelectItem value="M15" className="text-base">M15</SelectItem>
+                    <SelectItem value="M5" className="text-xs">M5</SelectItem>
+                    <SelectItem value="M15" className="text-xs">M15</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Upload Tips */}
-              <div className="bg-primary/5 border border-primary/10 rounded-xl p-5 space-y-3">
-                <p className="text-base font-display text-primary flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Dicas para melhor leitura</p>
-                <ul className="text-base text-muted-foreground space-y-2 ml-5 list-disc">
-                  <li><strong className="text-primary">⏱ Envie o print nos últimos 30 segundos do candle</strong> para maior precisão da leitura</li>
+              <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 space-y-2">
+                <p className="text-xs font-display text-primary flex items-center gap-1.5"><AlertTriangle className="w-4 h-4" /> Dicas para melhor leitura</p>
+                <ul className="text-xs text-muted-foreground space-y-1.5 ml-4 list-disc">
+                  <li><strong className="text-primary">⏱ Envie o print nos últimos 30 segundos do candle</strong> para maior precisão</li>
                   <li>Inclua a <strong>régua de preço</strong> (lateral) e <strong>régua de tempo</strong> (inferior)</li>
                   <li>Confirme que o timeframe ({selectedTimeframe}) está visível no canto do gráfico</li>
                   <li>Use prints com boa resolução e contraste nítido entre candles e fundo</li>
@@ -622,28 +599,28 @@ const HorusIA = () => {
                 onClick={() => fileInputRef.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={e => e.preventDefault()}
-                className="border-2 border-dashed border-border/60 rounded-xl p-10 text-center hover:border-primary/30 transition-colors cursor-pointer"
+                className="border-2 border-dashed border-border/60 rounded-xl p-6 text-center hover:border-primary/30 transition-colors cursor-pointer"
               >
               {previewUrl ? (
-                  <div className="space-y-4">
-                    <img src={previewUrl} alt="Preview" className="max-h-64 mx-auto rounded-lg border border-border/50" />
-                    <p className="text-base text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
-                    <p className="text-sm text-primary font-display animate-pulse">✨ Print pronto! Pressione Enter ou clique em Analisar Print</p>
+                  <div className="space-y-3">
+                    <img src={previewUrl} alt="Preview" className="max-h-48 mx-auto rounded-lg border border-border/50" />
+                    <p className="text-xs text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
+                    <p className="text-[11px] text-primary font-display animate-pulse">✨ Print pronto! Pressione Enter ou clique em Analisar Print</p>
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-14 h-14 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-lg text-foreground font-medium">Arraste, clique ou cole (Ctrl+V) para enviar o print</p>
-                    <p className="text-base text-muted-foreground mt-2">PNG, JPG, WEBP até 5MB</p>
-                    <p className="text-sm text-primary/60 mt-3">💡 Dica: Cole o print com Ctrl+V e pressione Enter para análise automática</p>
+                    <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-foreground font-medium">Arraste, clique ou cole (Ctrl+V) para enviar o print</p>
+                    <p className="text-xs text-muted-foreground mt-1.5">PNG, JPG, WEBP até 5MB</p>
+                    <p className="text-[11px] text-primary/60 mt-2">💡 Cole com Ctrl+V e pressione Enter para análise automática</p>
                   </>
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-sm text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-12 px-8 text-base" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
-                  {chartLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[11px] text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-1.5 h-9 px-5 text-xs" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
+                  {chartLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
                   {chartLoading ? 'Analisando...' : 'Analisar Print'}
                 </Button>
               </div>
@@ -652,13 +629,13 @@ const HorusIA = () => {
               <AnimatePresence>
                 {chartLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-primary/5 p-8 text-center space-y-4">
+                    className="border border-primary/20 rounded-xl bg-primary/5 p-5 text-center space-y-3">
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                      className="w-14 h-14 mx-auto rounded-xl gradient-gold flex items-center justify-center">
-                      <Eye className="w-7 h-7 text-primary-foreground" />
+                      className="w-10 h-10 mx-auto rounded-lg gradient-gold flex items-center justify-center">
+                      <Eye className="w-5 h-5 text-primary-foreground" />
                     </motion.div>
-                    <p className="text-base text-primary font-display">{loadingMsg}</p>
-                    <Skeleton className="h-24 w-full" />
+                    <p className="text-xs text-primary font-display">{loadingMsg}</p>
+                    <Skeleton className="h-16 w-full" />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -667,26 +644,26 @@ const HorusIA = () => {
               <AnimatePresence>
                 {chartResult && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className={`border rounded-xl p-6 space-y-4 ${chartResult.cenario === 'compra' ? 'border-success/30 bg-success/5' : chartResult.cenario === 'venda' ? 'border-destructive/30 bg-destructive/5' : 'border-border/50 bg-card'}`}>
-                    <p className="text-base font-display text-primary flex items-center gap-2"><Eye className="w-5 h-5" /> RESULTADO DA LEITURA</p>
-                    <div className="grid grid-cols-2 gap-6">
+                    className={`border rounded-xl p-5 space-y-3 ${chartResult.cenario === 'compra' ? 'border-success/30 bg-success/5' : chartResult.cenario === 'venda' ? 'border-destructive/30 bg-destructive/5' : 'border-border/50 bg-card'}`}>
+                    <p className="text-xs font-display text-primary flex items-center gap-1.5"><Eye className="w-4 h-4" /> RESULTADO DA LEITURA</p>
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-base text-muted-foreground mb-1.5">Cenário</p>
-                        <p className={`text-3xl font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        <p className="text-xs text-muted-foreground mb-1">Cenário</p>
+                        <p className={`text-lg font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
                           {chartResult.cenario === 'compra' ? '🟢 COMPRA' : chartResult.cenario === 'venda' ? '🔴 VENDA' : '⚪ INCONCLUSIVO'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-base text-muted-foreground mb-1.5">Confiança</p>
-                        <p className="text-3xl font-display font-bold text-primary">{chartResult.confianca}%</p>
+                        <p className="text-xs text-muted-foreground mb-1">Confiança</p>
+                        <p className="text-lg font-display font-bold text-primary">{chartResult.confianca}%</p>
                       </div>
                       <div>
-                        <p className="text-base text-muted-foreground mb-1.5">Entrada estimada</p>
-                        <p className="text-2xl font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
+                        <p className="text-xs text-muted-foreground mb-1">Entrada estimada</p>
+                        <p className="text-base font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
                       </div>
                       <div>
-                        <p className="text-base text-muted-foreground mb-1.5">Saída estimada</p>
-                        <p className="text-2xl font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
+                        <p className="text-xs text-muted-foreground mb-1">Saída estimada</p>
+                        <p className="text-base font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
                       </div>
                     </div>
                     {(chartResult as any)._horario_expirado && (
@@ -697,40 +674,40 @@ const HorusIA = () => {
                     )}
                     {/* Feedback Win/Loss - MANDATORY */}
                     {chartResult.analysis_id && (
-                      <div className="border-t border-border/30 pt-4 space-y-3">
+                      <div className="border-t border-border/30 pt-3 space-y-2">
                         {feedbackSent ? (
-                          <div className="flex items-center gap-3 justify-center py-3">
-                            <CheckCircle className="w-5 h-5 text-success" />
-                            <p className="text-base text-muted-foreground font-display">Feedback registrado! A Horus IA irá calibrar futuras análises.</p>
+                          <div className="flex items-center gap-2 justify-center py-2">
+                            <CheckCircle className="w-4 h-4 text-success" />
+                            <p className="text-xs text-muted-foreground font-display">Feedback registrado!</p>
                           </div>
                         ) : (
                           <>
-                            <div className="flex items-center gap-2 justify-center">
-                              <AlertTriangle className="w-5 h-5 text-orange-400" />
-                              <p className="text-sm text-orange-400 text-center font-display font-bold">
-                                OBRIGATÓRIO: Informe o resultado após a operação
+                            <div className="flex items-center gap-1.5 justify-center">
+                              <AlertTriangle className="w-4 h-4 text-orange-400" />
+                              <p className="text-xs text-orange-400 text-center font-display font-bold">
+                                OBRIGATÓRIO: Informe o resultado
                               </p>
                             </div>
-                            <p className="text-xs text-muted-foreground text-center">
-                              A Horus IA aguarda seu feedback para calibrar futuras análises. Você pode preencher depois na aba Print.
+                            <p className="text-[11px] text-muted-foreground text-center">
+                              Você pode preencher depois na aba Print.
                             </p>
-                            <div className="flex gap-4 justify-center">
+                            <div className="flex gap-3 justify-center">
                               <Button
                                 variant="outline"
                                 onClick={() => sendFeedback('win')}
                                 disabled={feedbackLoading}
-                                className="gap-2 border-success/30 bg-success/10 text-success hover:bg-success/20 font-display text-base h-11 px-6"
+                                className="gap-1.5 border-success/30 bg-success/10 text-success hover:bg-success/20 font-display text-xs h-8 px-4"
                               >
-                                {feedbackLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+                                {feedbackLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                                 WIN
                               </Button>
                               <Button
                                 variant="outline"
                                 onClick={() => sendFeedback('loss')}
                                 disabled={feedbackLoading}
-                                className="gap-2 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 font-display text-base h-11 px-6"
+                                className="gap-1.5 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 font-display text-xs h-8 px-4"
                               >
-                                {feedbackLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
+                                {feedbackLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <XCircle className="w-3.5 h-3.5" />}
                                 LOSS
                               </Button>
                             </div>
@@ -738,9 +715,9 @@ const HorusIA = () => {
                         )}
                       </div>
                     )}
-                    <div className="flex items-center gap-3 pt-3 border-t border-border/30">
-                      <Badge variant="outline" className="text-sm">{chartResult.timeframe}</Badge>
-                      <p className="text-xs text-muted-foreground italic">Análise probabilística. Não representa garantia de resultado.</p>
+                    <div className="flex items-center gap-2 pt-2 border-t border-border/30">
+                      <Badge variant="outline" className="text-[11px]">{chartResult.timeframe}</Badge>
+                      <p className="text-[11px] text-muted-foreground italic">Análise probabilística. Não representa garantia.</p>
                     </div>
                   </motion.div>
                 )}
@@ -760,52 +737,52 @@ const HorusIA = () => {
         </TabsContent>
 
         {/* History */}
-        <TabsContent value="history" className="space-y-5 mt-5">
+        <TabsContent value="history" className="space-y-4 mt-4">
           <Card className="border-border/50 bg-card/80">
-            <CardHeader className="pb-5">
-              <CardTitle className="text-2xl font-display text-foreground flex items-center gap-3">
-                <Clock className="w-7 h-7 text-primary" /> Histórico de Análises
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-display text-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" /> Histórico de Análises
               </CardTitle>
             </CardHeader>
             <CardContent>
               {analyses.length === 0 && printAnalyses.length === 0 ? (
-                <div className="text-center py-10">
-                  <BarChart3 className="w-14 h-14 text-muted-foreground/30 mx-auto mb-4" />
-                  <p className="text-base text-muted-foreground">Nenhuma análise realizada ainda.</p>
-                  <p className="text-sm text-muted-foreground mt-2">Use a aba Análise Comportamental ou Leitura de Print para começar.</p>
+                <div className="text-center py-8">
+                  <BarChart3 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-xs text-muted-foreground">Nenhuma análise realizada ainda.</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Use a aba Comportamental ou Print para começar.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {[...analyses.map(a => ({ ...a, _type: 'behavioral' })), ...printAnalyses.map(p => ({ ...p, _type: 'print' }))]
                     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                     .map((item) => (
-                      <div key={item.id} className="flex items-start gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30">
+                      <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg bg-secondary/30 border border-border/30">
                         {item._type === 'behavioral' ? (
-                          <Brain className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                          <Brain className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                         ) : (
-                          <ImageIcon className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                          <ImageIcon className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <Badge variant="outline" className="text-xs">{item._type === 'behavioral' ? 'Comportamental' : `Print ${item.timeframe}`}</Badge>
+                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                            <Badge variant="outline" className="text-[10px]">{item._type === 'behavioral' ? 'Comportamental' : `Print ${item.timeframe}`}</Badge>
                             {item._type === 'print' && item.result && (
-                              <Badge variant="outline" className={`text-xs ${item.result === 'win' ? 'border-success/30 text-success' : 'border-destructive/30 text-destructive'}`}>
+                              <Badge variant="outline" className={`text-[10px] ${item.result === 'win' ? 'border-success/30 text-success' : 'border-destructive/30 text-destructive'}`}>
                                 {item.result === 'win' ? '✅ WIN' : '❌ LOSS'}
                               </Badge>
                             )}
                             {item._type === 'print' && !item.result && (
-                              <Badge variant="outline" className="text-xs border-orange-400/30 text-orange-400 animate-pulse">
-                                ⏳ Aguardando resultado
+                              <Badge variant="outline" className="text-[10px] border-orange-400/30 text-orange-400 animate-pulse">
+                                ⏳ Aguardando
                               </Badge>
                             )}
-                            <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString('pt-BR')}</span>
+                            <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleString('pt-BR')}</span>
                           </div>
                           {item._type === 'behavioral' ? (
-                            <p className="text-sm text-muted-foreground line-clamp-2">
+                            <p className="text-[11px] text-muted-foreground line-clamp-2">
                               {(() => { try { return JSON.parse(item.response)?.resumo; } catch { return item.response; } })()}
                             </p>
                           ) : (
-                            <div className="flex items-center gap-4 text-sm">
+                            <div className="flex items-center gap-3 text-[11px]">
                               <span className={item.scenario === 'compra' ? 'text-success font-bold' : 'text-destructive font-bold'}>
                                 {item.scenario === 'compra' ? '🟢 Compra' : '🔴 Venda'}
                               </span>

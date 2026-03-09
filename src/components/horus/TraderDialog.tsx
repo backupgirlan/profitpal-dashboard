@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Eye, Send, Trash2, Loader2, Sparkles, User, Check, CheckCheck
+  Eye, Send, Trash2, Loader2, Sparkles, User, Check, CheckCheck, Palette
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -39,6 +39,17 @@ const HISTORY_FILTERS = [
   { value: 'all', label: 'Tudo' },
 ];
 
+const CHAT_BG_OPTIONS = [
+  { id: 'default', label: 'Padrão', bg: '#0B0F19', pattern: true },
+  { id: 'dark', label: 'Escuro', bg: '#080B12', pattern: false },
+  { id: 'deep', label: 'Profundo', bg: '#0D1117', pattern: true },
+  { id: 'navy', label: 'Marinho', bg: '#0A1628', pattern: true },
+  { id: 'charcoal', label: 'Carvão', bg: '#1A1A1A', pattern: false },
+  { id: 'forest', label: 'Floresta', bg: '#0B1A14', pattern: true },
+  { id: 'warm', label: 'Quente', bg: '#1A140B', pattern: true },
+  { id: 'purple', label: 'Roxo', bg: '#12091A', pattern: true },
+];
+
 export default function TraderDialog() {
   const { user, session } = useAuth();
   const { toast } = useToast();
@@ -51,6 +62,15 @@ export default function TraderDialog() {
   const [historyTab, setHistoryTab] = useState('today');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [chatBg, setChatBg] = useState(() => localStorage.getItem('horus-chat-bg') || 'default');
+  const [showBgPicker, setShowBgPicker] = useState(false);
+
+  const selectedBg = CHAT_BG_OPTIONS.find(o => o.id === chatBg) || CHAT_BG_OPTIONS[0];
+
+  const handleBgChange = (id: string) => {
+    setChatBg(id);
+    localStorage.setItem('horus-chat-bg', id);
+  };
 
   useEffect(() => {
     loadMessages();
@@ -183,6 +203,36 @@ export default function TraderDialog() {
               <SelectItem value="verdade_dura" className="text-sm">🔥 Verdade Dura</SelectItem>
             </SelectContent>
           </Select>
+          <div className="relative">
+            <Button variant="ghost" size="icon" onClick={() => setShowBgPicker(!showBgPicker)} className="h-10 w-10 text-muted-foreground hover:text-primary">
+              <Palette className="w-5 h-5" />
+            </Button>
+            <AnimatePresence>
+              {showBgPicker && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute right-0 top-12 z-50 bg-card border border-border/50 rounded-xl p-3 shadow-xl min-w-[200px]"
+                >
+                  <p className="text-xs text-muted-foreground mb-2 font-display tracking-wider">COR DO FUNDO</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {CHAT_BG_OPTIONS.map(opt => (
+                      <button
+                        key={opt.id}
+                        onClick={() => { handleBgChange(opt.id); setShowBgPicker(false); }}
+                        className={`w-10 h-10 rounded-lg border-2 transition-all hover:scale-110 ${
+                          chatBg === opt.id ? 'border-primary ring-2 ring-primary/30' : 'border-border/30'
+                        }`}
+                        style={{ backgroundColor: opt.bg }}
+                        title={opt.label}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           {messages.length > 0 && (
             <Button variant="ghost" size="icon" onClick={clearHistory} className="h-10 w-10 text-muted-foreground hover:text-destructive">
               <Trash2 className="w-5 h-5" />
@@ -217,8 +267,11 @@ export default function TraderDialog() {
       </div>
 
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1" style={{
-        backgroundImage: 'radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
+      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1 transition-colors duration-300" style={{
+        backgroundColor: selectedBg.bg,
+        backgroundImage: selectedBg.pattern
+          ? 'radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.06) 0%, transparent 50%)'
+          : 'none',
       }}>
         {messages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full py-10 space-y-6">

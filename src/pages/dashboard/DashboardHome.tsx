@@ -187,16 +187,20 @@ const DashboardHome = () => {
         evoMap[tradeDate] = cumBalance;
         dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
 
-        // Each trade = 1 candle of R$30
+        // Each trade = 1 candle of R$30 with realistic wicks
         const openVal = candleLevel;
         const isWin = trade.result === 'win';
         const closeVal = isWin ? candleLevel + 30 : candleLevel - 30;
+        // Add random wicks for visual realism (like real chart)
+        const wickExtend = Math.random() * 12 + 3;
+        const highVal = Math.max(openVal, closeVal) + wickExtend;
+        const lowVal = Math.min(openVal, closeVal) - wickExtend;
         candleList.push({
           day: (tradeDate || '').slice(5),
           open: openVal,
           close: closeVal,
-          high: Math.max(openVal, closeVal),
-          low: Math.min(openVal, closeVal),
+          high: highVal,
+          low: lowVal,
           result: trade.result,
         });
         candleLevel = closeVal;

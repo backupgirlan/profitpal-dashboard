@@ -341,14 +341,14 @@ const HorusIA = () => {
             </div>
             <div>
               <h1 className="text-3xl md:text-4xl font-display font-bold text-primary text-glow">HORUS IA</h1>
-              <p className="text-sm text-muted-foreground font-medium tracking-wider mt-1">ASSISTENTE INTELIGENTE DE PERFORMANCE</p>
+              <p className="text-base text-muted-foreground font-medium tracking-wider mt-1">ASSISTENTE INTELIGENTE DE PERFORMANCE</p>
             </div>
             <Badge className="ml-auto gradient-gold text-primary-foreground border-0 font-display text-sm px-4 py-1.5">
               <Star className="w-4 h-4 mr-1.5" /> SUPER VIP
             </Badge>
           </div>
           <motion.p key={phraseIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="text-base text-muted-foreground italic max-w-2xl">
+            className="text-lg text-muted-foreground italic max-w-2xl">
             "{POSITIONING_PHRASES[phraseIdx]}"
           </motion.p>
         </div>
@@ -359,27 +359,27 @@ const HorusIA = () => {
         {pendingPrints.length > 0 && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <Card className="border-orange-400/30 bg-orange-400/5">
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-orange-400" />
-                  <p className="text-sm font-display font-bold text-orange-400">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-6 h-6 text-orange-400" />
+                  <p className="text-base font-display font-bold text-orange-400">
                     {pendingPrints.length} {pendingPrints.length === 1 ? 'análise aguardando' : 'análises aguardando'} resultado
                   </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   Preencha o resultado (WIN/LOSS) de cada print analisado para que a Horus IA aprenda com seus dados.
                 </p>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {pendingPrints.map(p => (
-                    <div key={p.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-secondary/30 border border-border/30">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <ImageIcon className="w-4 h-4 text-blue-400 shrink-0" />
+                    <div key={p.id} className="flex items-center justify-between gap-4 p-4 rounded-xl bg-secondary/30 border border-border/30">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <ImageIcon className="w-5 h-5 text-blue-400 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-display text-foreground truncate">
+                          <p className="text-sm font-display text-foreground truncate">
                             {p.scenario === 'compra' ? '🟢 Compra' : p.scenario === 'venda' ? '🔴 Venda' : '⚪ Inconclusivo'}
                             {' '} — Confiança: {p.confidence}%
                           </p>
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-xs text-muted-foreground mt-0.5">
                             {new Date(p.created_at).toLocaleString('pt-BR')} • {p.timeframe}
                           </p>
                         </div>
@@ -390,9 +390,9 @@ const HorusIA = () => {
                           variant="outline"
                           onClick={() => sendPendingFeedback(p.id, 'win')}
                           disabled={pendingFeedbackLoading === p.id}
-                          className="gap-1 border-success/30 bg-success/10 text-success hover:bg-success/20 text-xs h-8 px-3"
+                          className="gap-1.5 border-success/30 bg-success/10 text-success hover:bg-success/20 text-sm h-9 px-4"
                         >
-                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                           WIN
                         </Button>
                         <Button
@@ -400,9 +400,9 @@ const HorusIA = () => {
                           variant="outline"
                           onClick={() => sendPendingFeedback(p.id, 'loss')}
                           disabled={pendingFeedbackLoading === p.id}
-                          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs h-8 px-3"
+                          className="gap-1.5 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-sm h-9 px-4"
                         >
-                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                           LOSS
                         </Button>
                       </div>

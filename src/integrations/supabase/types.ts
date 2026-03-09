@@ -258,6 +258,8 @@ export type Database = {
       }
       emotional_checkins: {
         Row: {
+          ai_feedback: string | null
+          answers: Json | null
           created_at: string
           emotional_state: string
           had_argument: boolean
@@ -265,10 +267,13 @@ export type Database = {
           is_risky: boolean
           proceeded: boolean
           recovering_loss: boolean
+          risk_level: string | null
           slept_well: boolean
           user_id: string
         }
         Insert: {
+          ai_feedback?: string | null
+          answers?: Json | null
           created_at?: string
           emotional_state?: string
           had_argument?: boolean
@@ -276,10 +281,13 @@ export type Database = {
           is_risky?: boolean
           proceeded?: boolean
           recovering_loss?: boolean
+          risk_level?: string | null
           slept_well?: boolean
           user_id: string
         }
         Update: {
+          ai_feedback?: string | null
+          answers?: Json | null
           created_at?: string
           emotional_state?: string
           had_argument?: boolean
@@ -287,6 +295,7 @@ export type Database = {
           is_risky?: boolean
           proceeded?: boolean
           recovering_loss?: boolean
+          risk_level?: string | null
           slept_well?: boolean
           user_id?: string
         }
@@ -543,6 +552,33 @@ export type Database = {
           super_vip_expires_at?: string | null
           total_profit?: number | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      protection_mode_events: {
+        Row: {
+          consecutive_losses: number
+          created_at: string
+          id: string
+          status: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          consecutive_losses: number
+          created_at?: string
+          id?: string
+          status?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          consecutive_losses?: number
+          created_at?: string
+          id?: string
+          status?: string
+          unlocked_at?: string | null
           user_id?: string
         }
         Relationships: []

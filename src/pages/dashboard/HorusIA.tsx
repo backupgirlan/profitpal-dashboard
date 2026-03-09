@@ -416,7 +416,7 @@ const HorusIA = () => {
       </AnimatePresence>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
         {[
           { icon: Brain, label: 'Análises', value: analyses.length, color: 'text-primary' },
           { icon: ImageIcon, label: 'Prints', value: printAnalyses.length, color: 'text-blue-400' },
@@ -426,13 +426,13 @@ const HorusIA = () => {
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/20 transition-colors">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-secondary/80 flex items-center justify-center shrink-0">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-secondary/80 flex items-center justify-center shrink-0">
                   <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
+                  <p className="text-base text-muted-foreground">{stat.label}</p>
+                  <p className="text-3xl font-display font-bold text-foreground">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -442,9 +442,9 @@ const HorusIA = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-1.5 p-1.5">
-          <TabsTrigger value="behavioral" className="gap-2 font-display text-sm py-2.5 px-4"><Brain className="w-5 h-5" /> Comportamental</TabsTrigger>
-          <TabsTrigger value="print" className="gap-2 font-display text-sm py-2.5 px-4 relative">
+        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-2 p-2">
+          <TabsTrigger value="behavioral" className="gap-2 font-display text-base py-3 px-5"><Brain className="w-5 h-5" /> Comportamental</TabsTrigger>
+          <TabsTrigger value="print" className="gap-2 font-display text-base py-3 px-5 relative">
             <ImageIcon className="w-5 h-5" /> Print
             {pendingPrints.length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-orange-400 text-[10px] text-white flex items-center justify-center font-bold animate-pulse">
@@ -452,9 +452,9 @@ const HorusIA = () => {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="account" className="gap-2 font-display text-sm py-2.5 px-4"><BarChart3 className="w-5 h-5" /> Análise da Conta</TabsTrigger>
-          <TabsTrigger value="dialog" className="gap-2 font-display text-sm py-2.5 px-4"><MessageSquare className="w-5 h-5" /> Diálogo do Trader</TabsTrigger>
-          <TabsTrigger value="history" className="gap-2 font-display text-sm py-2.5 px-4"><Clock className="w-5 h-5" /> Histórico</TabsTrigger>
+          <TabsTrigger value="account" className="gap-2 font-display text-base py-3 px-5"><BarChart3 className="w-5 h-5" /> Análise da Conta</TabsTrigger>
+          <TabsTrigger value="dialog" className="gap-2 font-display text-base py-3 px-5"><MessageSquare className="w-5 h-5" /> Diálogo do Trader</TabsTrigger>
+          <TabsTrigger value="history" className="gap-2 font-display text-base py-3 px-5"><Clock className="w-5 h-5" /> Histórico</TabsTrigger>
         </TabsList>
 
         {/* Behavioral Analysis */}

@@ -169,9 +169,9 @@ const DashboardHome = () => {
       let cumBalance = 0, peak = 0, mdd = 0;
       const evoMap: Record<string, number> = {};
       const dailyProfitMap: Record<string, number> = {};
-      // For candles: track daily open/high/low/close
-      const dailyOHLC: Record<string, { open: number; high: number; low: number; close: number; started: boolean }> = {};
-      let runningBalance = 0;
+      // For candles: each candle = R$30 movement, one per trade
+      const candleList: { day: string; open: number; close: number; high: number; low: number; result: string }[] = [];
+      let candleLevel = 0; // starts at 0, moves in R$30 steps
 
       tradesRes.data.forEach(trade => {
         const profit = Number(trade.profit);
@@ -187,22 +187,19 @@ const DashboardHome = () => {
         evoMap[tradeDate] = cumBalance;
         dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
 
-        // Build OHLC per day
-        const prevBalance = runningBalance;
-        runningBalance += profit;
-        if (!dailyOHLC[tradeDate]) {
-          dailyOHLC[tradeDate] = {
-            open: prevBalance,
-            high: Math.max(prevBalance, runningBalance),
-            low: Math.min(prevBalance, runningBalance),
-            close: runningBalance,
-            started: true,
-          };
-        } else {
-          dailyOHLC[tradeDate].high = Math.max(dailyOHLC[tradeDate].high, runningBalance);
-          dailyOHLC[tradeDate].low = Math.min(dailyOHLC[tradeDate].low, runningBalance);
-          dailyOHLC[tradeDate].close = runningBalance;
-        }
+        // Each trade = 1 candle of R$30
+        const openVal = candleLevel;
+        const isWin = trade.result === 'win';
+        const closeVal = isWin ? candleLevel + 30 : candleLevel - 30;
+        candleList.push({
+          day: (tradeDate || '').slice(5),
+          open: openVal,
+          close: closeVal,
+          high: Math.max(openVal, closeVal),
+          low: Math.min(openVal, closeVal),
+          result: trade.result,
+        });
+        candleLevel = closeVal;
       });
       for (let i = tradesRes.data.length - 1; i >= 0; i--) {
         if (tradesRes.data[i].result === 'win') { if (currentLossStreak > 0) break; currentWinStreak++; }
@@ -219,15 +216,8 @@ const DashboardHome = () => {
       const consistencyEntries = Object.entries(dailyProfitMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
 
-      // Build candle data (each candle = 1 day, value scale R$30 per unit)
-      const candleEntries = Object.entries(dailyOHLC).sort((a, b) => a[0].localeCompare(b[0]));
-      setCandleData(candleEntries.map(([day, ohlc]) => ({
-        day: day.slice(5),
-        open: +ohlc.open.toFixed(2),
-        close: +ohlc.close.toFixed(2),
-        high: +ohlc.high.toFixed(2),
-        low: +ohlc.low.toFixed(2),
-      })));
+      // Use last 30 candles max
+      setCandleData(candleList.slice(-30));
     }
 
   }, [user]);

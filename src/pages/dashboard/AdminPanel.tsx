@@ -14,6 +14,7 @@ import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminUsageControl from '@/components/admin/AdminUsageControl';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminContent from '@/components/admin/AdminContent';
+import AdminHorusFlows from '@/components/admin/AdminHorusFlows';
 
 const AdminPanel = () => {
   const { user } = useAuth();

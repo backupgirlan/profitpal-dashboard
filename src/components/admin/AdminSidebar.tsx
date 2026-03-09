@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Users, CreditCard, Eye, Key, Wallet, BarChart3,
-  Activity, Settings, FileText, Shield
+  Activity, Settings, FileText, Shield, Zap
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { id: 'users', label: 'Usuários', icon: Users },
   { id: 'plans', label: 'Planos & Assinaturas', icon: CreditCard },
   { id: 'horus', label: 'Horus IA', icon: Eye },
+  { id: 'horus-flows', label: 'Fluxos Inteligentes', icon: Zap, highlight: true },
   { id: 'integrations', label: 'Integrações API', icon: Key },
   { id: 'payments', label: 'Pagamentos', icon: Wallet },
   { id: 'analytics', label: 'Análises', icon: BarChart3 },

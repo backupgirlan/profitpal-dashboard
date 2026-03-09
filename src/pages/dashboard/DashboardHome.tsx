@@ -23,6 +23,9 @@ import RankAchievementModal from '@/components/RankAchievementModal';
 import { useManagement2x } from '@/hooks/useManagement2x';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, ComposedChart, Line, ReferenceArea } from 'recharts';
+import BehaviorRadar from '@/components/horus/BehaviorRadar';
+import EmotionalRiskMap from '@/components/horus/EmotionalRiskMap';
+import BankSimulator from '@/components/horus/BankSimulator';
 
 const MOTIVATIONAL_QUOTES = [
   "A maioria quebra após o segundo loss. A Horus IA observa isso.",
@@ -771,6 +774,20 @@ const DashboardHome = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* ═══════ Advanced Horus IA Modules ═══════ */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+          <p className="text-xs font-display font-bold text-primary uppercase tracking-widest">Módulos Avançados Horus IA</p>
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <BehaviorRadar />
+          <EmotionalRiskMap />
+        </div>
+        <BankSimulator />
+      </div>
 
       <PatentPreviewDialog open={patentDialogOpen} onOpenChange={setPatentDialogOpen} rank={selectedPatentRank} totalProfit={totalProfit} displayName={displayName} daysTrading={daysTrading} isEn={isEn} />
       {achievedRank && (

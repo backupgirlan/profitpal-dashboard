@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Eye, Send, Trash2, Loader2, Sparkles, User, Check, CheckCheck
+  Eye, Send, Trash2, Loader2, Sparkles, User, Check, CheckCheck, Palette
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -37,6 +37,17 @@ const HISTORY_FILTERS = [
   { value: 'today', label: 'Hoje' },
   { value: 'week', label: '7 dias' },
   { value: 'all', label: 'Tudo' },
+];
+
+const CHAT_BG_OPTIONS = [
+  { id: 'default', label: 'Padrão', bg: '#0B0F19', pattern: true },
+  { id: 'dark', label: 'Escuro', bg: '#080B12', pattern: false },
+  { id: 'deep', label: 'Profundo', bg: '#0D1117', pattern: true },
+  { id: 'navy', label: 'Marinho', bg: '#0A1628', pattern: true },
+  { id: 'charcoal', label: 'Carvão', bg: '#1A1A1A', pattern: false },
+  { id: 'forest', label: 'Floresta', bg: '#0B1A14', pattern: true },
+  { id: 'warm', label: 'Quente', bg: '#1A140B', pattern: true },
+  { id: 'purple', label: 'Roxo', bg: '#12091A', pattern: true },
 ];
 
 export default function TraderDialog() {

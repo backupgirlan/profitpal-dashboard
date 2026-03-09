@@ -62,6 +62,15 @@ export default function TraderDialog() {
   const [historyTab, setHistoryTab] = useState('today');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [chatBg, setChatBg] = useState(() => localStorage.getItem('horus-chat-bg') || 'default');
+  const [showBgPicker, setShowBgPicker] = useState(false);
+
+  const selectedBg = CHAT_BG_OPTIONS.find(o => o.id === chatBg) || CHAT_BG_OPTIONS[0];
+
+  const handleBgChange = (id: string) => {
+    setChatBg(id);
+    localStorage.setItem('horus-chat-bg', id);
+  };
 
   useEffect(() => {
     loadMessages();

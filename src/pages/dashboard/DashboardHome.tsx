@@ -98,11 +98,6 @@ const DashboardHome = () => {
   const [negativeDays, setNegativeDays] = useState(0);
   const [disciplineRate, setDisciplineRate] = useState(100);
 
-  // Horus IA state
-  const [isVip, setIsVip] = useState(false);
-  const [isSuperVip, setIsSuperVip] = useState(false);
-  const [lastAnalysis, setLastAnalysis] = useState<string | null>(null);
-  const [consecutiveLosses, setConsecutiveLosses] = useState(0);
 
   const quoteIndex = useMemo(() => Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length), []);
 

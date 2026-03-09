@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { DEFAULT_PAIRS } from '@/lib/defaultPairs';
@@ -14,7 +15,7 @@ import {
   Wallet, TrendingUp, CheckCircle, XCircle, Shield, ChevronRight, PiggyBank,
   Pencil, X, Target, ClipboardList, Activity, Calendar, Quote,
   ArrowUpRight, ArrowDownRight, BarChart3, Zap, AlertTriangle, TrendingDown,
-  Trash2, RotateCcw
+  Trash2, RotateCcw, Brain, Eye, MessageSquare, Sparkles, Lock
 } from 'lucide-react';
 import { getRankForProfit, getNextRankForProfit, TRADER_RANKS, TraderRank } from '@/lib/traderRanks';
 import PatentPreviewDialog from '@/components/PatentPreviewDialog';
@@ -24,12 +25,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 const MOTIVATIONAL_QUOTES = [
-  "Trader profissional protege o capital.",
-  "Disciplina gera consistência.",
-  "O mercado pune a impulsividade.",
-  "O objetivo não é ganhar hoje. É ainda estar no jogo amanhã.",
-  "Recuperar perdas imediatamente é o erro que quebra contas.",
-  "Paciência é a arma mais poderosa do trader.",
+  "A maioria quebra após o segundo loss. A Horus IA observa isso.",
+  "O mercado mostra o preço. A Horus IA mostra seu comportamento.",
+  "Disciplina não é entrar bem. É saber parar.",
+  "A Horus IA observa padrões que você não percebe.",
+  "Preservar o dia é mais inteligente do que tentar salvá-lo no impulso.",
   "Consistência supera intensidade.",
   "O mercado sempre estará aqui amanhã.",
 ];
@@ -46,6 +46,7 @@ const CHART_COLORS = {
 const DashboardHome = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isEn = i18n.language === 'en';
   const mgmt = useManagement2x();
 
@@ -67,7 +68,6 @@ const DashboardHome = () => {
   const [editingPairIndex, setEditingPairIndex] = useState<number | null>(null);
   const [editingPairValue, setEditingPairValue] = useState('');
 
-  // Deposit / Edit balance inline on Banca card
   const [showDepositInput, setShowDepositInput] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [depositing, setDepositing] = useState(false);
@@ -79,13 +79,11 @@ const DashboardHome = () => {
   const [patentDialogOpen, setPatentDialogOpen] = useState(false);
   const [selectedPatentRank, setSelectedPatentRank] = useState(TRADER_RANKS[0]);
 
-  // Achievement modal (auto-triggered on rank up)
   const [achievementOpen, setAchievementOpen] = useState(false);
   const [achievedRank, setAchievedRank] = useState<TraderRank | null>(null);
   const lastRankRef = useRef<string>('');
   const hasInitialized = useRef(false);
 
-  // Emotional check-in modal on page load
   const [emotionalState, setEmotionalState] = useState<string | null>(null);
   const [showEmotionalModal, setShowEmotionalModal] = useState(false);
   const [emotionalDismissed, setEmotionalDismissed] = useState(false);
@@ -100,9 +98,14 @@ const DashboardHome = () => {
   const [negativeDays, setNegativeDays] = useState(0);
   const [disciplineRate, setDisciplineRate] = useState(100);
 
+  // Horus IA state
+  const [isVip, setIsVip] = useState(false);
+  const [isSuperVip, setIsSuperVip] = useState(false);
+  const [lastAnalysis, setLastAnalysis] = useState<string | null>(null);
+  const [consecutiveLosses, setConsecutiveLosses] = useState(0);
+
   const quoteIndex = useMemo(() => Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length), []);
 
-  // Show emotional modal on first load of the day
   useEffect(() => {
     const todayKey = `emotional_checkin_${new Date().toISOString().split('T')[0]}`;
     const alreadyDone = localStorage.getItem(todayKey);
@@ -124,14 +127,10 @@ const DashboardHome = () => {
   const handleEmotionalConfirm = () => {
     setEmotionalDismissed(true);
     setShowEmotionalModal(false);
-    // Save to DB
     if (user && emotionalState) {
       const safe = emotionalOptions.find(o => o.key === emotionalState)?.safe ?? true;
       supabase.from('emotional_checkins').insert({
-        user_id: user.id,
-        emotional_state: emotionalState,
-        is_risky: !safe,
-        proceeded: true,
+        user_id: user.id, emotional_state: emotionalState, is_risky: !safe, proceeded: true,
       });
     }
   };
@@ -139,7 +138,7 @@ const DashboardHome = () => {
   const loadData = useCallback(async (checkRankUp = false) => {
     if (!user) return;
     const [profileRes, tradesRes] = await Promise.all([
-      supabase.from('profiles').select('balance, total_profit, display_name, created_at, discipline_score').eq('user_id', user.id).single(),
+      supabase.from('profiles').select('balance, total_profit, display_name, created_at, discipline_score, is_vip, is_super_vip, consecutive_losses').eq('user_id', user.id).single(),
       supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
     ]);
     if (profileRes.data) {
@@ -148,18 +147,18 @@ const DashboardHome = () => {
       setTotalProfit(newProfit);
       setDisplayName(profileRes.data.display_name || 'Trader');
       setDisciplineRate(Number(profileRes.data.discipline_score) || 100);
+      setIsVip(!!profileRes.data.is_vip);
+      setIsSuperVip(!!profileRes.data.is_super_vip);
+      setConsecutiveLosses(Number(profileRes.data.consecutive_losses) || 0);
       if (profileRes.data.created_at) {
         const created = new Date(profileRes.data.created_at);
         setDaysTrading(Math.max(1, Math.floor((Date.now() - created.getTime()) / 86400000)));
       }
-
-      // Rank-up detection: compare new rank to last known rank
       if (checkRankUp && hasInitialized.current) {
         const newRank = getRankForProfit(newProfit);
         if (lastRankRef.current && newRank.name !== lastRankRef.current) {
           const oldRankObj = TRADER_RANKS.find(r => r.name === lastRankRef.current);
           if (!oldRankObj || newRank.minProfit > oldRankObj.minProfit) {
-            // Genuine rank-up!
             setAchievedRank(newRank);
             setAchievementOpen(true);
             toast.success(`🏆 Parabéns! Você conquistou a patente ${newRank.emoji} ${newRank.name}!`, { duration: 6000 });
@@ -173,63 +172,49 @@ const DashboardHome = () => {
       const today = new Date().toISOString().split('T')[0];
       const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
       const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0];
-
       let currentWinStreak = 0, currentLossStreak = 0;
       let cumBalance = 0, peak = 0, mdd = 0;
       const evoMap: Record<string, number> = {};
       const dailyProfitMap: Record<string, number> = {};
-      
       tradesRes.data.forEach(trade => {
         const profit = Number(trade.profit);
         if (trade.result === 'win') w++; else l++;
-        
         const tradeDate = trade.trade_date || today;
         if (tradeDate >= today) todayP += profit;
         if (tradeDate >= weekAgo) weekP += profit;
         if (tradeDate >= monthAgo) monthP += profit;
-
         cumBalance += profit;
         if (cumBalance > peak) peak = cumBalance;
         const dd = peak - cumBalance;
         if (dd > mdd) mdd = dd;
-
         evoMap[tradeDate] = cumBalance;
         dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
       });
-
       for (let i = tradesRes.data.length - 1; i >= 0; i--) {
-        if (tradesRes.data[i].result === 'win') {
-          if (currentLossStreak > 0) break;
-          currentWinStreak++;
-        } else {
-          if (currentWinStreak > 0) break;
-          currentLossStreak++;
-        }
+        if (tradesRes.data[i].result === 'win') { if (currentLossStreak > 0) break; currentWinStreak++; }
+        else { if (currentWinStreak > 0) break; currentLossStreak++; }
       }
-
       let posDays = 0, negDays = 0;
       Object.values(dailyProfitMap).forEach(p => { if (p > 0) posDays++; else if (p < 0) negDays++; });
-
       setWins(w); setLosses(l);
       setTodayProfit(todayP); setWeekProfit(weekP); setMonthProfit(monthP);
       setWinStreak(currentWinStreak); setLossStreak(currentLossStreak);
-      setMaxDrawdown(mdd);
-      setPositiveDays(posDays); setNegativeDays(negDays);
-
+      setMaxDrawdown(mdd); setPositiveDays(posDays); setNegativeDays(negDays);
       const evoEntries = Object.entries(evoMap).sort((a, b) => a[0].localeCompare(b[0]));
       setEvolutionData(evoEntries.map(([day, balance]) => ({ day: day.slice(5), balance })));
-
       const consistencyEntries = Object.entries(dailyProfitMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
     }
+
+    // Last analysis
+    const { data: analysisData } = await supabase.from('account_analyses').select('summary, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
+    if (analysisData?.summary) setLastAnalysis(analysisData.summary);
   }, [user]);
 
-  // Initial load: set the baseline rank without triggering achievement
   useEffect(() => {
     if (user && !hasInitialized.current) {
       loadData(false).then(() => {
         hasInitialized.current = true;
-        // Set initial rank ref from profile
         supabase.from('profiles').select('total_profit').eq('user_id', user.id).single().then(({ data }) => {
           if (data) lastRankRef.current = getRankForProfit(Number(data.total_profit) || 0).name;
         });
@@ -245,15 +230,12 @@ const DashboardHome = () => {
       .then(({ data }) => {
         if (data) {
           const userPairs = [...new Set(data.map(d => d.pair_name))];
-          const merged = [...new Set([...DEFAULT_PAIRS, ...userPairs])].sort();
-          setSavedPairs(merged);
+          setSavedPairs([...new Set([...DEFAULT_PAIRS, ...userPairs])].sort());
         }
       });
   }, [user]);
 
-  const filteredPairs = pair.length > 0
-    ? savedPairs.filter(p => p.toLowerCase().includes(pair.toLowerCase()))
-    : [];
+  const filteredPairs = pair.length > 0 ? savedPairs.filter(p => p.toLowerCase().includes(pair.toLowerCase())) : [];
 
   useEffect(() => {
     const handler = () => loadData();
@@ -292,10 +274,7 @@ const DashboardHome = () => {
     if (isNaN(val) || val < 0 || !user) return;
     const newBalance = +val.toFixed(2);
     await supabase.from('profiles').update({ balance: newBalance }).eq('user_id', user.id);
-    setBalance(newBalance);
-    setEditBalanceMode(false);
-    setEditBalanceValue('');
-    setShowDepositInput(false);
+    setBalance(newBalance); setEditBalanceMode(false); setEditBalanceValue(''); setShowDepositInput(false);
     toast.success('✅ Banca atualizada!');
     window.dispatchEvent(new Event('balance-updated'));
   };
@@ -316,14 +295,10 @@ const DashboardHome = () => {
       localStorage.removeItem('management_engine_state');
       localStorage.removeItem('soros_management_state');
       toast.success('🔄 Conta resetada com sucesso!');
-      setShowResetConfirm(false);
-      setShowDepositInput(false);
+      setShowResetConfirm(false); setShowDepositInput(false);
       setTimeout(() => window.location.reload(), 1000);
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setResetLoading(false);
-    }
+    } catch (err: any) { toast.error(err.message); }
+    finally { setResetLoading(false); }
   };
 
   const handleTrade = async (result: 'win' | 'loss') => {
@@ -338,7 +313,6 @@ const DashboardHome = () => {
     const profit = result === 'win' ? +(amtNum * payNum).toFixed(2) : -amtNum;
     const newBalance = +(balance + profit).toFixed(2);
     const newTotalProfit = +(totalProfit + profit).toFixed(2);
-
     const [tradeRes, profileRes] = await Promise.all([
       supabase.from('trades').insert({
         user_id: user.id, pair_name: pair.trim().toUpperCase(), payout: Number(payout),
@@ -346,17 +320,15 @@ const DashboardHome = () => {
       }),
       supabase.from('profiles').update({ balance: newBalance, total_profit: newTotalProfit }).eq('user_id', user.id),
     ]);
-
-    if (tradeRes.error || profileRes.error) {
-      toast.error(t('common.error'));
-    } else {
+    if (tradeRes.error || profileRes.error) { toast.error(t('common.error')); }
+    else {
       setBalance(newBalance); setTotalProfit(newTotalProfit);
       if (result === 'win') setWins(w => w + 1); else setLosses(l => l + 1);
       toast.success(result === 'win' ? `✅ WIN +R$ ${(amtNum * payNum).toFixed(2)}` : `❌ LOSS -R$ ${amtNum.toFixed(2)}`);
       if (!savedPairs.includes(pair.trim().toUpperCase())) setSavedPairs(prev => [...prev, pair.trim().toUpperCase()].sort());
       setPair(''); setAmount('');
       window.dispatchEvent(new Event('balance-updated'));
-      loadData(true); // true = check for rank-up
+      loadData(true);
     }
     setSubmitting(false);
   };
@@ -385,10 +357,12 @@ const DashboardHome = () => {
 
   const formatCurrency = (v: number) => `R$ ${v.toFixed(2)}`;
 
-  const emotionalEmoji = emotionalState
-    ? emotionalOptions.find(o => o.key === emotionalState)?.label.split(' ')[0] || '😊'
-    : '😊';
+  const emotionalEmoji = emotionalState ? emotionalOptions.find(o => o.key === emotionalState)?.label.split(' ')[0] || '😊' : '😊';
   const isEmotionalRisky = emotionalState ? !emotionalOptions.find(o => o.key === emotionalState)?.safe : false;
+
+  const riskLevel = consecutiveLosses >= 2 ? 'Alto' : isEmotionalRisky ? 'Médio' : 'Baixo';
+  const riskColor = riskLevel === 'Alto' ? 'text-destructive' : riskLevel === 'Médio' ? 'text-primary' : 'text-success';
+  const stateLabel = isEmotionalRisky ? 'Atenção' : 'Estável';
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -396,37 +370,24 @@ const DashboardHome = () => {
       <Dialog open={showEmotionalModal} onOpenChange={(open) => { if (!open && emotionalState) handleEmotionalConfirm(); }}>
         <DialogContent className="bg-card border-border max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-display text-lg text-foreground text-center">
-              Como foi seu dia hoje?
-            </DialogTitle>
+            <DialogTitle className="font-display text-lg text-foreground text-center">Como foi seu dia hoje?</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground text-center mb-4">
-            Antes de operar, precisamos entender como você está se sentindo. Isso nos ajuda a proteger sua banca.
-          </p>
+          <p className="text-sm text-muted-foreground text-center mb-4">Antes de operar, precisamos entender como você está se sentindo. Isso nos ajuda a proteger sua banca.</p>
           <div className="grid grid-cols-2 gap-3">
             {emotionalOptions.map(opt => (
-              <button
-                key={opt.key}
-                onClick={() => handleEmotionalSelect(opt.key)}
+              <button key={opt.key} onClick={() => handleEmotionalSelect(opt.key)}
                 className={`px-4 py-4 rounded-xl text-sm font-medium transition-all duration-200 border flex flex-col items-center gap-2 ${
                   emotionalState === opt.key
-                    ? opt.safe
-                      ? 'border-success/50 bg-success/10 text-success scale-105'
-                      : 'border-destructive/50 bg-destructive/10 text-destructive scale-105'
+                    ? opt.safe ? 'border-success/50 bg-success/10 text-success scale-105' : 'border-destructive/50 bg-destructive/10 text-destructive scale-105'
                     : 'border-border bg-secondary/50 text-muted-foreground hover:text-foreground hover:bg-secondary hover:scale-[1.02]'
-                }`}
-              >
+                }`}>
                 <span className="text-2xl">{opt.label.split(' ')[0]}</span>
                 <span>{opt.label.split(' ')[1]}</span>
               </button>
             ))}
           </div>
           {emotionalState && !emotionalOptions.find(o => o.key === emotionalState)?.safe && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-2 p-4 rounded-xl bg-destructive/10 border border-destructive/25 flex items-start gap-3"
-            >
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mt-2 p-4 rounded-xl bg-destructive/10 border border-destructive/25 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-bold text-destructive">ATENÇÃO</p>
@@ -434,22 +395,110 @@ const DashboardHome = () => {
               </div>
             </motion.div>
           )}
-          <Button
-            onClick={handleEmotionalConfirm}
-            disabled={!emotionalState}
-            className="w-full mt-2 gradient-gold text-primary-foreground font-semibold h-11"
-          >
+          <Button onClick={handleEmotionalConfirm} disabled={!emotionalState} className="w-full mt-2 gradient-gold text-primary-foreground font-semibold h-11">
             Continuar para o Dashboard
           </Button>
         </DialogContent>
       </Dialog>
 
+      {/* ═══════ PAINEL HORUS IA — HERO SECTION ═══════ */}
+      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card box-glow-strong relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-60 h-60 bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+          <CardContent className="p-6 sm:p-8 relative">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center">
+                  <Brain className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h2 className="font-display text-sm font-bold text-primary uppercase tracking-wider">Painel Horus IA</h2>
+                  <p className="text-xs text-muted-foreground">Monitoramento inteligente do trader</p>
+                </div>
+              </div>
+              {(isVip || isSuperVip) ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-display text-success border border-success/20 bg-success/10 px-3 py-1 rounded-full">
+                  <CheckCircle className="w-3 h-3" /> Ativa
+                </span>
+              ) : (
+                <Button size="sm" onClick={() => navigate('/dashboard/super-vip')} className="gradient-gold text-primary-foreground font-display text-xs gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" /> Ativar
+                </Button>
+              )}
+            </div>
+
+            {/* Horus stats grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
+                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Estado</p>
+                <p className={`text-lg font-bold ${isEmotionalRisky ? 'text-destructive' : 'text-success'}`}>{stateLabel}</p>
+                <p className="text-lg">{emotionalEmoji}</p>
+              </div>
+              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
+                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Risco Emocional</p>
+                <p className={`text-lg font-bold ${riskColor}`}>{riskLevel}</p>
+              </div>
+              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
+                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Score</p>
+                <p className="text-2xl font-display font-black text-primary">{disciplineRate}</p>
+                <p className="text-[10px] text-muted-foreground">/ 100</p>
+              </div>
+              <div className="bg-secondary/30 rounded-xl p-4 text-center border border-border/50">
+                <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Losses Seguidos</p>
+                <p className={`text-2xl font-display font-black ${consecutiveLosses >= 2 ? 'text-destructive' : 'text-foreground'}`}>{consecutiveLosses}</p>
+              </div>
+            </div>
+
+            {/* Alerts */}
+            {consecutiveLosses >= 2 && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-4 p-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-destructive">Alerta da Horus IA</p>
+                  <p className="text-xs text-muted-foreground mt-1">{consecutiveLosses} losses consecutivos detectados. Seu risco de impulsividade aumentou. Considere encerrar o dia.</p>
+                </div>
+              </motion.div>
+            )}
+
+            {lastAnalysis && (
+              <div className="mb-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                <p className="text-xs text-primary font-display uppercase tracking-wider mb-1">Última Análise da Conta</p>
+                <p className="text-sm text-muted-foreground line-clamp-2">{lastAnalysis}</p>
+              </div>
+            )}
+
+            {/* Horus IA Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {(isVip || isSuperVip) ? (
+                <>
+                  <Button variant="outline" onClick={() => navigate('/dashboard/horus')} className="h-12 border-primary/20 hover:bg-primary/10 text-primary font-display text-xs gap-2 uppercase tracking-wider">
+                    <BarChart3 className="w-4 h-4" /> Analisar minha conta
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/dashboard/horus')} className="h-12 border-primary/20 hover:bg-primary/10 text-primary font-display text-xs gap-2 uppercase tracking-wider">
+                    <Eye className="w-4 h-4" /> Enviar print para análise
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/dashboard/horus')} className="h-12 border-primary/20 hover:bg-primary/10 text-primary font-display text-xs gap-2 uppercase tracking-wider">
+                    <MessageSquare className="w-4 h-4" /> Conversar com Horus IA
+                  </Button>
+                </>
+              ) : (
+                <div className="sm:col-span-3 text-center py-4">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Lock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Horus IA não ativa</span>
+                  </div>
+                  <Button onClick={() => navigate('/dashboard/super-vip')} className="gradient-gold text-primary-foreground font-display text-sm gap-2">
+                    <Sparkles className="w-4 h-4" /> Ativar agora — R$ 29,90/mês
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
       {/* Motivational Quote */}
-      <motion.div
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3 px-5 py-3 rounded-xl bg-primary/5 border border-primary/10"
-      >
+      <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 px-5 py-3 rounded-xl bg-primary/5 border border-primary/10">
         <Quote className="w-4 h-4 text-primary shrink-0" />
         <p className="text-sm text-muted-foreground italic">"{MOTIVATIONAL_QUOTES[quoteIndex]}"</p>
       </motion.div>
@@ -471,7 +520,7 @@ const DashboardHome = () => {
         </Card>
       )}
 
-      {/* ═══════ BANCA ATUAL — Hero Card with Pencil for Deposit ═══════ */}
+      {/* ═══════ BANCA ATUAL ═══════ */}
       <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}>
         <Card className="border-primary/20 bg-card box-glow-strong relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
@@ -479,118 +528,52 @@ const DashboardHome = () => {
             <div className="flex items-center justify-between mb-1">
               <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Banca Atual</span>
               <div className="flex items-center gap-3">
-                {/* Emotional indicator */}
-                <span className={`text-lg ${isEmotionalRisky ? 'animate-pulse-loss' : ''}`} title={emotionalState || 'Humor'}>
-                  {emotionalEmoji}
-                </span>
+                <span className={`text-lg ${isEmotionalRisky ? 'animate-pulse-loss' : ''}`} title={emotionalState || 'Humor'}>{emotionalEmoji}</span>
                 <Wallet className="w-5 h-5 text-primary" />
-                <button
-                  onClick={() => setShowDepositInput(!showDepositInput)}
-                  className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors"
-                  title="Depositar na banca"
-                >
+                <button onClick={() => setShowDepositInput(!showDepositInput)} className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" title="Depositar na banca">
                   <Pencil className="w-4 h-4" />
                 </button>
               </div>
             </div>
-            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">
-              R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </p>
+            <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mt-2">R$ {balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             <div className="flex items-center gap-2 mt-3">
               {totalProfit >= 0 ? <ArrowUpRight className="w-4 h-4 text-success" /> : <ArrowDownRight className="w-4 h-4 text-destructive" />}
-              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>
-                {totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total
-              </span>
+              <span className={`text-sm font-semibold ${totalProfit >= 0 ? 'win-text' : 'loss-text'}`}>{totalProfit >= 0 ? '+' : ''}R$ {totalProfit.toFixed(2)} total</span>
             </div>
-
-            {/* Inline actions area */}
             <AnimatePresence>
               {showDepositInput && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
-                >
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                   <div className="mt-4 pt-4 border-t border-border space-y-3">
-                    {/* Edit Balance */}
                     {editBalanceMode ? (
                       <div className="flex gap-3">
-                        <Input
-                          type="number"
-                          value={editBalanceValue}
-                          onChange={e => setEditBalanceValue(e.target.value)}
-                          placeholder="Novo valor da banca"
-                          className="bg-secondary/50 h-11 text-base flex-1"
-                          autoFocus
-                        />
-                        <Button
-                          disabled={!editBalanceValue && editBalanceValue !== '0'}
-                          className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
-                          onClick={handleEditBalance}
-                        >
-                          Salvar
-                        </Button>
-                        <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}>
-                          <X className="w-4 h-4" />
-                        </Button>
+                        <Input type="number" value={editBalanceValue} onChange={e => setEditBalanceValue(e.target.value)} placeholder="Novo valor da banca" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
+                        <Button disabled={!editBalanceValue && editBalanceValue !== '0'} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleEditBalance}>Salvar</Button>
+                        <Button variant="ghost" className="h-11 px-3" onClick={() => { setEditBalanceMode(false); setEditBalanceValue(''); }}><X className="w-4 h-4" /></Button>
                       </div>
                     ) : (
                       <div className="flex gap-3">
-                        <Input
-                          type="number"
-                          value={depositAmount}
-                          onChange={e => setDepositAmount(e.target.value)}
-                          placeholder="Valor do depósito"
-                          className="bg-secondary/50 h-11 text-base flex-1"
-                          autoFocus
-                        />
-                        <Button
-                          disabled={!depositAmount || depositing}
-                          className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold"
-                          onClick={handleDeposit}
-                        >
-                          <PiggyBank className="w-4 h-4 mr-2" />
-                          Depositar
+                        <Input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)} placeholder="Valor do depósito" className="bg-secondary/50 h-11 text-base flex-1" autoFocus />
+                        <Button disabled={!depositAmount || depositing} className="gradient-gold text-primary-foreground shrink-0 h-11 px-6 font-semibold" onClick={handleDeposit}>
+                          <PiggyBank className="w-4 h-4 mr-2" /> Depositar
                         </Button>
                       </div>
                     )}
-
-                    {/* Action buttons */}
                     <div className="flex gap-2">
                       {!editBalanceMode && (
-                        <Button
-                          variant="outline"
-                          className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary"
-                          onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                          Editar Banca
+                        <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-primary/20 hover:bg-primary/10 text-primary" onClick={() => { setEditBalanceMode(true); setEditBalanceValue(String(balance)); }}>
+                          <Pencil className="w-3.5 h-3.5" /> Editar Banca
                         </Button>
                       )}
                       {!showResetConfirm ? (
-                        <Button
-                          variant="outline"
-                          className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive"
-                          onClick={() => setShowResetConfirm(true)}
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          Resetar Dados
+                        <Button variant="outline" className="flex-1 h-9 text-xs gap-2 border-destructive/20 hover:bg-destructive/10 text-destructive" onClick={() => setShowResetConfirm(true)}>
+                          <RotateCcw className="w-3.5 h-3.5" /> Resetar Dados
                         </Button>
                       ) : (
                         <div className="flex-1 flex gap-2">
-                          <Button
-                            variant="destructive"
-                            className="flex-1 h-9 text-xs gap-2"
-                            onClick={handleResetAccount}
-                            disabled={resetLoading}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
+                          <Button variant="destructive" className="flex-1 h-9 text-xs gap-2" onClick={handleResetAccount} disabled={resetLoading}>
+                            <Trash2 className="w-3.5 h-3.5" /> {resetLoading ? 'Resetando...' : 'Confirmar Reset'}
                           </Button>
-                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>
-                            Cancelar
-                          </Button>
+                          <Button variant="ghost" className="h-9 px-3 text-xs" onClick={() => setShowResetConfirm(false)}>Cancelar</Button>
                         </div>
                       )}
                     </div>
@@ -611,15 +594,15 @@ const DashboardHome = () => {
           { icon: TrendingDown, label: 'Máx. Drawdown', value: formatCurrency(maxDrawdown), positive: false, alwaysRed: true },
         ].map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-            <Card className="border-border bg-card hover:border-primary/15 transition-all duration-300 group">
+            <Card className="border-border bg-card hover:border-primary/15 transition-all duration-300">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{s.label}</span>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.alwaysRed ? 'bg-destructive/10 text-destructive' : s.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${(s as any).alwaysRed ? 'bg-destructive/10 text-destructive' : s.positive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
                     <s.icon className="w-4 h-4" />
                   </div>
                 </div>
-                <p className={`text-2xl font-bold ${s.alwaysRed ? 'loss-text' : s.positive ? 'win-text' : 'loss-text'}`}>{s.value}</p>
+                <p className={`text-2xl font-bold ${(s as any).alwaysRed ? 'loss-text' : s.positive ? 'win-text' : 'loss-text'}`}>{s.value}</p>
               </CardContent>
             </Card>
           </motion.div>
@@ -628,41 +611,13 @@ const DashboardHome = () => {
 
       {/* ═══════ Win Rate + Streaks + Meta ═══════ */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-border bg-card">
-          <CardContent className="p-5 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Win Rate</p>
-            <p className="text-3xl font-bold text-primary">{winRate}%</p>
-            <p className="text-xs text-muted-foreground mt-1">{totalTrades} operações</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardContent className="p-5 text-center">
-            <div className="flex items-center justify-center gap-1.5 mb-2">
-              <ArrowUpRight className="w-3.5 h-3.5 text-success" />
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Wins</p>
-            </div>
-            <p className="text-3xl font-bold win-text">{winStreak}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardContent className="p-5 text-center">
-            <div className="flex items-center justify-center gap-1.5 mb-2">
-              <ArrowDownRight className="w-3.5 h-3.5 text-destructive" />
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Losses</p>
-            </div>
-            <p className="text-3xl font-bold loss-text">{lossStreak}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardContent className="p-5 text-center">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Meta Diária</p>
-            <p className="text-3xl font-bold text-primary">{todayProfit >= 0 ? '✓' : '—'}</p>
-            <p className="text-xs text-muted-foreground mt-1">{todayProfit >= 0 ? 'No alvo' : 'Abaixo'}</p>
-          </CardContent>
-        </Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Win Rate</p><p className="text-3xl font-bold text-primary">{winRate}%</p><p className="text-xs text-muted-foreground mt-1">{totalTrades} operações</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><div className="flex items-center justify-center gap-1.5 mb-2"><ArrowUpRight className="w-3.5 h-3.5 text-success" /><p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Wins</p></div><p className="text-3xl font-bold win-text">{winStreak}</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><div className="flex items-center justify-center gap-1.5 mb-2"><ArrowDownRight className="w-3.5 h-3.5 text-destructive" /><p className="text-xs text-muted-foreground uppercase tracking-wider">Sequência Losses</p></div><p className="text-3xl font-bold loss-text">{lossStreak}</p></CardContent></Card>
+        <Card className="border-border bg-card"><CardContent className="p-5 text-center"><p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Meta Diária</p><p className="text-3xl font-bold text-primary">{todayProfit >= 0 ? '✓' : '—'}</p><p className="text-xs text-muted-foreground mt-1">{todayProfit >= 0 ? 'No alvo' : 'Abaixo'}</p></CardContent></Card>
       </div>
 
-      {/* ═══════ REGISTRAR OPERAÇÃO (above charts) ═══════ */}
+      {/* ═══════ REGISTRAR OPERAÇÃO ═══════ */}
       <Card className="border-border bg-card">
         <CardContent className="p-5 sm:p-6">
           <h3 className="font-display text-sm font-bold text-primary mb-4 flex items-center gap-2 uppercase tracking-wider">
@@ -671,15 +626,10 @@ const DashboardHome = () => {
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="relative">
               <Label className="text-xs text-muted-foreground">{t('home.pair')}</Label>
-              <Input
-                value={pair}
-                onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
+              <Input value={pair} onChange={e => { setPair(e.target.value.toUpperCase()); setShowPairSuggestions(true); }}
                 onFocus={() => setShowPairSuggestions(true)}
                 onBlur={(e) => { const container = e.currentTarget.closest('.relative'); setTimeout(() => { if (container && !container.contains(document.activeElement)) setShowPairSuggestions(false); }, 200); }}
-                placeholder="EUR/USD"
-                className="bg-secondary/50 uppercase h-11"
-                autoComplete="off"
-              />
+                placeholder="EUR/USD" className="bg-secondary/50 uppercase h-11" autoComplete="off" />
               {showPairSuggestions && filteredPairs.length > 0 && (
                 <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-card border border-border rounded-xl shadow-2xl max-h-40 overflow-y-auto">
                   {filteredPairs.map((p, idx) => (
@@ -729,7 +679,6 @@ const DashboardHome = () => {
 
       {/* ═══════ Charts Row ═══════ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Evolution */}
         <Card className="border-border bg-card lg:col-span-2">
           <CardContent className="p-5 sm:p-6">
             <h3 className="font-display text-sm font-bold text-foreground mb-4 flex items-center gap-2 uppercase tracking-wider">
@@ -739,12 +688,7 @@ const DashboardHome = () => {
               {evolutionData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={evolutionData}>
-                    <defs>
-                      <linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={CHART_COLORS.gold} stopOpacity={0.25} />
-                        <stop offset="95%" stopColor={CHART_COLORS.gold} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
+                    <defs><linearGradient id="balanceGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={CHART_COLORS.gold} stopOpacity={0.25} /><stop offset="95%" stopColor={CHART_COLORS.gold} stopOpacity={0} /></linearGradient></defs>
                     <XAxis dataKey="day" tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fontSize: 11, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} labelStyle={{ color: '#F9FAFB' }} />
@@ -757,20 +701,13 @@ const DashboardHome = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* WIN x LOSS Pie */}
         <Card className="border-border bg-card">
           <CardContent className="p-5 sm:p-6">
             <h3 className="font-display text-sm font-bold text-foreground mb-4 uppercase tracking-wider">Distribuição</h3>
             <div className="h-48">
               {totalTrades > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value" strokeWidth={0}>
-                      {pieData.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}
-                    </Pie>
-                    <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} />
-                  </PieChart>
+                  <PieChart><Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={4} dataKey="value" strokeWidth={0}>{pieData.map((entry, idx) => <Cell key={idx} fill={entry.color} />)}</Pie><Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '13px' }} /></PieChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-full flex items-center justify-center text-muted-foreground text-sm">Sem dados</div>
@@ -788,28 +725,14 @@ const DashboardHome = () => {
       <Card className="border-border bg-card">
         <CardContent className="p-5 sm:p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
-              <Target className="w-4 h-4 text-primary" /> Consistência
-            </h3>
+            <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider"><Target className="w-4 h-4 text-primary" /> Consistência</h3>
             <span className={`text-xs font-bold ${consistencyColor}`}>{consistencyLevel}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
-            <div className="text-center">
-              <p className="text-2xl font-bold win-text">{positiveDays}</p>
-              <p className="text-xs text-muted-foreground">Dias Positivos</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold loss-text">{negativeDays}</p>
-              <p className="text-xs text-muted-foreground">Dias Negativos</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-primary">{disciplineRate}%</p>
-              <p className="text-xs text-muted-foreground">Disciplina</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold text-foreground">{daysTrading}</p>
-              <p className="text-xs text-muted-foreground">Dias Operando</p>
-            </div>
+            <div className="text-center"><p className="text-2xl font-bold win-text">{positiveDays}</p><p className="text-xs text-muted-foreground">Dias Positivos</p></div>
+            <div className="text-center"><p className="text-2xl font-bold loss-text">{negativeDays}</p><p className="text-xs text-muted-foreground">Dias Negativos</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-primary">{disciplineRate}%</p><p className="text-xs text-muted-foreground">Disciplina</p></div>
+            <div className="text-center"><p className="text-2xl font-bold text-foreground">{daysTrading}</p><p className="text-xs text-muted-foreground">Dias Operando</p></div>
           </div>
           <Progress value={disciplineRate} className="h-2 mb-4" />
           <div className="h-44">
@@ -819,11 +742,7 @@ const DashboardHome = () => {
                   <XAxis dataKey="day" tick={{ fontSize: 10, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '12px' }} />
-                  <Bar dataKey="profit" radius={[4, 4, 0, 0]}>
-                    {consistencyData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.profit >= 0 ? CHART_COLORS.green : CHART_COLORS.red} />
-                    ))}
-                  </Bar>
+                  <Bar dataKey="profit" radius={[4, 4, 0, 0]}>{consistencyData.map((entry, idx) => <Cell key={idx} fill={entry.profit >= 0 ? CHART_COLORS.green : CHART_COLORS.red} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -840,38 +759,26 @@ const DashboardHome = () => {
             <Shield className="w-4 h-4 text-primary" /> {t('home.patent')}
           </h3>
           <div className="flex items-center gap-5 mb-5">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: rank.color + '12', border: `2px solid ${rank.color}40` }}>
-              {rank.emoji}
-            </div>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: rank.color + '12', border: `2px solid ${rank.color}40` }}>{rank.emoji}</div>
             <div className="flex-1">
-              <p className="font-bold text-lg text-foreground" style={{ color: rank.color }}>
-                {isEn ? rank.nameEn : rank.name}
-              </p>
+              <p className="font-bold text-lg text-foreground" style={{ color: rank.color }}>{isEn ? rank.nameEn : rank.name}</p>
               {nextRank && (
                 <>
-                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                    Próxima: {isEn ? nextRank.nameEn : nextRank.name} {nextRank.emoji}
-                    <ChevronRight className="w-3 h-3" /> R$ {nextRank.minProfit.toLocaleString()}
-                  </p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">Próxima: {isEn ? nextRank.nameEn : nextRank.name} {nextRank.emoji}<ChevronRight className="w-3 h-3" /> R$ {nextRank.minProfit.toLocaleString()}</p>
                   <Progress value={rankProgress} className="h-1.5 mt-2" />
                 </>
               )}
               {!nextRank && <p className="text-xs text-primary font-bold mt-1">{t('home.maxRank')}</p>}
             </div>
           </div>
-
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
             {TRADER_RANKS.filter(r => r.minProfit > 0).map((r) => {
               const unlocked = totalProfit >= r.minProfit;
               return (
                 <button key={r.minProfit} onClick={() => { if (unlocked) { setSelectedPatentRank(r); setPatentDialogOpen(true); } }} disabled={!unlocked}
-                  className={`group relative rounded-xl border p-3 text-center transition-all duration-200 ${unlocked
-                    ? 'border-primary/25 bg-primary/5 hover:bg-primary/10 cursor-pointer hover:scale-105 hover:shadow-lg'
-                    : 'border-border/30 bg-secondary/20 opacity-30 cursor-not-allowed'}`}>
+                  className={`group relative rounded-xl border p-3 text-center transition-all duration-200 ${unlocked ? 'border-primary/25 bg-primary/5 hover:bg-primary/10 cursor-pointer hover:scale-105 hover:shadow-lg' : 'border-border/30 bg-secondary/20 opacity-30 cursor-not-allowed'}`}>
                   <div className="text-2xl mb-1">{r.emoji}</div>
-                  <p className="font-display text-[10px] font-bold leading-tight" style={unlocked ? { color: r.color } : { color: CHART_COLORS.muted }}>
-                    {isEn ? r.nameEn : r.name}
-                  </p>
+                  <p className="font-display text-[10px] font-bold leading-tight" style={unlocked ? { color: r.color } : { color: CHART_COLORS.muted }}>{isEn ? r.nameEn : r.name}</p>
                   <p className="text-[10px] text-muted-foreground">R$ {r.minProfit.toLocaleString()}</p>
                   {unlocked && <span className="text-[9px] win-text font-bold mt-1 block">✓ Story</span>}
                   {!unlocked && <span className="text-[9px] text-muted-foreground mt-1 block">🔒</span>}
@@ -882,20 +789,9 @@ const DashboardHome = () => {
         </CardContent>
       </Card>
 
-      <PatentPreviewDialog open={patentDialogOpen} onOpenChange={setPatentDialogOpen} rank={selectedPatentRank}
-        totalProfit={totalProfit} displayName={displayName} daysTrading={daysTrading} isEn={isEn} />
-
-      {/* Auto-triggered achievement modal when user levels up */}
+      <PatentPreviewDialog open={patentDialogOpen} onOpenChange={setPatentDialogOpen} rank={selectedPatentRank} totalProfit={totalProfit} displayName={displayName} daysTrading={daysTrading} isEn={isEn} />
       {achievedRank && (
-        <RankAchievementModal
-          open={achievementOpen}
-          onClose={() => setAchievementOpen(false)}
-          rank={achievedRank}
-          totalProfit={totalProfit}
-          displayName={displayName}
-          daysTrading={daysTrading}
-          totalTrades={wins + losses}
-        />
+        <RankAchievementModal open={achievementOpen} onClose={() => setAchievementOpen(false)} rank={achievedRank} totalProfit={totalProfit} displayName={displayName} daysTrading={daysTrading} totalTrades={wins + losses} />
       )}
     </div>
   );

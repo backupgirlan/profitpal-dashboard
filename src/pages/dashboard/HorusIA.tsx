@@ -332,23 +332,23 @@ const HorusIA = () => {
     <div className="space-y-6">
       {/* Hero Header */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 p-8 md:p-10">
+        <div className="absolute top-0 right-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
-              <Eye className="w-6 h-6 text-primary-foreground" />
+          <div className="flex items-center gap-4 mb-5">
+            <div className="w-14 h-14 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
+              <Eye className="w-7 h-7 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-display font-bold text-primary text-glow">HORUS IA</h1>
-              <p className="text-xs text-muted-foreground font-medium tracking-wider">ASSISTENTE INTELIGENTE DE PERFORMANCE</p>
+              <h1 className="text-3xl md:text-4xl font-display font-bold text-primary text-glow">HORUS IA</h1>
+              <p className="text-sm text-muted-foreground font-medium tracking-wider mt-1">ASSISTENTE INTELIGENTE DE PERFORMANCE</p>
             </div>
-            <Badge className="ml-auto gradient-gold text-primary-foreground border-0 font-display text-xs">
-              <Star className="w-3 h-3 mr-1" /> SUPER VIP
+            <Badge className="ml-auto gradient-gold text-primary-foreground border-0 font-display text-sm px-4 py-1.5">
+              <Star className="w-4 h-4 mr-1.5" /> SUPER VIP
             </Badge>
           </div>
           <motion.p key={phraseIdx} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="text-sm text-muted-foreground italic max-w-xl">
+            className="text-base text-muted-foreground italic max-w-2xl">
             "{POSITIONING_PHRASES[phraseIdx]}"
           </motion.p>
         </div>
@@ -416,7 +416,7 @@ const HorusIA = () => {
       </AnimatePresence>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
           { icon: Brain, label: 'Análises', value: analyses.length, color: 'text-primary' },
           { icon: ImageIcon, label: 'Prints', value: printAnalyses.length, color: 'text-blue-400' },
@@ -425,12 +425,14 @@ const HorusIA = () => {
           { icon: Activity, label: 'Win Rate Global', value: globalWinRate + '%', color: 'text-primary' },
         ].map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-            <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-              <CardContent className="p-4 flex items-center gap-3">
-                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+            <Card className="border-border/50 bg-card/80 backdrop-blur-sm hover:border-primary/20 transition-colors">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className="w-11 h-11 rounded-xl bg-secondary/80 flex items-center justify-center shrink-0">
+                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
+                </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                  <p className="text-lg font-display font-bold text-foreground">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  <p className="text-2xl font-display font-bold text-foreground">{stat.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -440,38 +442,38 @@ const HorusIA = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="behavioral" className="gap-2 font-display text-xs"><Brain className="w-4 h-4" /> Comportamental</TabsTrigger>
-          <TabsTrigger value="print" className="gap-2 font-display text-xs relative">
-            <ImageIcon className="w-4 h-4" /> Print
+        <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-1.5 p-1.5">
+          <TabsTrigger value="behavioral" className="gap-2 font-display text-sm py-2.5 px-4"><Brain className="w-5 h-5" /> Comportamental</TabsTrigger>
+          <TabsTrigger value="print" className="gap-2 font-display text-sm py-2.5 px-4 relative">
+            <ImageIcon className="w-5 h-5" /> Print
             {pendingPrints.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-400 text-[9px] text-white flex items-center justify-center font-bold animate-pulse">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-orange-400 text-[10px] text-white flex items-center justify-center font-bold animate-pulse">
                 {pendingPrints.length}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="account" className="gap-2 font-display text-xs"><BarChart3 className="w-4 h-4" /> Análise da Conta</TabsTrigger>
-          <TabsTrigger value="dialog" className="gap-2 font-display text-xs"><MessageSquare className="w-4 h-4" /> Diálogo do Trader</TabsTrigger>
-          <TabsTrigger value="history" className="gap-2 font-display text-xs"><Clock className="w-4 h-4" /> Histórico</TabsTrigger>
+          <TabsTrigger value="account" className="gap-2 font-display text-sm py-2.5 px-4"><BarChart3 className="w-5 h-5" /> Análise da Conta</TabsTrigger>
+          <TabsTrigger value="dialog" className="gap-2 font-display text-sm py-2.5 px-4"><MessageSquare className="w-5 h-5" /> Diálogo do Trader</TabsTrigger>
+          <TabsTrigger value="history" className="gap-2 font-display text-sm py-2.5 px-4"><Clock className="w-5 h-5" /> Histórico</TabsTrigger>
         </TabsList>
 
         {/* Behavioral Analysis */}
-        <TabsContent value="behavioral" className="space-y-4 mt-4">
+        <TabsContent value="behavioral" className="space-y-5 mt-5">
           <Card className="border-primary/10 bg-card/80">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-display text-foreground flex items-center gap-2">
-                <Brain className="w-5 h-5 text-primary" /> Análise Comportamental do Trader
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-display text-foreground flex items-center gap-3">
+                <Brain className="w-6 h-6 text-primary" /> Análise Comportamental do Trader
               </CardTitle>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground mt-1">
                 A Horus IA analisa seus dados de operações, gestão, diário emocional e padrões de comportamento.
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Tom da IA</label>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">Tom da IA</label>
                   <Select value={tone} onValueChange={setTone}>
-                    <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-secondary h-11 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="acolhedor">🤝 Acolhedor</SelectItem>
                       <SelectItem value="equilibrado">⚖️ Equilibrado</SelectItem>
@@ -481,9 +483,9 @@ const HorusIA = () => {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Foco da Análise</label>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">Foco da Análise</label>
                   <Select value={focus} onValueChange={setFocus}>
-                    <SelectTrigger className="bg-secondary"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-secondary h-11 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="geral">Visão Geral</SelectItem>
                       <SelectItem value="emocional">Padrão Emocional</SelectItem>
@@ -497,14 +499,14 @@ const HorusIA = () => {
               </div>
 
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Pergunta ou contexto adicional (opcional)</label>
-                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[80px]" />
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">Pergunta ou contexto adicional (opcional)</label>
+                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[100px] text-sm" />
               </div>
 
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
-                  {behaviorLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-xs text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-11 px-6 text-sm" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
+                  {behaviorLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
                   {behaviorLoading ? 'Analisando...' : 'Analisar'}
                 </Button>
               </div>
@@ -532,30 +534,30 @@ const HorusIA = () => {
               <AnimatePresence>
                 {behaviorResult && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-card p-5 space-y-4">
+                    className="border border-primary/20 rounded-xl bg-card p-6 space-y-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-display text-primary flex items-center gap-2"><Eye className="w-3 h-3" /> RESULTADO DA ANÁLISE</p>
-                      <Badge variant="outline" className={`text-xs ${riskColor(behaviorResult.nivel_risco)}`}>
+                      <p className="text-sm font-display text-primary flex items-center gap-2"><Eye className="w-4 h-4" /> RESULTADO DA ANÁLISE</p>
+                      <Badge variant="outline" className={`text-sm px-3 py-1 ${riskColor(behaviorResult.nivel_risco)}`}>
                         Risco: {behaviorResult.nivel_risco.toUpperCase()}
                       </Badge>
                     </div>
-                    <p className="text-sm text-foreground">{behaviorResult.resumo}</p>
+                    <p className="text-base text-foreground leading-relaxed">{behaviorResult.resumo}</p>
                     {behaviorResult.padroes_detectados.length > 0 && (
                       <div>
-                        <p className="text-xs text-muted-foreground mb-2 font-display">PADRÕES DETECTADOS</p>
-                        <div className="space-y-1.5">
+                        <p className="text-sm text-muted-foreground mb-3 font-display">PADRÕES DETECTADOS</p>
+                        <div className="space-y-2.5">
                           {behaviorResult.padroes_detectados.map((p, i) => (
-                            <div key={i} className="flex items-start gap-2 text-sm text-foreground">
-                              <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                            <div key={i} className="flex items-start gap-3 text-base text-foreground">
+                              <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
                               {p}
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-                    <div className="border-t border-border/50 pt-3">
-                      <p className="text-xs text-muted-foreground mb-1 font-display">RECOMENDAÇÃO</p>
-                      <p className="text-sm text-foreground font-medium">{behaviorResult.recomendacao}</p>
+                    <div className="border-t border-border/50 pt-4">
+                      <p className="text-sm text-muted-foreground mb-2 font-display">RECOMENDAÇÃO</p>
+                      <p className="text-base text-foreground font-medium leading-relaxed">{behaviorResult.recomendacao}</p>
                     </div>
                   </motion.div>
                 )}
@@ -563,16 +565,16 @@ const HorusIA = () => {
 
               {/* Data Sources */}
               <Card className="border-border/50 bg-card/60">
-                <CardContent className="p-4">
-                  <p className="text-xs font-display text-muted-foreground mb-3">FONTES DE DADOS ANALISADAS</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <CardContent className="p-5">
+                  <p className="text-sm font-display text-muted-foreground mb-4">FONTES DE DADOS ANALISADAS</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {['Gestão de Banca', 'Registro de Operações', 'Diário Emocional', 'Checklist',
                       'Modo Disciplina', 'Score Consistência', 'Histórico W/L', 'Horários',
                       'Overtrading', 'Sinais de Tilt', 'Patentes', 'Evolução da Banca',
                       'Pós-Loss', 'Pós-Win', 'Fora do Plano', 'Relatórios'
                     ].map(src => (
-                      <div key={src} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60" /> {src}
+                      <div key={src} className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="w-2 h-2 rounded-full bg-primary/60" /> {src}
                       </div>
                     ))}
                   </div>
@@ -583,19 +585,19 @@ const HorusIA = () => {
         </TabsContent>
 
         {/* Print Analysis */}
-        <TabsContent value="print" className="space-y-4 mt-4">
+        <TabsContent value="print" className="space-y-5 mt-5">
           <Card className="border-primary/10 bg-card/80">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-display text-foreground flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-blue-400" /> Análise de Print do Gráfico
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-display text-foreground flex items-center gap-3">
+                <ImageIcon className="w-6 h-6 text-blue-400" /> Análise de Print do Gráfico
               </CardTitle>
-              <p className="text-xs text-muted-foreground">Envie um print do gráfico para receber análise probabilística de cenário.</p>
+              <p className="text-sm text-muted-foreground mt-1">Envie um print do gráfico para receber análise probabilística de cenário.</p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Timeframe</label>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">Timeframe</label>
                 <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
-                  <SelectTrigger className="bg-secondary w-32"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="bg-secondary w-36 h-11 text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="M5">M5</SelectItem>
                     <SelectItem value="M15">M15</SelectItem>
@@ -604,9 +606,9 @@ const HorusIA = () => {
               </div>
 
               {/* Upload Tips */}
-              <div className="bg-primary/5 border border-primary/10 rounded-lg p-3 space-y-1">
-                <p className="text-xs font-display text-primary flex items-center gap-1.5"><AlertTriangle className="w-3 h-3" /> Dicas para melhor leitura</p>
-                <ul className="text-[11px] text-muted-foreground space-y-0.5 ml-4 list-disc">
+              <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 space-y-2">
+                <p className="text-sm font-display text-primary flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Dicas para melhor leitura</p>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-5 list-disc">
                   <li><strong className="text-primary">⏱ Envie o print nos últimos 30 segundos do candle</strong> para maior precisão da leitura</li>
                   <li>Inclua a <strong>régua de preço</strong> (lateral) e <strong>régua de tempo</strong> (inferior)</li>
                   <li>Confirme que o timeframe ({selectedTimeframe}) está visível no canto do gráfico</li>
@@ -620,26 +622,26 @@ const HorusIA = () => {
                 onClick={() => fileInputRef.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={e => e.preventDefault()}
-                className="border-2 border-dashed border-border/60 rounded-xl p-6 text-center hover:border-primary/30 transition-colors cursor-pointer"
+                className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center hover:border-primary/30 transition-colors cursor-pointer"
               >
                 {previewUrl ? (
-                  <div className="space-y-3">
-                    <img src={previewUrl} alt="Preview" className="max-h-48 mx-auto rounded-lg border border-border/50" />
-                    <p className="text-xs text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
+                  <div className="space-y-4">
+                    <img src={previewUrl} alt="Preview" className="max-h-56 mx-auto rounded-lg border border-border/50" />
+                    <p className="text-sm text-muted-foreground">{selectedFile?.name} • Clique para trocar</p>
                   </div>
                 ) : (
                   <>
-                    <Upload className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="text-sm text-foreground font-medium">Arraste ou clique para enviar o print</p>
-                    <p className="text-xs text-muted-foreground mt-1">PNG, JPG, WEBP até 5MB</p>
+                    <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-base text-foreground font-medium">Arraste ou clique para enviar o print</p>
+                    <p className="text-sm text-muted-foreground mt-1.5">PNG, JPG, WEBP até 5MB</p>
                   </>
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <p className="text-[10px] text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
-                  {chartLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-xs text-muted-foreground">⚠️ Análise probabilística. Não representa garantia de resultado.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-11 px-6 text-sm" onClick={runChartAnalysis} disabled={chartLoading || !selectedFile}>
+                  {chartLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
                   {chartLoading ? 'Analisando...' : 'Analisar Print'}
                 </Button>
               </div>
@@ -664,25 +666,25 @@ const HorusIA = () => {
                 {chartResult && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                     className={`border rounded-xl p-5 space-y-3 ${chartResult.cenario === 'compra' ? 'border-success/30 bg-success/5' : chartResult.cenario === 'venda' ? 'border-destructive/30 bg-destructive/5' : 'border-border/50 bg-card'}`}>
-                    <p className="text-xs font-display text-primary flex items-center gap-2"><Eye className="w-3 h-3" /> RESULTADO DA LEITURA</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <p className="text-sm font-display text-primary flex items-center gap-2"><Eye className="w-4 h-4" /> RESULTADO DA LEITURA</p>
+                    <div className="grid grid-cols-2 gap-5">
                       <div>
-                        <p className="text-xs text-muted-foreground">Cenário</p>
-                        <p className={`text-xl font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        <p className="text-sm text-muted-foreground mb-1">Cenário</p>
+                        <p className={`text-2xl font-display font-bold ${chartResult.cenario === 'compra' ? 'text-success' : chartResult.cenario === 'venda' ? 'text-destructive' : 'text-muted-foreground'}`}>
                           {chartResult.cenario === 'compra' ? '🟢 COMPRA' : chartResult.cenario === 'venda' ? '🔴 VENDA' : '⚪ INCONCLUSIVO'}
                         </p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Confiança</p>
-                        <p className="text-xl font-display font-bold text-primary">{chartResult.confianca}%</p>
+                        <p className="text-sm text-muted-foreground mb-1">Confiança</p>
+                        <p className="text-2xl font-display font-bold text-primary">{chartResult.confianca}%</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Entrada estimada</p>
-                        <p className="text-lg font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
+                        <p className="text-sm text-muted-foreground mb-1">Entrada estimada</p>
+                        <p className="text-xl font-mono font-bold text-foreground">{chartResult.entrada_estimada}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Saída estimada</p>
-                        <p className="text-lg font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
+                        <p className="text-sm text-muted-foreground mb-1">Saída estimada</p>
+                        <p className="text-xl font-mono font-bold text-foreground">{chartResult.saida_estimada}</p>
                       </div>
                     </div>
                     {(chartResult as any)._horario_expirado && (
@@ -756,11 +758,11 @@ const HorusIA = () => {
         </TabsContent>
 
         {/* History */}
-        <TabsContent value="history" className="space-y-4 mt-4">
+        <TabsContent value="history" className="space-y-5 mt-5">
           <Card className="border-border/50 bg-card/80">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-display text-foreground flex items-center gap-2">
-                <Clock className="w-5 h-5 text-primary" /> Histórico de Análises
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-display text-foreground flex items-center gap-3">
+                <Clock className="w-6 h-6 text-primary" /> Histórico de Análises
               </CardTitle>
             </CardHeader>
             <CardContent>

@@ -460,52 +460,52 @@ const HorusIA = () => {
         {/* Behavioral Analysis */}
         <TabsContent value="behavioral" className="space-y-5 mt-5">
           <Card className="border-primary/10 bg-card/80">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-display text-foreground flex items-center gap-3">
-                <Brain className="w-6 h-6 text-primary" /> Análise Comportamental do Trader
+            <CardHeader className="pb-5">
+              <CardTitle className="text-2xl font-display text-foreground flex items-center gap-3">
+                <Brain className="w-7 h-7 text-primary" /> Análise Comportamental do Trader
               </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-base text-muted-foreground mt-2">
                 A Horus IA analisa seus dados de operações, gestão, diário emocional e padrões de comportamento.
               </p>
             </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">Tom da IA</label>
+                  <label className="text-base font-medium text-muted-foreground mb-2.5 block">Tom da IA</label>
                   <Select value={tone} onValueChange={setTone}>
-                    <SelectTrigger className="bg-secondary h-11 text-sm"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-secondary h-12 text-base"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="acolhedor">🤝 Acolhedor</SelectItem>
-                      <SelectItem value="equilibrado">⚖️ Equilibrado</SelectItem>
-                      <SelectItem value="firme">💪 Firme</SelectItem>
-                      <SelectItem value="verdade_dura">🔥 Verdade Dura</SelectItem>
+                      <SelectItem value="acolhedor" className="text-base">🤝 Acolhedor</SelectItem>
+                      <SelectItem value="equilibrado" className="text-base">⚖️ Equilibrado</SelectItem>
+                      <SelectItem value="firme" className="text-base">💪 Firme</SelectItem>
+                      <SelectItem value="verdade_dura" className="text-base">🔥 Verdade Dura</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground mb-2 block">Foco da Análise</label>
+                  <label className="text-base font-medium text-muted-foreground mb-2.5 block">Foco da Análise</label>
                   <Select value={focus} onValueChange={setFocus}>
-                    <SelectTrigger className="bg-secondary h-11 text-sm"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-secondary h-12 text-base"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="geral">Visão Geral</SelectItem>
-                      <SelectItem value="emocional">Padrão Emocional</SelectItem>
-                      <SelectItem value="gestao">Gestão de Banca</SelectItem>
-                      <SelectItem value="disciplina">Disciplina</SelectItem>
-                      <SelectItem value="tilt">Detecção de Tilt</SelectItem>
-                      <SelectItem value="horarios">Horários de Operação</SelectItem>
+                      <SelectItem value="geral" className="text-base">Visão Geral</SelectItem>
+                      <SelectItem value="emocional" className="text-base">Padrão Emocional</SelectItem>
+                      <SelectItem value="gestao" className="text-base">Gestão de Banca</SelectItem>
+                      <SelectItem value="disciplina" className="text-base">Disciplina</SelectItem>
+                      <SelectItem value="tilt" className="text-base">Detecção de Tilt</SelectItem>
+                      <SelectItem value="horarios" className="text-base">Horários de Operação</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">Pergunta ou contexto adicional (opcional)</label>
-                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[100px] text-sm" />
+                <label className="text-base font-medium text-muted-foreground mb-2.5 block">Pergunta ou contexto adicional (opcional)</label>
+                <Textarea placeholder="Ex: Quero entender meu padrão após perdas consecutivas..." value={behavioralQuery} onChange={e => setBehavioralQuery(e.target.value)} className="bg-secondary min-h-[110px] text-base" />
               </div>
 
               <div className="flex items-center justify-between gap-4">
-                <p className="text-xs text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
-                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-11 px-6 text-sm" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
+                <p className="text-sm text-muted-foreground">⚠️ Análise de performance e autoconhecimento. Não substitui acompanhamento profissional.</p>
+                <Button className="gradient-gold text-primary-foreground font-display gap-2 h-12 px-8 text-base" onClick={runBehavioralAnalysis} disabled={behaviorLoading}>
                   {behaviorLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
                   {behaviorLoading ? 'Analisando...' : 'Analisar'}
                 </Button>
@@ -515,16 +515,16 @@ const HorusIA = () => {
               <AnimatePresence>
                 {behaviorLoading && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-primary/5 p-6 text-center space-y-3">
+                    className="border border-primary/20 rounded-xl bg-primary/5 p-8 text-center space-y-4">
                     <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-                      className="w-12 h-12 mx-auto rounded-xl gradient-gold flex items-center justify-center">
-                      <Eye className="w-6 h-6 text-primary-foreground" />
+                      className="w-14 h-14 mx-auto rounded-xl gradient-gold flex items-center justify-center">
+                      <Eye className="w-7 h-7 text-primary-foreground" />
                     </motion.div>
-                    <p className="text-sm text-primary font-display">{loadingMsg}</p>
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-3/4 mx-auto" />
-                      <Skeleton className="h-4 w-1/2 mx-auto" />
-                      <Skeleton className="h-4 w-2/3 mx-auto" />
+                    <p className="text-base text-primary font-display">{loadingMsg}</p>
+                    <div className="space-y-2.5">
+                      <Skeleton className="h-5 w-3/4 mx-auto" />
+                      <Skeleton className="h-5 w-1/2 mx-auto" />
+                      <Skeleton className="h-5 w-2/3 mx-auto" />
                     </div>
                   </motion.div>
                 )}
@@ -534,30 +534,30 @@ const HorusIA = () => {
               <AnimatePresence>
                 {behaviorResult && (
                   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    className="border border-primary/20 rounded-xl bg-card p-6 space-y-5">
+                    className="border border-primary/20 rounded-xl bg-card p-7 space-y-5">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-display text-primary flex items-center gap-2"><Eye className="w-4 h-4" /> RESULTADO DA ANÁLISE</p>
-                      <Badge variant="outline" className={`text-sm px-3 py-1 ${riskColor(behaviorResult.nivel_risco)}`}>
+                      <p className="text-base font-display text-primary flex items-center gap-2"><Eye className="w-5 h-5" /> RESULTADO DA ANÁLISE</p>
+                      <Badge variant="outline" className={`text-base px-4 py-1.5 ${riskColor(behaviorResult.nivel_risco)}`}>
                         Risco: {behaviorResult.nivel_risco.toUpperCase()}
                       </Badge>
                     </div>
-                    <p className="text-base text-foreground leading-relaxed">{behaviorResult.resumo}</p>
+                    <p className="text-lg text-foreground leading-relaxed">{behaviorResult.resumo}</p>
                     {behaviorResult.padroes_detectados.length > 0 && (
                       <div>
-                        <p className="text-sm text-muted-foreground mb-3 font-display">PADRÕES DETECTADOS</p>
-                        <div className="space-y-2.5">
+                        <p className="text-base text-muted-foreground mb-3 font-display">PADRÕES DETECTADOS</p>
+                        <div className="space-y-3">
                           {behaviorResult.padroes_detectados.map((p, i) => (
-                            <div key={i} className="flex items-start gap-3 text-base text-foreground">
-                              <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
+                            <div key={i} className="flex items-start gap-3 text-base text-foreground leading-relaxed">
+                              <div className="w-2.5 h-2.5 rounded-full bg-primary mt-2 shrink-0" />
                               {p}
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
-                    <div className="border-t border-border/50 pt-4">
-                      <p className="text-sm text-muted-foreground mb-2 font-display">RECOMENDAÇÃO</p>
-                      <p className="text-base text-foreground font-medium leading-relaxed">{behaviorResult.recomendacao}</p>
+                    <div className="border-t border-border/50 pt-5">
+                      <p className="text-base text-muted-foreground mb-3 font-display">RECOMENDAÇÃO</p>
+                      <p className="text-lg text-foreground font-medium leading-relaxed">{behaviorResult.recomendacao}</p>
                     </div>
                   </motion.div>
                 )}
@@ -565,16 +565,16 @@ const HorusIA = () => {
 
               {/* Data Sources */}
               <Card className="border-border/50 bg-card/60">
-                <CardContent className="p-5">
-                  <p className="text-sm font-display text-muted-foreground mb-4">FONTES DE DADOS ANALISADAS</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <CardContent className="p-6">
+                  <p className="text-base font-display text-muted-foreground mb-4">FONTES DE DADOS ANALISADAS</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {['Gestão de Banca', 'Registro de Operações', 'Diário Emocional', 'Checklist',
                       'Modo Disciplina', 'Score Consistência', 'Histórico W/L', 'Horários',
                       'Overtrading', 'Sinais de Tilt', 'Patentes', 'Evolução da Banca',
                       'Pós-Loss', 'Pós-Win', 'Fora do Plano', 'Relatórios'
                     ].map(src => (
-                      <div key={src} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className="w-2 h-2 rounded-full bg-primary/60" /> {src}
+                      <div key={src} className="flex items-center gap-2.5 text-base text-muted-foreground">
+                        <div className="w-2.5 h-2.5 rounded-full bg-primary/60" /> {src}
                       </div>
                     ))}
                   </div>

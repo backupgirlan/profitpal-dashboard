@@ -66,11 +66,17 @@ export default function BankSimulator() {
 
         // Generate AI insight based on data
         if (trades && trades.length >= 10) {
+          const wins = trades.filter(t => t.result === 'win').length;
+          const currentWinRate = Math.round((wins / trades.length) * 100);
           const recentLosses = trades.slice(0, 5).filter(t => t.result === 'loss').length;
           if (recentLosses >= 3) {
             setAiInsight('Se continuar tentando recuperar perdas no mesmo dia, sua curva de crescimento tende a se tornar instável. Considere pausar após 2 losses consecutivos.');
-          } else if (calculatedWinRate >= 60) {
+          } else if (currentWinRate >= 60) {
             setAiInsight('Se manter disciplina e o win rate atual, sua projeção de crescimento é muito promissora. Foque em consistência.');
+          } else {
+            setAiInsight('Seu padrão atual mostra potencial de crescimento moderado. Mantenha o gerenciamento e evite aumentar o risco.');
+          }
+        }
           } else {
             setAiInsight('Seu padrão atual mostra potencial de crescimento moderado. Mantenha o gerenciamento e evite aumentar o risco.');
           }

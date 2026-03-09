@@ -331,6 +331,45 @@ export type Database = {
         }
         Relationships: []
       }
+      horus_plan: {
+        Row: {
+          active: boolean
+          benefits: Json | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          name: string
+          period: string
+          price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          benefits?: Json | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          name?: string
+          period?: string
+          price?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          benefits?: Json | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          name?: string
+          period?: string
+          price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       horus_print_analyses: {
         Row: {
           confidence: number | null

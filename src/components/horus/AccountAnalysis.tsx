@@ -153,11 +153,11 @@ function ChatBubble({ msg, index }: { msg: ChatMessage; index: number }) {
       className={`flex gap-2.5 ${isHorus ? 'justify-start' : 'justify-end'}`}
     >
       {isHorus && (
-        <div className="w-8 h-8 rounded-full gradient-gold flex items-center justify-center shrink-0 mt-1 box-glow">
-          <Bot className="w-4 h-4 text-primary-foreground" />
+        <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center shrink-0 mt-1 box-glow">
+          <Bot className="w-5 h-5 text-primary-foreground" />
         </div>
       )}
-      <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
+      <div className={`max-w-[85%] rounded-2xl px-5 py-4 text-base leading-relaxed whitespace-pre-line ${
         isHorus
           ? 'bg-secondary/60 border border-border/50 text-foreground rounded-tl-md'
           : 'bg-primary/15 border border-primary/20 text-foreground rounded-tr-md'
@@ -170,8 +170,8 @@ function ChatBubble({ msg, index }: { msg: ChatMessage; index: number }) {
         })}
       </div>
       {!isHorus && (
-        <div className="w-8 h-8 rounded-full bg-secondary border border-border/50 flex items-center justify-center shrink-0 mt-1">
-          <User className="w-4 h-4 text-muted-foreground" />
+        <div className="w-10 h-10 rounded-full bg-secondary border border-border/50 flex items-center justify-center shrink-0 mt-1">
+          <User className="w-5 h-5 text-muted-foreground" />
         </div>
       )}
     </motion.div>
@@ -275,12 +275,12 @@ export default function AccountAnalysis() {
         <CardContent className="p-5 relative z-10">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
-                <BarChart3 className="w-5 h-5 text-primary-foreground" />
+              <div className="w-12 h-12 rounded-xl gradient-gold flex items-center justify-center box-glow-strong">
+                <BarChart3 className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-lg font-display font-bold text-foreground">Análise da Conta</h2>
-                <p className="text-xs text-muted-foreground">Conversa inteligente com a Horus IA sobre sua performance</p>
+                <h2 className="text-xl font-display font-bold text-foreground">Análise da Conta</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">Conversa inteligente com a Horus IA sobre sua performance</p>
               </div>
             </div>
             <div className="flex flex-col items-end gap-1.5">
@@ -323,25 +323,25 @@ export default function AccountAnalysis() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Card className="border-border/50 bg-card/90 overflow-hidden">
             {/* Chat Header */}
-            <div className="flex items-center gap-3 px-5 py-3 border-b border-border/30 bg-secondary/30">
-              <div className="w-9 h-9 rounded-full gradient-gold flex items-center justify-center">
-                <Bot className="w-4.5 h-4.5 text-primary-foreground" />
+            <div className="flex items-center gap-3 px-6 py-4 border-b border-border/30 bg-secondary/30">
+              <div className="w-11 h-11 rounded-full gradient-gold flex items-center justify-center">
+                <Bot className="w-5 h-5 text-primary-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-display font-bold text-foreground">Horus IA</p>
-                <p className="text-[10px] text-success flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" /> Online • Trader Profissional
+                <p className="text-base font-display font-bold text-foreground">Horus IA</p>
+                <p className="text-xs text-success flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-success animate-pulse" /> Online • Trader Profissional
                 </p>
               </div>
               {result && (
-                <Badge className={`${scoreLabel(result.score).bg} border text-xs font-display px-2 py-0.5`}>
+                <Badge className={`${scoreLabel(result.score).bg} border text-sm font-display px-3 py-1`}>
                   Score: {result.score}
                 </Badge>
               )}
             </div>
 
             {/* Messages */}
-            <div className="p-4 space-y-4 max-h-[600px] overflow-y-auto">
+            <div className="p-5 space-y-5 max-h-[650px] overflow-y-auto">
               {chatMessages.slice(0, visibleCount).map((msg, i) => (
                 <ChatBubble key={msg.id} msg={msg} index={i} />
               ))}

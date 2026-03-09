@@ -169,9 +169,9 @@ const DashboardHome = () => {
       let cumBalance = 0, peak = 0, mdd = 0;
       const evoMap: Record<string, number> = {};
       const dailyProfitMap: Record<string, number> = {};
-      // For candles: track daily open/high/low/close
-      const dailyOHLC: Record<string, { open: number; high: number; low: number; close: number; started: boolean }> = {};
-      let runningBalance = 0;
+      // For candles: each candle = R$30 movement, one per trade
+      const candleList: { day: string; open: number; close: number; high: number; low: number; result: string }[] = [];
+      let candleLevel = 0; // starts at 0, moves in R$30 steps
 
       tradesRes.data.forEach(trade => {
         const profit = Number(trade.profit);
@@ -187,22 +187,19 @@ const DashboardHome = () => {
         evoMap[tradeDate] = cumBalance;
         dailyProfitMap[tradeDate] = (dailyProfitMap[tradeDate] || 0) + profit;
 
-        // Build OHLC per day
-        const prevBalance = runningBalance;
-        runningBalance += profit;
-        if (!dailyOHLC[tradeDate]) {
-          dailyOHLC[tradeDate] = {
-            open: prevBalance,
-            high: Math.max(prevBalance, runningBalance),
-            low: Math.min(prevBalance, runningBalance),
-            close: runningBalance,
-            started: true,
-          };
-        } else {
-          dailyOHLC[tradeDate].high = Math.max(dailyOHLC[tradeDate].high, runningBalance);
-          dailyOHLC[tradeDate].low = Math.min(dailyOHLC[tradeDate].low, runningBalance);
-          dailyOHLC[tradeDate].close = runningBalance;
-        }
+        // Each trade = 1 candle of R$30
+        const openVal = candleLevel;
+        const isWin = trade.result === 'win';
+        const closeVal = isWin ? candleLevel + 30 : candleLevel - 30;
+        candleList.push({
+          day: (tradeDate || '').slice(5),
+          open: openVal,
+          close: closeVal,
+          high: Math.max(openVal, closeVal),
+          low: Math.min(openVal, closeVal),
+          result: trade.result,
+        });
+        candleLevel = closeVal;
       });
       for (let i = tradesRes.data.length - 1; i >= 0; i--) {
         if (tradesRes.data[i].result === 'win') { if (currentLossStreak > 0) break; currentWinStreak++; }
@@ -219,15 +216,8 @@ const DashboardHome = () => {
       const consistencyEntries = Object.entries(dailyProfitMap).sort((a, b) => a[0].localeCompare(b[0])).slice(-14);
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
 
-      // Build candle data (each candle = 1 day, value scale R$30 per unit)
-      const candleEntries = Object.entries(dailyOHLC).sort((a, b) => a[0].localeCompare(b[0]));
-      setCandleData(candleEntries.map(([day, ohlc]) => ({
-        day: day.slice(5),
-        open: +ohlc.open.toFixed(2),
-        close: +ohlc.close.toFixed(2),
-        high: +ohlc.high.toFixed(2),
-        low: +ohlc.low.toFixed(2),
-      })));
+      // Use last 30 candles max
+      setCandleData(candleList.slice(-30));
     }
 
   }, [user]);
@@ -611,19 +601,29 @@ const DashboardHome = () => {
               <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
                 <Activity className="w-4 h-4 text-primary" /> Evolução da Banca
               </h3>
-              <span className="text-[10px] text-muted-foreground">Cada candle = 1 dia • Escala R$30</span>
+              <span className="text-[10px] text-muted-foreground">Cada candle = R$30 • 1 operação</span>
             </div>
             <div className="h-64">
               {candleData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={candleData} barCategoryGap="20%">
-                    <XAxis dataKey="day" tick={{ fontSize: 10, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} />
+                  <ComposedChart data={candleData} barCategoryGap="15%">
+                    <XAxis dataKey="day" tick={{ fontSize: 9, fill: CHART_COLORS.muted }} axisLine={false} tickLine={false} interval={Math.max(0, Math.floor(candleData.length / 10))} />
                     <YAxis
                       tick={{ fontSize: 10, fill: CHART_COLORS.muted }}
                       axisLine={false}
                       tickLine={false}
                       tickFormatter={(v: number) => `R$${v}`}
-                      domain={['auto', 'auto']}
+                      domain={[(dataMin: number) => Math.floor(dataMin / 30) * 30 - 30, (dataMax: number) => Math.ceil(dataMax / 30) * 30 + 30]}
+                      ticks={(() => {
+                        const allVals = candleData.flatMap(d => [d.open, d.close]);
+                        const minV = Math.min(...allVals);
+                        const maxV = Math.max(...allVals);
+                        const start = Math.floor(minV / 30) * 30 - 30;
+                        const end = Math.ceil(maxV / 30) * 30 + 30;
+                        const t = [];
+                        for (let v = start; v <= end; v += 30) t.push(v);
+                        return t;
+                      })()}
                     />
                     <Tooltip
                       contentStyle={{ backgroundColor: CHART_COLORS.cardBg, border: `1px solid ${CHART_COLORS.border}`, borderRadius: '10px', fontSize: '11px' }}
@@ -633,76 +633,77 @@ const DashboardHome = () => {
                         return [`R$ ${value.toFixed(2)}`, labels[name] || name];
                       }}
                     />
-                    {/* Wick (high-low line) */}
-                    <Bar dataKey="high" fill="transparent" barSize={2}>
-                      {candleData.map((entry, idx) => {
-                        const bullish = entry.close >= entry.open;
-                        return (
-                          <Cell key={idx} fill="transparent" />
+                    {/* R$30 grid lines */}
+                    {(() => {
+                      const allVals = candleData.flatMap(d => [d.open, d.close]);
+                      const minV = Math.min(...allVals);
+                      const maxV = Math.max(...allVals);
+                      const start = Math.floor(minV / 30) * 30 - 30;
+                      const end = Math.ceil(maxV / 30) * 30 + 30;
+                      const lines = [];
+                      for (let v = start; v <= end; v += 30) {
+                        lines.push(
+                          <ReferenceArea key={v} y1={v} y2={v} stroke={CHART_COLORS.border} strokeDasharray="3 3" strokeOpacity={0.4} />
                         );
-                      })}
-                    </Bar>
-                    {/* Candle body rendered via custom shapes */}
+                      }
+                      return lines;
+                    })()}
+                    {/* Candle bodies */}
                     <Bar
                       dataKey="close"
-                      barSize={16}
+                      barSize={14}
                       shape={(props: any) => {
-                        const { x, y, width, payload, index } = props;
+                        const { x, width, payload } = props;
                         if (!payload) return null;
-                        const { open, close, high, low } = payload;
+                        const { open, close } = payload;
                         const bullish = close >= open;
                         const color = bullish ? CHART_COLORS.green : CHART_COLORS.red;
 
-                        // Calculate y positions from the chart's coordinate system
-                        const yAxis = props.background;
-                        const chartHeight = 256; // approximate
-                        const allValues = candleData.flatMap(d => [d.open, d.close, d.high, d.low]);
-                        const minVal = Math.min(...allValues);
-                        const maxVal = Math.max(...allValues);
-                        const range = maxVal - minVal || 1;
-                        const scale = (v: number) => 16 + (1 - (v - minVal) / range) * (chartHeight - 40);
+                        // Use the YAxis scale from Recharts internal props
+                        const yAxisMap = (props as any).yAxisMap || {};
+                        const allVals = candleData.flatMap(d => [d.open, d.close]);
+                        const minDomain = Math.floor(Math.min(...allVals) / 30) * 30 - 30;
+                        const maxDomain = Math.ceil(Math.max(...allVals) / 30) * 30 + 30;
+                        const range = maxDomain - minDomain || 1;
+                        const chartTop = 5;
+                        const chartBottom = 240;
+                        const scale = (v: number) => chartTop + ((maxDomain - v) / range) * (chartBottom - chartTop);
 
-                        const bodyTop = scale(Math.max(open, close));
-                        const bodyBottom = scale(Math.min(open, close));
-                        const bodyHeight = Math.max(bodyBottom - bodyTop, 2);
-                        const wickTop = scale(high);
-                        const wickBottom = scale(low);
+                        const yOpen = scale(open);
+                        const yClose = scale(close);
+                        const bodyTop = Math.min(yOpen, yClose);
+                        const bodyHeight = Math.max(Math.abs(yOpen - yClose), 2);
                         const centerX = x + width / 2;
 
                         return (
                           <g>
-                            {/* Wick */}
-                            <line x1={centerX} y1={wickTop} x2={centerX} y2={wickBottom} stroke={color} strokeWidth={1.5} />
-                            {/* Body */}
+                            {/* Wick line */}
+                            <line x1={centerX} y1={bodyTop} x2={centerX} y2={bodyTop + bodyHeight} stroke={color} strokeWidth={1} />
+                            {/* Candle body */}
+                            <rect
+                              x={x + 1}
+                              y={bodyTop}
+                              width={Math.max(width - 2, 6)}
+                              height={bodyHeight}
+                              fill={color}
+                              stroke={color}
+                              strokeWidth={0.5}
+                              rx={1.5}
+                              opacity={0.9}
+                            />
+                            {/* Small glow effect */}
                             <rect
                               x={x + 2}
-                              y={bodyTop}
-                              width={width - 4}
-                              height={bodyHeight}
-                              fill={bullish ? color : color}
-                              stroke={color}
-                              strokeWidth={1}
-                              rx={2}
-                              opacity={bullish ? 1 : 0.85}
+                              y={bodyTop + 1}
+                              width={Math.max(width - 4, 4)}
+                              height={Math.max(bodyHeight - 2, 1)}
+                              fill={bullish ? 'rgba(74,222,128,0.3)' : 'rgba(248,113,113,0.3)'}
+                              rx={1}
                             />
                           </g>
                         );
                       }}
                     />
-                    {/* R$30 reference lines */}
-                    {(() => {
-                      const allVals = candleData.flatMap(d => [d.open, d.close, d.high, d.low]);
-                      const minV = Math.min(...allVals);
-                      const maxV = Math.max(...allVals);
-                      const startLine = Math.floor(minV / 30) * 30;
-                      const lines = [];
-                      for (let v = startLine; v <= maxV + 30; v += 30) {
-                        lines.push(
-                          <ReferenceArea key={v} y1={v} y2={v} stroke={CHART_COLORS.border} strokeDasharray="3 3" strokeOpacity={0.5} />
-                        );
-                      }
-                      return lines;
-                    })()}
                   </ComposedChart>
                 </ResponsiveContainer>
               ) : (
@@ -710,9 +711,9 @@ const DashboardHome = () => {
               )}
             </div>
             <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-success inline-block" /> Alta (WIN)</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-destructive inline-block" /> Baixa (LOSS)</span>
-              <span className="flex items-center gap-1">--- Escala R$30</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-success inline-block" /> WIN (+R$30)</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-2 rounded-sm bg-destructive inline-block" /> LOSS (-R$30)</span>
+              <span>Nível: R${candleData.length > 0 ? candleData[candleData.length - 1].close : 0}</span>
             </div>
           </CardContent>
         </Card>

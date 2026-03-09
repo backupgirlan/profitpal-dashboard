@@ -112,6 +112,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
   };
 
+  // Load settings + check-in status + consecutive losses
   useEffect(() => {
     if (!user) return;
     supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' })
@@ -123,7 +124,88 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         else if ((data as any)?.is_vip) setUserLevel('vip');
         else setUserLevel('common');
       });
+
+    // Load Horus flow settings
+    supabase.from('horus_settings')
+      .select('setting_key, setting_value')
+      .in('setting_key', ['checkin_enabled', 'protection_enabled', 'protection_loss_threshold', 'protection_lockout_minutes'])
+      .then(({ data: settings }) => {
+        if (settings) {
+          const map: Record<string, string> = {};
+          settings.forEach(s => { map[s.setting_key] = s.setting_value; });
+          setCheckinEnabled(map.checkin_enabled !== 'false');
+          setProtectionThreshold(parseInt(map.protection_loss_threshold || '2'));
+          setLockoutMinutes(parseInt(map.protection_lockout_minutes || '15'));
+        }
+      });
+
+    // Check if today's check-in already done
+    const today = new Date().toISOString().split('T')[0];
+    supabase.from('emotional_checkins')
+      .select('id')
+      .eq('user_id', user.id)
+      .gte('created_at', `${today}T00:00:00`)
+      .limit(1)
+      .then(({ data }) => {
+        if (!data || data.length === 0) {
+          // No check-in today — show after a short delay
+          setTimeout(() => setShowCheckin(true), 1200);
+        }
+      });
+
+    // Check consecutive losses from recent trades
+    supabase.from('trades')
+      .select('result')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10)
+      .then(({ data: trades }) => {
+        if (!trades) return;
+        let losses = 0;
+        for (const t of trades) {
+          if (t.result === 'loss') losses++;
+          else break;
+        }
+        setConsecutiveLosses(losses);
+      });
   }, [user]);
+
+  // Listen for real-time trade events to trigger protection mode
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('trades-monitor')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'trades', filter: `user_id=eq.${user.id}` }, async () => {
+        // Re-fetch consecutive losses
+        const { data: trades } = await supabase
+          .from('trades')
+          .select('result')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        if (!trades) return;
+        let losses = 0;
+        for (const t of trades) {
+          if (t.result === 'loss') losses++;
+          else break;
+        }
+        setConsecutiveLosses(losses);
+        if (losses >= protectionThreshold) {
+          setShowProtection(true);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, protectionThreshold]);
+
+  // Show protection if consecutive losses already at threshold
+  useEffect(() => {
+    if (consecutiveLosses >= protectionThreshold && consecutiveLosses > 0) {
+      setShowProtection(true);
+    }
+  }, [consecutiveLosses, protectionThreshold]);
+
+
 
   const handleSignOut = async () => { await signOut(); navigate('/'); };
 

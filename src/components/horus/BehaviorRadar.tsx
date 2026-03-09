@@ -117,9 +117,9 @@ export default function BehaviorRadar() {
 
   const renderRadarChart = () => {
     if (!analysis) return null;
-    const centerX = 140;
-    const centerY = 140;
-    const maxRadius = 100;
+    const centerX = 160;
+    const centerY = 160;
+    const maxRadius = 90;
     const levels = 5;
     const categories = analysis.categories;
     const angleStep = (2 * Math.PI) / categories.length;
@@ -131,7 +131,7 @@ export default function BehaviorRadar() {
     const polygonPoints = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
 
     return (
-      <svg width="280" height="280" className="mx-auto">
+      <svg width="320" height="320" className="mx-auto" viewBox="0 0 320 320">
         {Array.from({ length: levels }).map((_, i) => (
           <circle key={i} cx={centerX} cy={centerY} r={(maxRadius / levels) * (i + 1)} fill="none" stroke="hsl(var(--border))" strokeOpacity={0.3} strokeWidth={1} />
         ))}
@@ -147,11 +147,23 @@ export default function BehaviorRadar() {
         ))}
         {categories.map((cat, i) => {
           const angle = i * angleStep - Math.PI / 2;
-          const labelRadius = maxRadius + 25;
+          const labelRadius = maxRadius + 30;
           const x = centerX + labelRadius * Math.cos(angle);
           const y = centerY + labelRadius * Math.sin(angle);
           const isLeft = x < centerX;
-          return <text key={i} x={x} y={y} textAnchor={isLeft ? 'end' : 'start'} dominantBaseline="middle" fontSize={9} fontWeight={500} fill="hsl(var(--muted-foreground))">{cat.label.split(' ')[0]}</text>;
+          const isCenter = Math.abs(x - centerX) < 20;
+          const anchor = isCenter ? 'middle' : isLeft ? 'end' : 'start';
+          const words = cat.label.split(' ');
+          return (
+            <text key={i} x={x} y={y} textAnchor={anchor} dominantBaseline="middle" fontSize={9} fontWeight={500} fill="hsl(var(--muted-foreground))">
+              {words.length > 1 ? (
+                <>
+                  <tspan x={x} dy="-0.4em">{words[0]}</tspan>
+                  <tspan x={x} dy="1.1em">{words.slice(1).join(' ')}</tspan>
+                </>
+              ) : cat.label}
+            </text>
+          );
         })}
       </svg>
     );

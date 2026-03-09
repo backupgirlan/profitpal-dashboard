@@ -506,6 +506,37 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <InstallAppDialog open={installOpen} onOpenChange={setInstallOpen} />
 
+      {/* ═══ Horus IA Behavioral Overlays ═══ */}
+      <AnimatePresence>
+        {showCheckin && checkinEnabled && (
+          <HorusCheckinModal
+            onComplete={(riskLevel) => {
+              setShowCheckin(false);
+              if (riskLevel === 'paused') {
+                toast({ title: '🛑 Banca protegida', description: 'Você escolheu pausar hoje. Boa decisão.' });
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showProtection && (
+          <ProtectionModeOverlay
+            consecutiveLosses={consecutiveLosses}
+            lockoutMinutes={lockoutMinutes}
+            onDismiss={() => {
+              setShowProtection(false);
+              setConsecutiveLosses(0);
+            }}
+            onOpenDialog={() => {
+              setShowProtection(false);
+              navigate('/dashboard/horus');
+            }}
+          />
+        )}
+      </AnimatePresence>
+
       {/* ═══════ Topbar + Main ═══════ */}
       <div className="flex-1 flex flex-col min-h-screen">
         <header className="sticky top-0 z-20 h-14 bg-card/90 backdrop-blur-xl border-b border-border flex items-center justify-between px-4 lg:px-8">
@@ -532,3 +563,4 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+

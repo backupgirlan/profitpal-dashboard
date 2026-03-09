@@ -267,8 +267,11 @@ export default function TraderDialog() {
       </div>
 
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1" style={{
-        backgroundImage: 'radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.03) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.05) 0%, transparent 50%)',
+      <div className="flex-1 overflow-y-auto px-4 py-5 space-y-1 transition-colors duration-300" style={{
+        backgroundColor: selectedBg.bg,
+        backgroundImage: selectedBg.pattern
+          ? 'radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.04) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsl(var(--primary) / 0.06) 0%, transparent 50%)'
+          : 'none',
       }}>
         {messages.length === 0 && !loading && (
           <div className="flex flex-col items-center justify-center h-full py-10 space-y-6">

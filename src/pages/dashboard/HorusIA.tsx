@@ -74,6 +74,14 @@ const HorusIA = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Pending feedback (prints without result)
+  const [pendingPrints, setPendingPrints] = useState<any[]>([]);
+  const [pendingFeedbackLoading, setPendingFeedbackLoading] = useState<string | null>(null);
+
+  // Global wins/losses from print analyses
+  const [globalPrintWins, setGlobalPrintWins] = useState(0);
+  const [globalPrintLosses, setGlobalPrintLosses] = useState(0);
+
   useEffect(() => {
     if (!user) return;
     Promise.all([
@@ -84,6 +92,8 @@ const HorusIA = () => {
       setIsAdmin(!!roleRes.data);
     });
     loadHistory();
+    loadPendingPrints();
+    loadGlobalPrintStats();
   }, [user]);
 
   useEffect(() => {
@@ -99,6 +109,41 @@ const HorusIA = () => {
     ]);
     if (a) setAnalyses(a);
     if (p) setPrintAnalyses(p);
+  };
+
+  const loadPendingPrints = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('horus_print_analyses')
+      .select('*')
+      .eq('user_id', user.id)
+      .is('result', null)
+      .order('created_at', { ascending: false });
+    if (data) setPendingPrints(data);
+  };
+
+  const loadGlobalPrintStats = async () => {
+    // Count all wins and losses from print analyses across ALL users (public stats)
+    const [{ count: winsCount }, { count: lossesCount }] = await Promise.all([
+      supabase.from('horus_print_analyses').select('*', { count: 'exact', head: true }).eq('result', 'win'),
+      supabase.from('horus_print_analyses').select('*', { count: 'exact', head: true }).eq('result', 'loss'),
+    ]);
+    setGlobalPrintWins(winsCount || 0);
+    setGlobalPrintLosses(lossesCount || 0);
+  };
+
+  const sendPendingFeedback = async (analysisId: string, result: 'win' | 'loss') => {
+    setPendingFeedbackLoading(analysisId);
+    try {
+      await supabase.from('horus_print_analyses').update({ result }).eq('id', analysisId);
+      setPendingPrints(prev => prev.filter(p => p.id !== analysisId));
+      toast({ title: result === 'win' ? '✅ WIN registrado!' : '❌ LOSS registrado!', description: 'Resultado salvo com sucesso.' });
+      loadHistory();
+      loadGlobalPrintStats();
+    } catch {
+      toast({ title: 'Erro', description: 'Não foi possível salvar.', variant: 'destructive' });
+    } finally {
+      setPendingFeedbackLoading(null);
+    }
   };
 
   const runBehavioralAnalysis = async () => {
@@ -166,10 +211,8 @@ const HorusIA = () => {
     }
   }, []);
 
-  // Ref to trigger auto-analysis after paste
   const pastedFileRef = useRef<File | null>(null);
 
-  // Ctrl+V paste support — auto-analyze on Enter
   const handlePaste = useCallback((e: ClipboardEvent) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -191,7 +234,6 @@ const HorusIA = () => {
     }
   }, [toast]);
 
-  // Enter key triggers analysis after paste
   const runChartAnalysisRef = useRef<() => void>(() => {});
 
   const handleKeyDownAnalysis = useCallback((e: KeyboardEvent) => {
@@ -211,7 +253,6 @@ const HorusIA = () => {
     };
   }, [handlePaste, handleKeyDownAnalysis]);
 
-  // AXIS: Validação de sincronização temporal
   const validarHorarioEntrada = (horarioSugerido: string): boolean => {
     if (!horarioSugerido || horarioSugerido === '--:--') return false;
     const agora = new Date();
@@ -246,13 +287,13 @@ const HorusIA = () => {
         return;
       }
 
-      // AXIS: Validar se horário sugerido ainda é válido
       if (data.entrada_estimada && !validarHorarioEntrada(data.entrada_estimada)) {
         data._horario_expirado = true;
       }
 
       setChartResult(data);
       loadHistory();
+      loadPendingPrints();
       toast({ title: 'Análise concluída', description: data._horario_expirado ? 'Atenção: horário de entrada já expirou.' : 'Print analisado pela Horus IA.' });
     } catch (e) {
       toast({ title: 'Erro', description: 'Não foi possível interpretar a imagem enviada.', variant: 'destructive' });
@@ -269,8 +310,10 @@ const HorusIA = () => {
     try {
       await supabase.from('horus_print_analyses').update({ result }).eq('id', chartResult.analysis_id);
       setFeedbackSent(true);
+      setPendingPrints(prev => prev.filter(p => p.id !== chartResult.analysis_id));
       toast({ title: result === 'win' ? '✅ WIN registrado!' : '❌ LOSS registrado!', description: 'Feedback salvo. A Horus IA usará este dado para melhorar futuras análises.' });
       loadHistory();
+      loadGlobalPrintStats();
     } catch {
       toast({ title: 'Erro', description: 'Não foi possível salvar o feedback.', variant: 'destructive' });
     } finally {
@@ -282,6 +325,8 @@ const HorusIA = () => {
   if (!isSuperVip && !isAdmin) return <SuperVipGate />;
 
   const riskColor = (r: string) => r === 'alto' ? 'text-destructive' : r === 'medio' ? 'text-primary' : 'text-success';
+  const totalGlobalPrints = globalPrintWins + globalPrintLosses;
+  const globalWinRate = totalGlobalPrints > 0 ? ((globalPrintWins / totalGlobalPrints) * 100).toFixed(1) : '0.0';
 
   return (
     <div className="space-y-6">
@@ -309,15 +354,77 @@ const HorusIA = () => {
         </div>
       </motion.div>
 
+      {/* Pending Prints Alert */}
+      <AnimatePresence>
+        {pendingPrints.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+            <Card className="border-orange-400/30 bg-orange-400/5">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-orange-400" />
+                  <p className="text-sm font-display font-bold text-orange-400">
+                    {pendingPrints.length} {pendingPrints.length === 1 ? 'análise aguardando' : 'análises aguardando'} resultado
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Preencha o resultado (WIN/LOSS) de cada print analisado para que a Horus IA aprenda com seus dados.
+                </p>
+                <div className="space-y-2">
+                  {pendingPrints.map(p => (
+                    <div key={p.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-secondary/30 border border-border/30">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <ImageIcon className="w-4 h-4 text-blue-400 shrink-0" />
+                        <div className="min-w-0">
+                          <p className="text-xs font-display text-foreground truncate">
+                            {p.scenario === 'compra' ? '🟢 Compra' : p.scenario === 'venda' ? '🔴 Venda' : '⚪ Inconclusivo'}
+                            {' '} — Confiança: {p.confidence}%
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {new Date(p.created_at).toLocaleString('pt-BR')} • {p.timeframe}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => sendPendingFeedback(p.id, 'win')}
+                          disabled={pendingFeedbackLoading === p.id}
+                          className="gap-1 border-success/30 bg-success/10 text-success hover:bg-success/20 text-xs h-8 px-3"
+                        >
+                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                          WIN
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => sendPendingFeedback(p.id, 'loss')}
+                          disabled={pendingFeedbackLoading === p.id}
+                          className="gap-1 border-destructive/30 bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs h-8 px-3"
+                        >
+                          {pendingFeedbackLoading === p.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />}
+                          LOSS
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { icon: Brain, label: 'Análises', value: analyses.length, color: 'text-primary' },
           { icon: ImageIcon, label: 'Prints', value: printAnalyses.length, color: 'text-blue-400' },
-          { icon: Activity, label: 'Confiança Média', value: printAnalyses.length > 0 ? Math.round(printAnalyses.reduce((s, p) => s + (p.confidence || 0), 0) / printAnalyses.length) + '%' : '--', color: 'text-success' },
-          { icon: Shield, label: 'Status', value: 'Ativo', color: 'text-primary' },
+          { icon: CheckCircle, label: 'Wins (Global)', value: globalPrintWins, color: 'text-success' },
+          { icon: XCircle, label: 'Losses (Global)', value: globalPrintLosses, color: 'text-destructive' },
+          { icon: Activity, label: 'Win Rate Global', value: globalWinRate + '%', color: 'text-primary' },
         ].map((stat, i) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
+          <motion.div key={stat.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
               <CardContent className="p-4 flex items-center gap-3">
                 <stat.icon className={`w-5 h-5 ${stat.color}`} />
@@ -335,7 +442,14 @@ const HorusIA = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-secondary/80 border border-border/50 w-full justify-start flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="behavioral" className="gap-2 font-display text-xs"><Brain className="w-4 h-4" /> Comportamental</TabsTrigger>
-          <TabsTrigger value="print" className="gap-2 font-display text-xs"><ImageIcon className="w-4 h-4" /> Print</TabsTrigger>
+          <TabsTrigger value="print" className="gap-2 font-display text-xs relative">
+            <ImageIcon className="w-4 h-4" /> Print
+            {pendingPrints.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orange-400 text-[9px] text-white flex items-center justify-center font-bold animate-pulse">
+                {pendingPrints.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="account" className="gap-2 font-display text-xs"><BarChart3 className="w-4 h-4" /> Análise da Conta</TabsTrigger>
           <TabsTrigger value="dialog" className="gap-2 font-display text-xs"><MessageSquare className="w-4 h-4" /> Diálogo do Trader</TabsTrigger>
           <TabsTrigger value="history" className="gap-2 font-display text-xs"><Clock className="w-4 h-4" /> Histórico</TabsTrigger>
@@ -577,7 +691,7 @@ const HorusIA = () => {
                         <p className="text-xs text-destructive font-medium">Horário de entrada já expirou. Aguarde o próximo candle ou envie um print atualizado.</p>
                       </div>
                     )}
-                    {/* Feedback Win/Loss */}
+                    {/* Feedback Win/Loss - MANDATORY */}
                     {chartResult.analysis_id && (
                       <div className="border-t border-border/30 pt-3 space-y-2">
                         {feedbackSent ? (
@@ -587,7 +701,15 @@ const HorusIA = () => {
                           </div>
                         ) : (
                           <>
-                            <p className="text-xs text-muted-foreground text-center font-display">Após a operação, informe o resultado:</p>
+                            <div className="flex items-center gap-2 justify-center">
+                              <AlertTriangle className="w-4 h-4 text-orange-400" />
+                              <p className="text-xs text-orange-400 text-center font-display font-bold">
+                                OBRIGATÓRIO: Informe o resultado após a operação
+                              </p>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground text-center">
+                              A Horus IA aguarda seu feedback para calibrar futuras análises. Você pode preencher depois na aba Print.
+                            </p>
                             <div className="flex gap-3 justify-center">
                               <Button
                                 variant="outline"
@@ -662,6 +784,16 @@ const HorusIA = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <Badge variant="outline" className="text-[10px]">{item._type === 'behavioral' ? 'Comportamental' : `Print ${item.timeframe}`}</Badge>
+                            {item._type === 'print' && item.result && (
+                              <Badge variant="outline" className={`text-[10px] ${item.result === 'win' ? 'border-success/30 text-success' : 'border-destructive/30 text-destructive'}`}>
+                                {item.result === 'win' ? '✅ WIN' : '❌ LOSS'}
+                              </Badge>
+                            )}
+                            {item._type === 'print' && !item.result && (
+                              <Badge variant="outline" className="text-[10px] border-orange-400/30 text-orange-400 animate-pulse">
+                                ⏳ Aguardando resultado
+                              </Badge>
+                            )}
                             <span className="text-[10px] text-muted-foreground">{new Date(item.created_at).toLocaleString('pt-BR')}</span>
                           </div>
                           {item._type === 'behavioral' ? (

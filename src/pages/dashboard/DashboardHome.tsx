@@ -142,9 +142,6 @@ const DashboardHome = () => {
       setTotalProfit(newProfit);
       setDisplayName(profileRes.data.display_name || 'Trader');
       setDisciplineRate(Number(profileRes.data.discipline_score) || 100);
-      setIsVip(!!profileRes.data.is_vip);
-      setIsSuperVip(!!profileRes.data.is_super_vip);
-      setConsecutiveLosses(Number(profileRes.data.consecutive_losses) || 0);
       if (profileRes.data.created_at) {
         const created = new Date(profileRes.data.created_at);
         setDaysTrading(Math.max(1, Math.floor((Date.now() - created.getTime()) / 86400000)));
@@ -201,9 +198,6 @@ const DashboardHome = () => {
       setConsistencyData(consistencyEntries.map(([day, profit]) => ({ day: day.slice(5), profit: +profit.toFixed(2) })));
     }
 
-    // Last analysis
-    const { data: analysisData } = await supabase.from('account_analyses').select('summary, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
-    if (analysisData?.summary) setLastAnalysis(analysisData.summary);
   }, [user]);
 
   useEffect(() => {
@@ -355,7 +349,7 @@ const DashboardHome = () => {
   const emotionalEmoji = emotionalState ? emotionalOptions.find(o => o.key === emotionalState)?.label.split(' ')[0] || '😊' : '😊';
   const isEmotionalRisky = emotionalState ? !emotionalOptions.find(o => o.key === emotionalState)?.safe : false;
 
-  const riskLevel = consecutiveLosses >= 2 ? 'Alto' : isEmotionalRisky ? 'Médio' : 'Baixo';
+  const riskLevel = isEmotionalRisky ? 'Médio' : 'Baixo';
   const riskColor = riskLevel === 'Alto' ? 'text-destructive' : riskLevel === 'Médio' ? 'text-primary' : 'text-success';
   const stateLabel = isEmotionalRisky ? 'Atenção' : 'Estável';
 

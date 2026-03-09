@@ -350,7 +350,7 @@ const DashboardHome = () => {
   const isEmotionalRisky = emotionalState ? !emotionalOptions.find(o => o.key === emotionalState)?.safe : false;
 
   const riskLevel = isEmotionalRisky ? 'Médio' : 'Baixo';
-  const riskColor = riskLevel === 'Alto' ? 'text-destructive' : riskLevel === 'Médio' ? 'text-primary' : 'text-success';
+  const riskColor = riskLevel === 'Médio' ? 'text-primary' : 'text-success';
   const stateLabel = isEmotionalRisky ? 'Atenção' : 'Estável';
 
   return (

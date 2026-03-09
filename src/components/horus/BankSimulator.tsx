@@ -9,6 +9,7 @@ import { TrendingUp, Calculator, AlertTriangle, Sparkles, BarChart3 } from 'luci
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import FieldHelp from '@/components/FieldHelp';
 
 interface Scenario {
   name: string;
@@ -117,12 +118,32 @@ export default function BankSimulator() {
 
         <div className="space-y-4 mb-5 p-4 rounded-lg bg-secondary/20 border border-border/50">
           <div>
-            <div className="flex items-center justify-between mb-2"><span className="text-xs text-muted-foreground">{t('horus.projectionPeriod')}</span><span className="text-xs font-mono text-primary">{days} {t('common.days')}</span></div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground flex items-center">{t('horus.projectionPeriod')}<FieldHelp text={t('horus.projectionPeriodHelp')} /></span>
+              <span className="text-xs font-mono text-primary">{days} {t('common.days')}</span>
+            </div>
             <Slider value={[days]} onValueChange={([v]) => setDays(v)} min={7} max={90} step={1} className="w-full" />
           </div>
           <div>
-            <div className="flex items-center justify-between mb-2"><span className="text-xs text-muted-foreground">{t('horus.simulatedWinRate')}</span><span className="text-xs font-mono text-primary">{winRate}%</span></div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground flex items-center">{t('horus.simulatedWinRate')}<FieldHelp text={t('horus.winRateHelp')} /></span>
+              <span className="text-xs font-mono text-primary">{winRate}%</span>
+            </div>
             <Slider value={[winRate]} onValueChange={([v]) => setWinRate(v)} min={40} max={80} step={1} className="w-full" />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground flex items-center">{t('horus.avgProfit')}<FieldHelp text={t('horus.avgProfitHelp')} /></span>
+              <span className="text-xs font-mono text-primary">{currency} {avgProfit}</span>
+            </div>
+            <Slider value={[avgProfit]} onValueChange={([v]) => setAvgProfit(v)} min={1} max={200} step={1} className="w-full" />
+          </div>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground flex items-center">{t('horus.opsPerDay')}<FieldHelp text={t('horus.opsPerDayHelp')} /></span>
+              <span className="text-xs font-mono text-primary">{opsPerDay}</span>
+            </div>
+            <Slider value={[opsPerDay]} onValueChange={([v]) => setOpsPerDay(v)} min={1} max={30} step={1} className="w-full" />
           </div>
         </div>
 
@@ -139,13 +160,16 @@ export default function BankSimulator() {
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-5">
-          {projections.map((proj, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="text-center p-3 rounded-lg border" style={{ borderColor: `${proj.color}40`, backgroundColor: `${proj.color}08` }}>
-              <p className="text-[10px] text-muted-foreground uppercase mb-1">{proj.scenario}</p>
-              <p className="text-lg font-bold font-mono" style={{ color: proj.color }}>{currency} {proj.finalValue.toLocaleString()}</p>
-              <p className="text-[9px] text-muted-foreground">{proj.finalValue > balance ? '+' : ''}{Math.round(((proj.finalValue - balance) / balance) * 100)}%</p>
-            </motion.div>
-          ))}
+          {projections.map((proj, i) => {
+            const helpKeys = ['conservativeHelp', 'moderateHelp', 'aggressiveHelp'];
+            return (
+              <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="text-center p-3 rounded-lg border" style={{ borderColor: `${proj.color}40`, backgroundColor: `${proj.color}08` }}>
+                <p className="text-[10px] text-muted-foreground uppercase mb-1 flex items-center justify-center">{proj.scenario}<FieldHelp text={t(`horus.${helpKeys[i]}`)} /></p>
+                <p className="text-lg font-bold font-mono" style={{ color: proj.color }}>{currency} {proj.finalValue.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground">{balance > 0 ? `${proj.finalValue > balance ? '+' : ''}${Math.round(((proj.finalValue - balance) / balance) * 100)}%` : '—'}</p>
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="bg-secondary/30 border border-border/50 rounded-lg p-3 mb-4">

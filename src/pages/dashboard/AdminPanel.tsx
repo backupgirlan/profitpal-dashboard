@@ -14,6 +14,7 @@ import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminUsageControl from '@/components/admin/AdminUsageControl';
 import AdminSettings from '@/components/admin/AdminSettings';
 import AdminContent from '@/components/admin/AdminContent';
+import AdminHorusFlows from '@/components/admin/AdminHorusFlows';
 
 const AdminPanel = () => {
   const { user } = useAuth();
@@ -55,6 +56,7 @@ const AdminPanel = () => {
       case 'users': return <AdminUsers />;
       case 'plans': return <AdminPlans />;
       case 'horus': return <AdminHorusIA />;
+      case 'horus-flows': return <AdminHorusFlows />;
       case 'integrations': return <AdminIntegrations />;
       case 'payments': return <AdminPayments />;
       case 'analytics': return <AdminAnalytics />;

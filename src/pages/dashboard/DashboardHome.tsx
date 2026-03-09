@@ -136,20 +136,36 @@ const DashboardHome = () => {
     }
   };
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (checkRankUp = false) => {
     if (!user) return;
     const [profileRes, tradesRes] = await Promise.all([
       supabase.from('profiles').select('balance, total_profit, display_name, created_at, discipline_score').eq('user_id', user.id).single(),
       supabase.from('trades').select('*').eq('user_id', user.id).order('created_at', { ascending: true }),
     ]);
     if (profileRes.data) {
+      const newProfit = Number(profileRes.data.total_profit) || 0;
       setBalance(Number(profileRes.data.balance) || 0);
-      setTotalProfit(Number(profileRes.data.total_profit) || 0);
+      setTotalProfit(newProfit);
       setDisplayName(profileRes.data.display_name || 'Trader');
       setDisciplineRate(Number(profileRes.data.discipline_score) || 100);
       if (profileRes.data.created_at) {
         const created = new Date(profileRes.data.created_at);
         setDaysTrading(Math.max(1, Math.floor((Date.now() - created.getTime()) / 86400000)));
+      }
+
+      // Rank-up detection: compare new rank to last known rank
+      if (checkRankUp && hasInitialized.current) {
+        const newRank = getRankForProfit(newProfit);
+        if (lastRankRef.current && newRank.name !== lastRankRef.current) {
+          const oldRankObj = TRADER_RANKS.find(r => r.name === lastRankRef.current);
+          if (!oldRankObj || newRank.minProfit > oldRankObj.minProfit) {
+            // Genuine rank-up!
+            setAchievedRank(newRank);
+            setAchievementOpen(true);
+            toast.success(`🏆 Parabéns! Você conquistou a patente ${newRank.emoji} ${newRank.name}!`, { duration: 6000 });
+          }
+        }
+        lastRankRef.current = newRank.name;
       }
     }
     if (tradesRes.data) {
@@ -208,7 +224,20 @@ const DashboardHome = () => {
     }
   }, [user]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  // Initial load: set the baseline rank without triggering achievement
+  useEffect(() => {
+    if (user && !hasInitialized.current) {
+      loadData(false).then(() => {
+        hasInitialized.current = true;
+        // Set initial rank ref from profile
+        supabase.from('profiles').select('total_profit').eq('user_id', user.id).single().then(({ data }) => {
+          if (data) lastRankRef.current = getRankForProfit(Number(data.total_profit) || 0).name;
+        });
+      });
+    }
+  }, [user, loadData]);
+
+  useEffect(() => { if (hasInitialized.current) loadData(false); }, [loadData]);
 
   useEffect(() => {
     if (!user) return;

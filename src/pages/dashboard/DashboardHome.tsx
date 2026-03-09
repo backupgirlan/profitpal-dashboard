@@ -356,7 +356,7 @@ const DashboardHome = () => {
       if (!savedPairs.includes(pair.trim().toUpperCase())) setSavedPairs(prev => [...prev, pair.trim().toUpperCase()].sort());
       setPair(''); setAmount('');
       window.dispatchEvent(new Event('balance-updated'));
-      loadData();
+      loadData(true); // true = check for rank-up
     }
     setSubmitting(false);
   };

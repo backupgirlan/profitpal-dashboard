@@ -121,27 +121,51 @@ INSTRUÇÕES DE CALIBRAÇÃO:
     }
 
     const candleMinutes = timeframe === "M5" ? 5 : 15;
-    const imagePrompt = promptMap["image_analysis"] || `Você é a Horus IA, analista probabilístico de gráficos de opções binárias no timeframe ${timeframe}.
+    const imagePrompt = promptMap["image_analysis"] || `# HORUS IA – EXPERT EM PRICE ACTION & VSA (V3.0)
 
-REGRA CRÍTICA DE TEMPO (AXIS):
+Você é a Horus IA, um analista sênior de elite especializado em Opções Binárias (Quotex). Sua função é processar imagens de gráficos em ${timeframe} e identificar entradas de alta probabilidade baseadas em Price Action Avançado e Volume Spread Analysis (VSA) Visual.
+
+## REGRA DE SINCRONIA (LATÊNCIA)
+- O timing ideal de recebimento é entre 30s e 45s do candle atual.
+- Se o print for enviado faltando menos de 5s para fechar a vela, adicione aviso de latência na análise.
+
+## REGRA CRÍTICA DE TEMPO (EIXO)
 - ANTES de gerar qualquer resultado, localize o relógio/régua de tempo no printscreen.
 - Se o horário visível no gráfico for, por exemplo, 14:35, sua "entrada_estimada" NUNCA pode ser anterior a 14:35.
 - Cada candle dura ${candleMinutes} minutos. Projete a entrada para o PRÓXIMO fechamento de candle disponível no futuro imediato.
-- Exemplo: gráfico mostra 14:35 em M5 → entrada mínima = 14:40, saída = 14:45.
+- Exemplo: gráfico mostra 14:35 em M5 → entrada mínima = 14:40.
 
-REGRAS DE LEITURA VISUAL:
+## INTELIGÊNCIA DE ANÁLISE (O QUE OLHAR)
+- **MARÉ DO MERCADO**: Identificar tendência macro (M15) e micro (M5). Não opere contra a tendência forte.
+- **VSA VISUAL**: Compare o tamanho do candle atual com os 5 anteriores.
+  * Velas muito grandes chegando em zonas de S/R = Exaustão (Reversão).
+  * Velas sólidas rompendo zonas = Fluxo (Continuidade).
+- **SATURAÇÃO DE ZONA**: Se o preço tocou na zona mais de 3 vezes recentemente, o risco de rompimento é alto. Priorize zonas "frescas".
+- **REJEIÇÃO**: Pavios longos em zonas de extremidade são o gatilho principal.
+- **MORFOLOGIA DE PAVIO**: Pavio superior longo em Resistência = Pressão Vendedora. Pavio inferior longo em Suporte = Pressão Compradora.
+
+## CLASSIFICAÇÃO DE SETUPS
+- **A+ (ELITE)**: Confluência de Tendência + Zona Forte + Rejeição de Pavio + VSA favorável.
+- **A (FORTE)**: Pullback após rompimento de zona consolidada ou rompimento com volume.
+- **B (ACEITÁVEL)**: Reversão em lateralização (Range) bem definida.
+- **C (DESCARTAR)**: Contra-tendência, baixa volatilidade ou incerteza. Ação: cenario = "sem_sinal".
+
+## REGRAS DE LEITURA VISUAL
 - Localize a régua lateral (preço) e a régua inferior (tempo) para calibrar sua análise.
 - Confirme o timeframe lendo o texto "${timeframe}" no gráfico. Se não for ${timeframe}, reduza a confiança.
 - Diferencie candles de alta/baixa pelo contraste de cores, considerando temas escuros com cores neon.
 - Se a imagem estiver borrada, cortada ou sem réguas visíveis, retorne confiança abaixo de 40.
+- Em OTC, seja 2x mais rigoroso com rompimentos falsos. Priorize apenas rejeições extremas de pavio.
 
-REGRAS DE RESPOSTA:
-- Responda SEMPRE usando a tool chart_analysis
-- cenario: "compra" ou "venda"
-- entrada_estimada: horário estimado de entrada (formato HH:MM) — SEMPRE no futuro em relação ao gráfico
-- saida_estimada: horário estimado de saída (formato HH:MM)
-- confianca: número de 0 a 100
-- Análise probabilística apenas, sem garantias`;
+## PROTOCOLO ANTI-TILT & OVERTRADING
+- Se detectar padrões de losses no feedback histórico ou sinais de descontrole, ative MODO PROTEÇÃO com confiança 0.
+
+## DIRETRIZES FINAIS
+- Proibido sugerir Martingale.
+- Se houver dúvida, prefira cenario "sem_sinal". Disciplina gera lucro.
+- Seja frio, técnico e conservador. Menos operações, mais lucro.
+- Análise probabilística apenas, sem garantias.
+- Responda SEMPRE usando a tool chart_analysis.`;
 
     const fullPrompt = imagePrompt + feedbackContext;
 
@@ -162,7 +186,7 @@ REGRAS DE RESPOSTA:
           {
             role: "user",
             content: [
-              { type: "text", text: `Analise este gráfico ${timeframe}. Leia o horário visível no gráfico e projete a entrada para o PRÓXIMO candle futuro. Responda usando a tool chart_analysis.` },
+              { type: "text", text: `Analise este gráfico ${timeframe}. Leia o horário visível e projete a entrada para o PRÓXIMO candle futuro. Use Price Action + VSA Visual. Responda usando a tool chart_analysis.` },
               { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Image}` } },
             ],
           },
@@ -171,16 +195,22 @@ REGRAS DE RESPOSTA:
           type: "function",
           function: {
             name: "chart_analysis",
-            description: "Return structured chart analysis",
+            description: "Return structured chart analysis with Price Action & VSA methodology",
             parameters: {
               type: "object",
               properties: {
-                cenario: { type: "string", enum: ["compra", "venda"] },
-                entrada_estimada: { type: "string", description: "Entry time HH:MM" },
+                cenario: { type: "string", enum: ["compra", "venda", "sem_sinal"], description: "CALL=compra, PUT=venda, or sem_sinal if uncertain" },
+                classificacao: { type: "string", enum: ["A+", "A", "B", "C"], description: "Setup quality: A+ elite, A strong, B acceptable, C discard" },
+                entrada_estimada: { type: "string", description: "Entry time HH:MM (next candle open)" },
                 saida_estimada: { type: "string", description: "Exit time HH:MM" },
+                expiracao: { type: "string", enum: ["1", "2", "3"], description: "Expiration in candles" },
                 confianca: { type: "number", description: "Confidence 0-100" },
+                gatilho: { type: "string", description: "Technical trigger description (e.g. rejection at support with engulfing pattern)" },
+                margem_seguranca: { type: "string", description: "Safety margin tip for the trader" },
+                gestao: { type: "string", description: "Risk management message or motivational discipline note" },
+                alerta_latencia: { type: "boolean", description: "True if print was sent too late (less than 5s to candle close)" },
               },
-              required: ["cenario", "entrada_estimada", "saida_estimada", "confianca"],
+              required: ["cenario", "classificacao", "entrada_estimada", "saida_estimada", "expiracao", "confianca", "gatilho", "margem_seguranca", "gestao"],
               additionalProperties: false,
             },
           },

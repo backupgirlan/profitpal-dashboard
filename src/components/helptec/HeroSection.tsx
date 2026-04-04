@@ -248,6 +248,7 @@ const HeroSection = () => {
             </div>
 
             {/* Linha separadora com glow */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-1" />
             <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-1.5" />
 
             {/* Código PHP/HTML saindo da logo */}

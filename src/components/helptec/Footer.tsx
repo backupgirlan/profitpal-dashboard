@@ -52,10 +52,10 @@ const Footer = () => {
 
         <div className="border-t border-border/30 pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Help GB Tec — Todos os direitos reservados.
+            © {new Date().getFullYear()} Help Tec — Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Help GB Tec — Criando soluções digitais para transformar negócios.
+            Help Tec — Criando soluções digitais para transformar negócios.
           </p>
         </div>
       </div>

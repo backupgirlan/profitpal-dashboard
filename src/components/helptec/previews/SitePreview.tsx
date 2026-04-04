@@ -10,33 +10,30 @@ const colorSchemes = [
 
 const segmentLayouts: Record<string, (colors: typeof colorSchemes[0]) => React.ReactNode> = {
   Supermercado: (c) => (
-    <div className="space-y-1.5">
-      {/* Top bar with logo + search */}
+    <div className="space-y-2">
       <div className="flex items-center gap-1">
-        <div className="w-8 h-3 rounded" style={{ background: c.primary }} />
-        <div className="flex-1 h-3 rounded-full border border-border/30 bg-muted/20 px-1 flex items-center">
-          <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/20" />
+        <div className="w-10 h-4 rounded" style={{ background: c.primary }} />
+        <div className="flex-1 h-4 rounded-full border border-foreground/20 bg-foreground/5 px-1.5 flex items-center">
+          <div className="w-2 h-2 rounded-full bg-foreground/30" />
+          <div className="text-[4px] text-foreground/40 ml-1">Buscar produtos...</div>
         </div>
-        <div className="w-4 h-3 rounded text-[4px] flex items-center justify-center" style={{ background: c.secondary }}>🛒</div>
+        <div className="w-6 h-4 rounded text-[6px] flex items-center justify-center" style={{ background: c.secondary }}>🛒</div>
       </div>
-      {/* Hero banner with offers */}
-      <div className="h-10 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }}>
+      <div className="h-14 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }}>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-[5px] font-bold text-foreground/80">OFERTAS DA SEMANA</div>
-          <div className="text-[4px] text-foreground/50">Até 50% de desconto</div>
-          <div className="mt-0.5 w-8 h-2 rounded text-[3px] flex items-center justify-center font-bold" style={{ background: c.primary }}>VER MAIS</div>
+          <div className="text-[7px] font-bold text-foreground">OFERTAS DA SEMANA</div>
+          <div className="text-[5px] text-foreground/70">Até 50% de desconto</div>
+          <div className="mt-1 w-12 h-3 rounded text-[4px] flex items-center justify-center font-bold text-foreground" style={{ background: c.primary }}>VER MAIS</div>
         </div>
       </div>
-      {/* Category chips */}
-      <div className="flex gap-0.5 overflow-hidden">
-        {["🥩 Carnes", "🥬 Hortifruti", "🧴 Limpeza", "🥛 Laticínios", "🍞 Padaria"].map((cat, i) => (
-          <div key={i} className="shrink-0 px-1.5 py-0.5 rounded-full text-[3px] border border-border/20" style={{ background: i === 0 ? c.secondary : "transparent" }}>
+      <div className="flex gap-1 overflow-hidden">
+        {["🥩 Carnes", "🥬 Hortifruti", "🧴 Limpeza", "🥛 Laticínios"].map((cat, i) => (
+          <div key={i} className="shrink-0 px-2 py-1 rounded-full text-[4px] text-foreground/80 border border-foreground/20" style={{ background: i === 0 ? c.secondary : "transparent" }}>
             {cat}
           </div>
         ))}
       </div>
-      {/* Product grid */}
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-1.5">
         {[
           { name: "Arroz 5kg", price: "R$ 24,90", emoji: "🍚" },
           { name: "Feijão 1kg", price: "R$ 8,49", emoji: "🫘" },
@@ -45,18 +42,17 @@ const segmentLayouts: Record<string, (colors: typeof colorSchemes[0]) => React.R
           { name: "Café 500g", price: "R$ 15,90", emoji: "☕" },
           { name: "Açúcar 1kg", price: "R$ 4,49", emoji: "🧂" },
         ].map((p, i) => (
-          <div key={i} className="rounded border border-border/20 p-0.5 flex flex-col items-center animate-pulse" style={{ animationDelay: `${i * 200}ms`, animationDuration: "3s" }}>
-            <div className="text-[8px]">{p.emoji}</div>
-            <div className="text-[3px] text-foreground/70 text-center">{p.name}</div>
-            <div className="text-[4px] font-bold" style={{ color: c.primary.replace("0.4", "1") }}>{p.price}</div>
+          <div key={i} className="rounded border border-foreground/15 p-1 flex flex-col items-center" style={{ background: c.secondary, animationDelay: `${i * 200}ms` }}>
+            <div className="text-[10px]">{p.emoji}</div>
+            <div className="text-[4px] text-foreground/80 text-center">{p.name}</div>
+            <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>{p.price}</div>
           </div>
         ))}
       </div>
-      {/* WhatsApp bar */}
-      <div className="flex items-center gap-1 p-0.5 rounded" style={{ background: "hsla(142,71%,45%,0.1)" }}>
-        <div className="text-[5px]">💬</div>
-        <div className="text-[3px] text-foreground/50 flex-1">Peça pelo WhatsApp</div>
-        <div className="w-6 h-2 rounded text-[3px]" style={{ background: "hsla(142,71%,45%,0.3)" }} />
+      <div className="flex items-center gap-1.5 p-1 rounded" style={{ background: "hsla(142,71%,45%,0.2)" }}>
+        <div className="text-[7px]">💬</div>
+        <div className="text-[4px] text-foreground/60 flex-1">Peça pelo WhatsApp</div>
+        <div className="w-8 h-3 rounded text-[3px] flex items-center justify-center text-foreground/80" style={{ background: "hsla(142,71%,45%,0.4)" }}>Enviar</div>
       </div>
     </div>
   ),

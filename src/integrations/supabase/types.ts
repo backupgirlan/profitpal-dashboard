@@ -149,6 +149,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+          project_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+          project_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+          project_type?: string | null
+        }
+        Relationships: []
+      }
       course_categories: {
         Row: {
           created_at: string | null
@@ -595,6 +625,51 @@ export type Database = {
         }
         Relationships: []
       }
+      project_demos: {
+        Row: {
+          category: string
+          cover_image: string | null
+          created_at: string
+          demo_link: string | null
+          description: string | null
+          gallery_images: string[] | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string
+          segment: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          demo_link?: string | null
+          description?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name: string
+          segment?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cover_image?: string | null
+          created_at?: string
+          demo_link?: string | null
+          description?: string | null
+          gallery_images?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string
+          segment?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       protection_mode_events: {
         Row: {
           consecutive_losses: number
@@ -721,6 +796,39 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          comment: string
+          company: string | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          photo_url: string | null
+          rating: number | null
+        }
+        Insert: {
+          comment: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          photo_url?: string | null
+          rating?: number | null
+        }
+        Update: {
+          comment?: string
+          company?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          photo_url?: string | null
+          rating?: number | null
         }
         Relationships: []
       }

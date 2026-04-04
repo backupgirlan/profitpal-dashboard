@@ -28,6 +28,18 @@ const categoryColors: Record<string, string> = {
   loja: "from-neon-cyan/20 to-neon-blue/5",
 };
 
+const CategoryPreview = ({ category, segment, name }: { category: string; segment?: string; name: string }) => {
+  const previewMap: Record<string, React.ReactNode> = {
+    site: <SitePreview segment={segment} name={name} />,
+    sistema: <SistemaPreview segment={segment} name={name} />,
+    aplicativo: <AppPreview segment={segment} name={name} />,
+    ia: <IAPreview segment={segment} name={name} />,
+    landing: <LandingPreview segment={segment} name={name} />,
+    loja: <LojaPreview segment={segment} name={name} />,
+  };
+  return <>{previewMap[category] || previewMap.site}</>;
+};
+
 const ProjectsSection = () => {
   const [activeCategory, setActiveCategory] = useState("site");
   const [demos, setDemos] = useState<any[]>([]);
@@ -214,16 +226,5 @@ const ProjectsSection = () => {
   );
 };
 
-const CategoryPreview = ({ category, segment, name }: { category: string; segment?: string; name: string }) => {
-  const previewMap: Record<string, React.ReactNode> = {
-    site: <SitePreview segment={segment} name={name} />,
-    sistema: <SistemaPreview segment={segment} name={name} />,
-    aplicativo: <AppPreview segment={segment} name={name} />,
-    ia: <IAPreview segment={segment} name={name} />,
-    landing: <LandingPreview segment={segment} name={name} />,
-    loja: <LojaPreview segment={segment} name={name} />,
-  };
-  return previewMap[category] || previewMap.site;
-};
 
 export default ProjectsSection;

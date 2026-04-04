@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ["Orbitron", "sans-serif"],
+        display: ["Space Grotesk", "sans-serif"],
         sans: ["Inter", "sans-serif"],
       },
       colors: {
@@ -54,6 +54,11 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        neon: {
+          blue: "hsl(var(--neon-blue))",
+          purple: "hsl(var(--neon-purple))",
+          cyan: "hsl(var(--neon-cyan))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

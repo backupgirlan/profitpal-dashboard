@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Menu, X, Sparkles } from "lucide-react";
 
 const links = [
-  { label: "Serviços", href: "#servicos" },
-  { label: "Projetos", href: "#projetos" },
-  { label: "Planos", href: "#planos" },
-  { label: "Contato", href: "#contato" },
+  { label: "SERVIÇOS", href: "#servicos" },
+  { label: "PROJETOS", href: "#projetos" },
+  { label: "PLANOS", href: "#planos" },
+  { label: "CONTATO", href: "#contato" },
 ];
 
 const Navbar = () => {

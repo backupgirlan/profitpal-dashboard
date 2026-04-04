@@ -4,6 +4,47 @@ import { ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
 
+// Local cover images for demos
+import clinicaSite from "@/assets/demos/clinica-site.jpg";
+import advocaciaSite from "@/assets/demos/advocacia-site.jpg";
+import imobiliariaSite from "@/assets/demos/imobiliaria-site.jpg";
+import barbeariaSistema from "@/assets/demos/barbearia-sistema.jpg";
+import dashboardFinanceiro from "@/assets/demos/dashboard-financeiro.jpg";
+import crmVendas from "@/assets/demos/crm-vendas.jpg";
+import restauranteSistema from "@/assets/demos/restaurante-sistema.jpg";
+import cursoLanding from "@/assets/demos/curso-landing.jpg";
+import saasLanding from "@/assets/demos/saas-landing.jpg";
+import eventoLanding from "@/assets/demos/evento-landing.jpg";
+import modaLoja from "@/assets/demos/moda-loja.jpg";
+import petshopLoja from "@/assets/demos/petshop-loja.jpg";
+import fitnessLoja from "@/assets/demos/fitness-loja.jpg";
+import deliveryApp from "@/assets/demos/delivery-app.jpg";
+import agendamentoApp from "@/assets/demos/agendamento-app.jpg";
+import chatbotIa from "@/assets/demos/chatbot-ia.jpg";
+import vendasIa from "@/assets/demos/vendas-ia.jpg";
+import analyticsIa from "@/assets/demos/analytics-ia.jpg";
+
+const localCovers: Record<string, string> = {
+  "Clínica Vida Saúde": clinicaSite,
+  "Escritório Advocacia Elite": advocaciaSite,
+  "Imobiliária Prime": imobiliariaSite,
+  "Gestão de Barbearia": barbeariaSistema,
+  "Dashboard Financeiro": dashboardFinanceiro,
+  "CRM para Vendas": crmVendas,
+  "Sistema para Restaurante": restauranteSistema,
+  "Lançamento Curso Online": cursoLanding,
+  "Captação de Leads SaaS": saasLanding,
+  "Evento Presencial VIP": eventoLanding,
+  "Moda Feminina Store": modaLoja,
+  "Pet Shop Online": petshopLoja,
+  "Suplementos Fitness": fitnessLoja,
+  "App Delivery Local": deliveryApp,
+  "App de Agendamento": agendamentoApp,
+  "Chatbot Atendimento 24h": chatbotIa,
+  "Assistente de Vendas IA": vendasIa,
+  "Análise de Dados com IA": analyticsIa,
+};
+
 const categories = [
   { key: "site", label: "Site" },
   { key: "sistema", label: "Sistema" },
@@ -31,18 +72,20 @@ const ProjectsSection = () => {
 
   const filtered = demos.filter((d) => d.category === activeCategory);
 
+  const getCover = (demo: any) => demo.cover_image || localCovers[demo.name] || "";
+
   const openWhatsApp = (name: string) => {
-    const link = document.createElement("a");
-    link.href = `https://wa.me/5575999401616?text=Olá! Gostaria de um projeto igual ao "${name}".`;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    link.click();
+    window.open(
+      `https://wa.me/5575999401616?text=Olá! Gostaria de um projeto igual ao "${name}".`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   return (
     <section id="projetos" className="relative py-20 px-4">
       <div className="absolute top-1/2 right-0 w-72 h-72 bg-neon-cyan/5 rounded-full blur-[120px] animate-orb" />
-      
+
       <div className="max-w-7xl mx-auto">
         <ScrollReveal variant="flip-up">
           <div className="text-center mb-12">
@@ -82,8 +125,15 @@ const ProjectsSection = () => {
                 <div className="group glass rounded-2xl overflow-hidden hover-3d h-full relative">
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
                   <div className="aspect-video bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 relative overflow-hidden">
-                    {demo.cover_image ? (
-                      <img src={demo.cover_image} alt={demo.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    {getCover(demo) ? (
+                      <img
+                        src={getCover(demo)}
+                        alt={demo.name}
+                        loading="lazy"
+                        width={800}
+                        height={512}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-muted-foreground text-sm">Preview</span>
@@ -108,11 +158,20 @@ const ProjectsSection = () => {
                     <p className="text-xs text-muted-foreground mb-4">{demo.description}</p>
                     <div className="flex gap-2">
                       {demo.demo_link && (
-                        <Button size="sm" variant="outline" className="text-xs border-neon-blue/30 hover:bg-neon-blue/10" onClick={() => window.open(demo.demo_link, "_blank")}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs border-neon-blue/30 hover:bg-neon-blue/10"
+                          onClick={() => window.open(demo.demo_link, "_blank")}
+                        >
                           <ExternalLink className="w-3 h-3 mr-1" /> Ver Demo
                         </Button>
                       )}
-                      <Button size="sm" className="text-xs gradient-neon text-primary-foreground" onClick={() => openWhatsApp(demo.name)}>
+                      <Button
+                        size="sm"
+                        className="text-xs gradient-neon text-primary-foreground"
+                        onClick={() => openWhatsApp(demo.name)}
+                      >
                         Solicitar Igual <ArrowRight className="w-3 h-3 ml-1" />
                       </Button>
                     </div>
@@ -127,12 +186,12 @@ const ProjectsSection = () => {
               <p className="text-muted-foreground">Novos projetos em breve nesta categoria.</p>
               <Button
                 className="mt-4 gradient-neon text-primary-foreground hover-magnetic"
-                onClick={() => {
-                  const link = document.createElement("a");
-                  link.href = "https://wa.me/5575999401616?text=Olá! Quero solicitar um orçamento.";
-                  link.target = "_blank";
-                  link.click();
-                }}
+                onClick={() =>
+                  window.open(
+                    "https://wa.me/5575999401616?text=Olá! Quero solicitar um orçamento.",
+                    "_blank"
+                  )
+                }
               >
                 Solicitar Orçamento
               </Button>

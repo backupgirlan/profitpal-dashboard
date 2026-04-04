@@ -86,6 +86,48 @@ const FloatingIcon = ({ icon: Icon, className, delay = "0s" }: { icon: any; clas
   </div>
 );
 
+const aiMessages = [
+  "Analisando seu mercado...",
+  "Criando design personalizado...",
+  "Integrando inteligência artificial...",
+  "Otimizando para conversão...",
+  "Automatizando processos...",
+  "Deploy em produção...",
+  "Sistema online e funcionando ✓",
+];
+
+const AIMessageStream = () => {
+  const [messages, setMessages] = useState<{ text: string; id: number }[]>([]);
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const msg = aiMessages[idRef.current % aiMessages.length];
+      const id = idRef.current;
+      idRef.current += 1;
+      setMessages((prev) => [...prev.slice(-3), { text: msg, id }]);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-start gap-1.5 min-h-[90px]">
+      {messages.map((m, i) => (
+        <div
+          key={m.id}
+          className="flex items-center gap-2 animate-fade-in"
+          style={{ animationDuration: "0.5s" }}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan shadow-[0_0_6px_hsl(var(--neon-cyan)/0.8)] animate-pulse" />
+          <span className={`text-xs font-mono ${i === messages.length - 1 ? "text-neon-cyan" : "text-muted-foreground/60"} transition-colors duration-300`}>
+            {m.text}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const HeroSection = () => {
   const [mounted, setMounted] = useState(false);
   

@@ -1,4 +1,4 @@
-import { MessageCircle, Mail, Instagram, Globe } from "lucide-react";
+import { MessageCircle, Instagram, Globe } from "lucide-react";
 
 const Footer = () => {
   const openWhatsApp = () => {
@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <h3 className="font-display font-bold text-xl gradient-neon-text mb-3">HELP TEC</h3>
+            <h3 className="font-display font-bold text-xl gradient-neon-text mb-3">HELP GB TEC</h3>
             <p className="text-sm text-muted-foreground">
               Criando soluções digitais para transformar negócios.
             </p>
@@ -38,9 +38,6 @@ const Footer = () => {
               <li className="flex items-center gap-2 cursor-pointer hover:text-primary transition-colors" onClick={openWhatsApp}>
                 <MessageCircle className="w-4 h-4" /> +55 75 99940-1616
               </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4" /> contato@helptec.com.br
-              </li>
             </ul>
             <div className="flex gap-3 mt-4">
               <button className="w-9 h-9 rounded-full glass flex items-center justify-center hover:box-glow transition-all">
@@ -55,10 +52,10 @@ const Footer = () => {
 
         <div className="border-t border-border/30 pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Help Tec — Todos os direitos reservados.
+            © {new Date().getFullYear()} Help GB Tec — Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Help Tec — Criando soluções digitais para transformar negócios.
+            Help GB Tec — Criando soluções digitais para transformar negócios.
           </p>
         </div>
       </div>

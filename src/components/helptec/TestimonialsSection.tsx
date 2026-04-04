@@ -4,7 +4,7 @@ import { Star, User, Quote } from "lucide-react";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
 
 const fallbackTestimonials = [
-  { id: "1", name: "Maria Silva", company: "Loja Elegância", comment: "A Help Tec transformou nosso negócio com um site incrível. As vendas aumentaram 200% em 3 meses!", rating: 5, photo_url: null },
+  { id: "1", name: "Maria Silva", company: "Loja Elegância", comment: "A Help GB Tec transformou nosso negócio com um site incrível. As vendas aumentaram 200% em 3 meses!", rating: 5, photo_url: null },
   { id: "2", name: "João Santos", company: "Clínica Saúde+", comment: "Sistema de agendamento perfeito. Nossos pacientes adoraram a facilidade.", rating: 5, photo_url: null },
   { id: "3", name: "Ana Costa", company: "Restaurante Sabor", comment: "O cardápio digital e sistema de pedidos online revolucionou nosso atendimento.", rating: 5, photo_url: null },
   { id: "4", name: "Pedro Oliveira", company: "Imobiliária Central", comment: "Plataforma completa com IA que facilitou a gestão de mais de 500 imóveis.", rating: 5, photo_url: null },

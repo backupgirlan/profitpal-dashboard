@@ -196,7 +196,7 @@ const DifferentialsSection = () => {
         <ScrollReveal variant="blur-in">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Por que escolher a <span className="gradient-neon-text text-glow">Help Tec</span>?
+              Por que escolher a <span className="gradient-neon-text text-glow">Help GB Tec</span>?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Tecnologia, design e inteligência artificial reunidos para transformar sua ideia em resultado real

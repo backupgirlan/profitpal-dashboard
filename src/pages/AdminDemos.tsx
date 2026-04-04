@@ -100,7 +100,7 @@ const AdminDemos = () => {
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside className="w-64 border-r border-border/50 p-4 hidden md:block">
-        <h2 className="font-display font-bold text-lg gradient-neon-text mb-8">HELP TEC Admin</h2>
+        <h2 className="font-display font-bold text-lg gradient-neon-text mb-8">HELP GB TEC Admin</h2>
         <nav className="space-y-1">
           {[
             { key: "demos", icon: FolderOpen, label: "Projetos" },

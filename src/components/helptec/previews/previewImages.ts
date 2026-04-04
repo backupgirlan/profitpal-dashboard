@@ -138,8 +138,8 @@ const siteImages: ImageMap = [
   { keywords: ["gastronomia"], src: siteRestaurante },
   { keywords: ["imobiliária", "imobiliaria", "imobiliário", "aluguel", "corretor"], src: siteImobiliaria },
   { keywords: ["construtora", "construção", "construcao", "engenharia", "arquitetura", "arquiteto", "reforma", "obra", "empreiteira"], src: siteConstrucao },
-  { keywords: ["clínica", "clinica", "saúde", "saude", "médico", "medico", "hospital", "psicólogo", "psicologo", "nutricionista", "fisioterapia", "terapia"], src: siteClinica },
   { keywords: ["dentista", "odontologia", "ortodontia", "odonto", "sorriso", "implante"], src: siteDentista },
+  { keywords: ["clínica", "clinica", "saúde", "saude", "médico", "medico", "hospital", "psicólogo", "psicologo", "nutricionista", "fisioterapia", "terapia"], src: siteClinica },
   { keywords: ["advocacia", "advogado", "jurídico", "juridico"], src: siteEscritorio },
   { keywords: ["contabilidade", "contador", "contábil", "contabil"], src: siteEscritorio },
   { keywords: ["escritório", "escritorio", "consultoria"], src: siteEscritorio },
@@ -241,7 +241,8 @@ const landingImages: ImageMap = [
   { keywords: ["hamburgueria", "hambúrguer", "hamburguer"], src: landingGastronomia },
   { keywords: ["pizzaria", "pizza"], src: landingGastronomia },
   { keywords: ["restaurante", "gastronomia"], src: landingGastronomia },
-  { keywords: ["imobiliária", "imobiliaria", "imóvel", "imovel", "apartamento", "condomínio", "condominio", "empreendimento", "construtora"], src: landingImobiliaria },
+  { keywords: ["condomínio", "condominio", "apartamento", "empreendimento"], src: landingImovel },
+  { keywords: ["imobiliária", "imobiliaria", "imóvel", "imovel", "construtora"], src: landingImobiliaria },
   { keywords: ["loja virtual", "e-commerce", "ecommerce", "loja"], src: landingEcommerce },
   { keywords: ["salão", "salao", "beleza", "cabeleireiro", "estética", "estetica"], src: landingBeleza },
   { keywords: ["evento", "festa", "vip", "show", "ingresso"], src: landingEventos },
@@ -252,7 +253,7 @@ const landingImages: ImageMap = [
   { keywords: ["produto", "digital", "ebook", "infoproduto", "lançamento", "lancamento", "oferta"], src: landingProduto },
   { keywords: ["saas", "software", "plataforma", "startup", "tech", "tecnologia", "sistema", "app", "aplicativo"], src: landingSaas },
   { keywords: ["fitness", "academia", "personal", "treino", "emagrecimento", "dieta", "nutrição", "nutricao"], src: landingFitness },
-  { keywords: ["casa", "imóvel", "imovel"], src: landingImovel },
+  { keywords: ["casa"], src: landingImovel },
 ];
 
 const lojaImages: ImageMap = [

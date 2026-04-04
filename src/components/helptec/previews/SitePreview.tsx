@@ -194,49 +194,49 @@ const segmentLayouts: Record<string, (colors: typeof colorSchemes[0]) => React.R
   ),
 
   default: (c) => (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="w-10 h-3 rounded" style={{ background: c.primary }} />
-        <div className="flex gap-1">
+        <div className="w-12 h-4 rounded" style={{ background: c.primary }} />
+        <div className="flex gap-2">
           {["Home", "Sobre", "Serviços", "Contato"].map((l, i) => (
-            <div key={i} className="text-[3px] text-muted-foreground/50">{l}</div>
+            <div key={i} className="text-[5px] text-foreground/70">{l}</div>
           ))}
         </div>
       </div>
-      <div className="h-12 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }}>
+      <div className="h-16 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }}>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-[5px] font-bold text-foreground/80">Seu Negócio</div>
-          <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.4", "1") }}>Online</div>
-          <div className="flex gap-1 mt-1">
-            <div className="w-10 h-2.5 rounded-full text-[3px] flex items-center justify-center" style={{ background: c.primary }}>SAIBA MAIS</div>
-            <div className="w-10 h-2.5 rounded-full text-[3px] flex items-center justify-center border border-border/30">CONTATO</div>
+          <div className="text-[8px] font-bold text-foreground">Seu Negócio</div>
+          <div className="text-[8px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>Online</div>
+          <div className="flex gap-1 mt-1.5">
+            <div className="w-14 h-3.5 rounded-full text-[4px] flex items-center justify-center font-bold text-foreground" style={{ background: c.primary }}>SAIBA MAIS</div>
+            <div className="w-14 h-3.5 rounded-full text-[4px] flex items-center justify-center text-foreground/80 border border-foreground/30">CONTATO</div>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-1.5">
         {[
           { icon: "⚡", title: "Rápido" },
           { icon: "🔒", title: "Seguro" },
           { icon: "📱", title: "Responsivo" },
         ].map((f, i) => (
-          <div key={i} className="text-center p-1 rounded border border-border/15 animate-pulse" style={{ animationDelay: `${i * 200}ms`, animationDuration: "3s" }}>
-            <div className="text-[6px]">{f.icon}</div>
-            <div className="text-[3px] text-foreground/60">{f.title}</div>
+          <div key={i} className="text-center p-1.5 rounded border border-foreground/20 animate-pulse" style={{ animationDelay: `${i * 200}ms`, animationDuration: "3s", background: c.secondary }}>
+            <div className="text-[8px]">{f.icon}</div>
+            <div className="text-[4px] text-foreground/80 font-medium">{f.title}</div>
           </div>
         ))}
       </div>
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {[1, 2, 3].map(i => (
-          <div key={i} className="flex items-center gap-1 p-0.5 rounded border border-border/10">
-            <div className="w-4 h-4 rounded" style={{ background: c.secondary }} />
+          <div key={i} className="flex items-center gap-1.5 p-1 rounded border border-foreground/15" style={{ background: c.secondary }}>
+            <div className="w-6 h-6 rounded" style={{ background: c.primary }} />
             <div className="flex-1 space-y-0.5">
-              <div className="h-1 w-3/4 rounded-full bg-foreground/10" />
-              <div className="h-0.5 w-1/2 rounded-full bg-foreground/5" />
+              <div className="h-1.5 w-3/4 rounded-full bg-foreground/30" />
+              <div className="h-1 w-1/2 rounded-full bg-foreground/15" />
             </div>
           </div>
         ))}
       </div>
-      <div className="h-3 rounded-lg flex items-center justify-center text-[3px] font-bold" style={{ background: c.primary }}>
+      <div className="h-4 rounded-lg flex items-center justify-center text-[5px] font-bold text-foreground" style={{ background: c.primary }}>
         💬 FALE CONOSCO
       </div>
     </div>

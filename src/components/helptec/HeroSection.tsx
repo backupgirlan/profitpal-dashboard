@@ -86,6 +86,48 @@ const FloatingIcon = ({ icon: Icon, className, delay = "0s" }: { icon: any; clas
   </div>
 );
 
+const aiMessages = [
+  "Analisando seu mercado...",
+  "Criando design personalizado...",
+  "Integrando inteligência artificial...",
+  "Otimizando para conversão...",
+  "Automatizando processos...",
+  "Deploy em produção...",
+  "Sistema online e funcionando ✓",
+];
+
+const AIMessageStream = () => {
+  const [messages, setMessages] = useState<{ text: string; id: number }[]>([]);
+  const idRef = useRef(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const msg = aiMessages[idRef.current % aiMessages.length];
+      const id = idRef.current;
+      idRef.current += 1;
+      setMessages((prev) => [...prev.slice(-3), { text: msg, id }]);
+    }, 2200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-start gap-1.5 min-h-[90px]">
+      {messages.map((m, i) => (
+        <div
+          key={m.id}
+          className="flex items-center gap-2 animate-fade-in"
+          style={{ animationDuration: "0.5s" }}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan shadow-[0_0_6px_hsl(var(--neon-cyan)/0.8)] animate-pulse" />
+          <span className={`text-xs font-mono ${i === messages.length - 1 ? "text-neon-cyan" : "text-muted-foreground/60"} transition-colors duration-300`}>
+            {m.text}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const HeroSection = () => {
   const [mounted, setMounted] = useState(false);
   
@@ -119,29 +161,51 @@ const HeroSection = () => {
       <FloatingIcon icon={Smartphone} className="top-[40%] right-[5%] hidden xl:block" delay="3.5s" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
-        {/* Logo com efeitos */}
-        <div className={`mb-10 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-75"}`}>
-          <div className="relative inline-block group">
-            {/* Glow rings behind logo */}
-            <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-neon-blue/20 via-neon-cyan/15 to-neon-purple/20 blur-3xl animate-pulse opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="absolute inset-0 -m-12 rounded-full animate-[spin_12s_linear_infinite]">
-              <div className="absolute top-0 left-1/2 w-2 h-2 rounded-full bg-neon-cyan/50 shadow-[0_0_12px_hsl(var(--neon-cyan)/0.6)]" />
-              <div className="absolute bottom-0 right-1/4 w-1.5 h-1.5 rounded-full bg-neon-purple/50 shadow-[0_0_10px_hsl(var(--neon-purple)/0.6)]" />
+        {/* Logo centralizada com terminal IA */}
+        <div className={`mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
+          {/* Container glass com logo + mensagens IA */}
+          <div className="relative glass rounded-2xl p-6 md:p-8 max-w-2xl w-full box-glow">
+            {/* Borda animada */}
+            <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+              <div className="absolute inset-0 rounded-2xl border border-neon-cyan/20" />
+              <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-neon-blue/0 via-neon-cyan/30 to-neon-blue/0 animate-[shimmer-sweep_4s_ease-in-out_infinite] opacity-50" />
             </div>
-            <div className="absolute inset-0 -m-16 rounded-full animate-[spin_18s_linear_infinite_reverse]">
-              <div className="absolute top-1/4 right-0 w-1.5 h-1.5 rounded-full bg-neon-blue/40 shadow-[0_0_8px_hsl(var(--neon-blue)/0.5)]" />
-              <div className="absolute bottom-1/4 left-0 w-1 h-1 rounded-full bg-primary/40 shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
+            
+            {/* Header do terminal */}
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
+              <div className="w-2.5 h-2.5 rounded-full bg-destructive/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />
+              <span className="text-[10px] text-muted-foreground/50 font-mono ml-2">help-gb-tec-ai — terminal</span>
+              <div className="ml-auto flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse shadow-[0_0_6px_hsl(var(--neon-cyan)/0.6)]" />
+                <span className="text-[9px] text-neon-cyan font-mono">ONLINE</span>
+              </div>
             </div>
-            {/* Logo image */}
-            <img 
-              src={logomarca} 
-              alt="HELP GB TEC" 
-              className="relative z-10 h-24 sm:h-32 md:h-40 lg:h-48 w-auto drop-shadow-[0_0_25px_hsl(var(--neon-blue)/0.4)] group-hover:drop-shadow-[0_0_40px_hsl(var(--neon-cyan)/0.6)] transition-all duration-700 group-hover:scale-105 animate-[float_6s_ease-in-out_infinite]"
-            />
-            {/* Shimmer overlay */}
-            <div className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer-sweep_3s_ease-in-out_infinite] pointer-events-none" />
+
+            {/* Logo centralizada */}
+            <div className="flex justify-center mb-5">
+              <img 
+                src={logomarca} 
+                alt="HELP GB TEC" 
+                className="h-20 sm:h-28 md:h-36 w-auto drop-shadow-[0_0_20px_hsl(var(--neon-blue)/0.35)]"
+              />
+            </div>
+
+            {/* Linha separadora com glow */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-4" />
+
+            {/* Mensagens IA saindo da logo */}
+            <div className="pl-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Brain className="w-3.5 h-3.5 text-neon-purple animate-pulse" />
+                <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC IA</span>
+              </div>
+              <AIMessageStream />
+            </div>
           </div>
-          <div className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass animate-surreal-float">
+
+          <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass animate-surreal-float">
             <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
             <span className="text-xs text-neon-cyan font-medium">🚀 Tecnologia que transforma negócios</span>
           </div>

@@ -236,7 +236,7 @@ const HeroSection = () => {
         </div>
 
         {/* Title with typewriter */}
-        <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 transition-all duration-1000 delay-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <h1 className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-4 sm:mb-6 transition-all duration-1000 delay-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           Criamos{" "}
           <TypeWriter words={[
             "Sites Profissionais",

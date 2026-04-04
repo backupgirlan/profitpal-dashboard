@@ -222,7 +222,7 @@ const HeroSection = () => {
                   className="absolute inset-0 blur-md opacity-40"
                   style={{ transform: "translateZ(-30px) scale(1.05)" }}
                 >
-                  <img src={logomarca} alt="" className="h-48 sm:h-52 md:h-64 lg:h-72 w-auto" />
+                  <img src={logomarca} alt="" className="h-56 sm:h-64 md:h-80 lg:h-96 w-auto" />
                 </div>
                 {/* Glow ring 3D */}
                 <div 
@@ -235,7 +235,7 @@ const HeroSection = () => {
                 <img 
                   src={logomarca} 
                   alt="HELP GB TEC" 
-                  className="relative h-48 sm:h-52 md:h-64 lg:h-72 w-auto transition-transform duration-500 hover:scale-105"
+                  className="relative h-56 sm:h-64 md:h-80 lg:h-96 w-auto transition-transform duration-500 hover:scale-105"
                   style={{ 
                     filter: "drop-shadow(0 0 40px hsl(var(--neon-blue) / 0.6)) drop-shadow(0 20px 30px rgba(0,0,0,0.5)) drop-shadow(0 0 80px hsl(var(--neon-purple) / 0.3))",
                     transform: "translateZ(20px) rotateX(2deg)",

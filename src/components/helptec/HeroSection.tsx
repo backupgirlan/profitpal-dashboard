@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { ArrowRight, MessageCircle, Eye, Sparkles, Monitor, Smartphone, BarChart3, Brain, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
+import logomarca from "@/assets/logomarca.png";
 
 const CountUp = ({ target, suffix = "", label }: { target: number; suffix?: string; label: string }) => {
   const [count, setCount] = useState(0);
@@ -118,17 +119,31 @@ const HeroSection = () => {
       <FloatingIcon icon={Smartphone} className="top-[40%] right-[5%] hidden xl:block" delay="3.5s" />
 
       <div className="relative z-10 max-w-6xl mx-auto text-center">
-        {/* Badge */}
-        <div className={`mb-8 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-10"}`}>
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass mb-4 animate-surreal-float">
+        {/* Logo com efeitos */}
+        <div className={`mb-10 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-75"}`}>
+          <div className="relative inline-block group">
+            {/* Glow rings behind logo */}
+            <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-r from-neon-blue/20 via-neon-cyan/15 to-neon-purple/20 blur-3xl animate-pulse opacity-60 group-hover:opacity-100 transition-opacity duration-700" />
+            <div className="absolute inset-0 -m-12 rounded-full animate-[spin_12s_linear_infinite]">
+              <div className="absolute top-0 left-1/2 w-2 h-2 rounded-full bg-neon-cyan/50 shadow-[0_0_12px_hsl(var(--neon-cyan)/0.6)]" />
+              <div className="absolute bottom-0 right-1/4 w-1.5 h-1.5 rounded-full bg-neon-purple/50 shadow-[0_0_10px_hsl(var(--neon-purple)/0.6)]" />
+            </div>
+            <div className="absolute inset-0 -m-16 rounded-full animate-[spin_18s_linear_infinite_reverse]">
+              <div className="absolute top-1/4 right-0 w-1.5 h-1.5 rounded-full bg-neon-blue/40 shadow-[0_0_8px_hsl(var(--neon-blue)/0.5)]" />
+              <div className="absolute bottom-1/4 left-0 w-1 h-1 rounded-full bg-primary/40 shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
+            </div>
+            {/* Logo image */}
+            <img 
+              src={logomarca} 
+              alt="HELP GB TEC" 
+              className="relative z-10 h-24 sm:h-32 md:h-40 lg:h-48 w-auto drop-shadow-[0_0_25px_hsl(var(--neon-blue)/0.4)] group-hover:drop-shadow-[0_0_40px_hsl(var(--neon-cyan)/0.6)] transition-all duration-700 group-hover:scale-105 animate-[float_6s_ease-in-out_infinite]"
+            />
+            {/* Shimmer overlay */}
+            <div className="absolute inset-0 z-20 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-[shimmer-sweep_3s_ease-in-out_infinite] pointer-events-none" />
+          </div>
+          <div className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass animate-surreal-float">
             <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
             <span className="text-xs text-neon-cyan font-medium">🚀 Tecnologia que transforma negócios</span>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-display font-bold gradient-neon-text tracking-wider text-glow">
-            HELP GB TEC
-          </h2>
-          <div className="w-20 h-0.5 gradient-neon mx-auto mt-2 rounded-full relative overflow-hidden">
-            <div className="absolute inset-0 animate-glow-line bg-gradient-to-r from-transparent via-white/60 to-transparent" />
           </div>
         </div>
 

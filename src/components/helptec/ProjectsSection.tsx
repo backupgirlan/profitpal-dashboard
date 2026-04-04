@@ -72,20 +72,20 @@ const ProjectsSection = () => {
   };
 
   return (
-    <section id="projetos" className="relative py-24 px-4">
-      <div className="absolute top-1/2 right-0 w-72 h-72 bg-neon-cyan/5 rounded-full blur-[120px] animate-orb" />
-      <div className="absolute top-1/4 left-0 w-80 h-80 bg-neon-purple/5 rounded-full blur-[120px] animate-orb" style={{ animationDelay: "3s" }} />
+    <section id="projetos" className="relative py-16 sm:py-24 px-3 sm:px-4">
+      <div className="absolute top-1/2 right-0 w-48 sm:w-72 h-48 sm:h-72 bg-neon-cyan/5 rounded-full blur-[100px] sm:blur-[120px] animate-orb" />
+      <div className="absolute top-1/4 left-0 w-56 sm:w-80 h-56 sm:h-80 bg-neon-purple/5 rounded-full blur-[100px] sm:blur-[120px] animate-orb" style={{ animationDelay: "3s" }} />
 
       <div className="max-w-7xl mx-auto">
         <ScrollReveal variant="flip-up">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
               <span className="text-xs text-neon-cyan font-medium">✨ Portfólio Completo</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-3 sm:mb-4">
               Modelos de <span className="gradient-neon-text text-glow">Projetos</span>
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
               Conheça nossos projetos reais e solicite algo semelhante para o seu negócio.
               <span className="text-primary font-medium"> Mais de 130 modelos disponíveis!</span>
             </p>
@@ -94,14 +94,14 @@ const ProjectsSection = () => {
 
         {/* Category filters */}
         <ScrollReveal variant="fade-up" delay={200}>
-          <div className="flex flex-wrap justify-center gap-2 mb-10">
+          <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 mb-6 sm:mb-10">
             {categories.map((cat) => {
               const count = demos.filter(d => d.category === cat.key).length;
               return (
                 <button
                   key={cat.key}
                   onClick={() => handleCategoryClick(cat.key)}
-                  className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-500 relative overflow-hidden ${
+                  className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-full text-[11px] sm:text-sm font-medium transition-all duration-500 relative overflow-hidden ${
                     activeCategory === cat.key
                       ? "gradient-neon text-primary-foreground box-glow scale-105"
                       : "glass text-muted-foreground hover:text-foreground hover:box-glow hover:scale-105"
@@ -119,19 +119,19 @@ const ProjectsSection = () => {
 
         {/* Auto-play indicator */}
         {autoPlay && (
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <div className="glass rounded-full px-3 py-1 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[hsl(var(--success))] animate-pulse" />
-              <span className="text-[10px] text-muted-foreground">Rotação automática ativa</span>
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Rotação automática ativa</span>
             </div>
           </div>
         )}
 
         {/* Projects grid */}
-        <div className="min-h-[400px]">
+        <div className="min-h-[300px] sm:min-h-[400px]">
           {filtered.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-fade-in-up" key={activeCategory + String(showAll)}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 animate-fade-in-up" key={activeCategory + String(showAll)}>
                 {visibleProjects.map((demo, i) => (
                   <ScrollReveal
                     key={demo.id}

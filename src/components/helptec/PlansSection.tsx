@@ -72,7 +72,7 @@ const PlansSection = () => {
           {plans.map((plan, i) => (
             <ScrollReveal key={plan.name} variant="flip-up" delay={i * 150}>
               <div
-                className={`glass rounded-2xl p-6 relative hover-3d h-full flex flex-col ${
+                className={`glass rounded-xl sm:rounded-2xl p-4 sm:p-6 relative hover-3d h-full flex flex-col ${
                   plan.highlight
                     ? "box-glow border border-primary/30 scale-[1.02]"
                     : "hover:box-glow"

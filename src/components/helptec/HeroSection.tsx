@@ -178,7 +178,7 @@ const HeroSection = () => {
             </div>
             
             {/* Header do terminal */}
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-border/50">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-border/50">
               <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-destructive/70" />
               <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
               <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
-import logomarca from "@/assets/logomarca.png";
+import logomarca from "@/assets/helpgbtec-logo.png";
 
 const links = [
   { label: "SERVIÇOS", href: "#servicos" },

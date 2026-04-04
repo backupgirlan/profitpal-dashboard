@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Menu, X, Sparkles } from "lucide-react";
 
 const links = [
-  { label: "Serviços", href: "#servicos" },
-  { label: "Projetos", href: "#projetos" },
-  { label: "Planos", href: "#planos" },
-  { label: "Contato", href: "#contato" },
+  { label: "SERVIÇOS", href: "#servicos" },
+  { label: "PROJETOS", href: "#projetos" },
+  { label: "PLANOS", href: "#planos" },
+  { label: "CONTATO", href: "#contato" },
 ];
 
 const Navbar = () => {
@@ -31,7 +31,7 @@ const Navbar = () => {
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <a href="#" className="font-display font-bold text-lg gradient-neon-text tracking-wider flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
-          HELP TEC
+          HELP GB TEC
         </a>
 
         {/* Desktop */}

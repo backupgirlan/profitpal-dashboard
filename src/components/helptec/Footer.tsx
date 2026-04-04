@@ -14,7 +14,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <h3 className="font-display font-bold text-xl gradient-neon-text mb-3">HELP TEC</h3>
+            <h3 className="font-display font-bold text-xl gradient-neon-text mb-3">HELP GB TEC</h3>
             <p className="text-sm text-muted-foreground">
               Criando soluções digitais para transformar negócios.
             </p>
@@ -52,10 +52,10 @@ const Footer = () => {
 
         <div className="border-t border-border/30 pt-6 text-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Help Tec — Todos os direitos reservados.
+            © {new Date().getFullYear()} Help GB Tec — Todos os direitos reservados.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Help Tec — Criando soluções digitais para transformar negócios.
+            Help GB Tec — Criando soluções digitais para transformar negócios.
           </p>
         </div>
       </div>

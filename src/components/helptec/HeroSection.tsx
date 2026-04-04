@@ -125,7 +125,7 @@ const HeroSection = () => {
             <span className="text-xs text-neon-cyan font-medium">🚀 Tecnologia que transforma negócios</span>
           </div>
           <h2 className="text-2xl md:text-3xl font-display font-bold gradient-neon-text tracking-wider text-glow">
-            HELP TEC
+            HELP GB TEC
           </h2>
           <div className="w-20 h-0.5 gradient-neon mx-auto mt-2 rounded-full relative overflow-hidden">
             <div className="absolute inset-0 animate-glow-line bg-gradient-to-r from-transparent via-white/60 to-transparent" />

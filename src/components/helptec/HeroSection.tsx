@@ -189,12 +189,23 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Logo centralizada */}
+            {/* Logo centralizada com raios */}
             <div className="flex justify-center mb-0 relative py-2 sm:py-3">
+              {/* Raios de energia */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                  <div key={deg} className="absolute w-full h-full" style={{ transform: `rotate(${deg}deg)` }}>
+                    <div
+                      className="absolute top-1/2 left-1/2 w-16 sm:w-24 md:w-32 h-[1px] origin-left bg-gradient-to-r from-[hsl(var(--neon-cyan)/0.5)] to-transparent animate-[energy-ray_2.5s_ease-in-out_infinite]"
+                      style={{ animationDelay: `${deg * 0.01}s` }}
+                    />
+                  </div>
+                ))}
+              </div>
               <img 
                 src={logomarca} 
                 alt="HELP GB TEC" 
-                className="relative h-28 sm:h-36 md:h-44 lg:h-52 w-auto"
+                className="relative z-10 h-28 sm:h-36 md:h-44 lg:h-52 w-auto"
               />
             </div>
 

@@ -55,7 +55,7 @@ const ProjectsSection = () => {
   }, [autoPlay]);
 
   const filtered = demos.filter((d) => d.category === activeCategory);
-
+  const visibleProjects = showAll ? filtered : filtered.slice(0, 4);
   const openWhatsApp = (name: string) => {
     window.open(
       `https://wa.me/5575999401616?text=Olá! Gostaria de um projeto igual ao "${name}".`,

@@ -34,12 +34,12 @@ const CountUp = ({ target, suffix = "", label }: { target: number; suffix?: stri
   }, [target]);
 
   return (
-    <div ref={ref} className="text-center glass rounded-xl p-5 hover-magnetic group relative overflow-hidden">
+    <div ref={ref} className="text-center glass rounded-lg sm:rounded-xl p-3 sm:p-5 hover-magnetic group relative overflow-hidden">
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
-      <div className="text-3xl md:text-4xl font-bold gradient-neon-text font-display relative z-10">
+      <div className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-neon-text font-display relative z-10">
         +{count}{suffix}
       </div>
-      <p className="text-xs text-muted-foreground mt-1 relative z-10">{label}</p>
+      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 relative z-10">{label}</p>
     </div>
   );
 };

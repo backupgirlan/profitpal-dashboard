@@ -229,7 +229,7 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass animate-surreal-float">
+          <div className="mt-4 sm:mt-5 inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full glass animate-surreal-float">
             <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
             <span className="text-xs text-neon-cyan font-medium">🚀 Tecnologia que transforma negócios</span>
           </div>

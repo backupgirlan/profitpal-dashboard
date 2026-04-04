@@ -86,42 +86,48 @@ const FloatingIcon = ({ icon: Icon, className, delay = "0s" }: { icon: any; clas
   </div>
 );
 
-const aiMessages = [
-  "Analisando seu mercado...",
-  "Criando design personalizado...",
-  "Integrando inteligência artificial...",
-  "Otimizando para conversão...",
-  "Automatizando processos...",
-  "Deploy em produção...",
-  "Sistema online e funcionando ✓",
+const codeLines = [
+  { lang: "php", code: '<?php echo "Conectando banco de dados..."; ?>' },
+  { lang: "html", code: '<div class="app-container" id="root">' },
+  { lang: "php", code: '$api = new HelpGBTec\\AI\\Engine();' },
+  { lang: "html", code: '<section class="hero" data-animate="true">' },
+  { lang: "php", code: '$result = $api->analyze($userData);' },
+  { lang: "html", code: '<script src="/assets/js/app.min.js"></script>' },
+  { lang: "php", code: 'return Response::json(["status" => "online"]);' },
+  { lang: "html", code: '<meta name="ai-powered" content="true" />' },
+  { lang: "php", code: '$site = Site::deploy($config)->publish();' },
+  { lang: "html", code: '</div><!-- Build complete ✓ -->' },
 ];
 
-const AIMessageStream = () => {
-  const [messages, setMessages] = useState<{ text: string; id: number }[]>([]);
+const CodeStream = () => {
+  const [lines, setLines] = useState<{ text: string; lang: string; id: number }[]>([]);
   const idRef = useRef(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const msg = aiMessages[idRef.current % aiMessages.length];
+      const line = codeLines[idRef.current % codeLines.length];
       const id = idRef.current;
       idRef.current += 1;
-      setMessages((prev) => [...prev.slice(-3), { text: msg, id }]);
-    }, 2200);
+      setLines((prev) => [...prev.slice(-4), { text: line.code, lang: line.lang, id }]);
+    }, 1800);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex flex-col items-start gap-1.5 min-h-[90px]">
-      {messages.map((m, i) => (
+    <div className="flex flex-col items-start gap-1 min-h-[100px] font-mono text-[11px] md:text-xs">
+      {lines.map((l, i) => (
         <div
-          key={m.id}
-          className="flex items-center gap-2 animate-fade-in"
-          style={{ animationDuration: "0.5s" }}
+          key={l.id}
+          className="flex items-center gap-2 animate-fade-in w-full"
+          style={{ animationDuration: "0.4s" }}
         >
-          <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan shadow-[0_0_6px_hsl(var(--neon-cyan)/0.8)] animate-pulse" />
-          <span className={`text-xs font-mono ${i === messages.length - 1 ? "text-neon-cyan" : "text-muted-foreground/60"} transition-colors duration-300`}>
-            {m.text}
+          <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${l.lang === "php" ? "bg-neon-purple/20 text-neon-purple" : "bg-neon-cyan/20 text-neon-cyan"}`}>
+            {l.lang}
           </span>
+          <span className={`${i === lines.length - 1 ? "text-[hsl(142,71%,45%)]" : "text-muted-foreground/50"} transition-colors duration-300 truncate`}>
+            {l.text}
+          </span>
+          {i === lines.length - 1 && <span className="animate-blink text-[hsl(142,71%,45%)]">▌</span>}
         </div>
       ))}
     </div>

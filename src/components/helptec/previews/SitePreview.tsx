@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 
 const colorSchemes = [
-  { primary: "hsla(199,89%,48%,0.4)", secondary: "hsla(199,89%,48%,0.15)", accent: "hsla(180,100%,50%,0.2)" },
-  { primary: "hsla(263,70%,50%,0.4)", secondary: "hsla(263,70%,50%,0.15)", accent: "hsla(199,89%,48%,0.2)" },
-  { primary: "hsla(142,71%,45%,0.4)", secondary: "hsla(142,71%,45%,0.15)", accent: "hsla(180,100%,50%,0.2)" },
-  { primary: "hsla(0,84%,60%,0.4)", secondary: "hsla(0,84%,60%,0.15)", accent: "hsla(263,70%,50%,0.2)" },
-  { primary: "hsla(30,100%,50%,0.4)", secondary: "hsla(30,100%,50%,0.15)", accent: "hsla(0,84%,60%,0.2)" },
+  { primary: "hsla(199,89%,48%,0.7)", secondary: "hsla(199,89%,48%,0.3)", accent: "hsla(180,100%,50%,0.4)" },
+  { primary: "hsla(263,70%,50%,0.7)", secondary: "hsla(263,70%,50%,0.3)", accent: "hsla(199,89%,48%,0.4)" },
+  { primary: "hsla(142,71%,45%,0.7)", secondary: "hsla(142,71%,45%,0.3)", accent: "hsla(180,100%,50%,0.4)" },
+  { primary: "hsla(0,84%,60%,0.7)", secondary: "hsla(0,84%,60%,0.3)", accent: "hsla(263,70%,50%,0.4)" },
+  { primary: "hsla(30,100%,50%,0.7)", secondary: "hsla(30,100%,50%,0.3)", accent: "hsla(0,84%,60%,0.4)" },
 ];
 
 const segmentLayouts: Record<string, (colors: typeof colorSchemes[0]) => React.ReactNode> = {

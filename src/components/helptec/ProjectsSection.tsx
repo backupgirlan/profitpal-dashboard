@@ -132,14 +132,22 @@ const ProjectsSection = () => {
                         loading="lazy"
                         width={800}
                         height={512}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-auto object-cover object-top animate-preview-scroll"
+                        style={{ minHeight: "200%" }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <span className="text-muted-foreground text-sm">Preview</span>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    {/* Browser chrome overlay */}
+                    <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
+                      <span className="w-2 h-2 rounded-full bg-red-400/80" />
+                      <span className="w-2 h-2 rounded-full bg-yellow-400/80" />
+                      <span className="w-2 h-2 rounded-full bg-green-400/80" />
+                      <span className="ml-2 text-[8px] text-muted-foreground truncate">{demo.name?.toLowerCase().replace(/\s+/g, "-")}.com.br</span>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-500 z-10" />
                   </div>
                   <div className="p-5 relative z-10">
                     <div className="flex items-center gap-2 mb-2">

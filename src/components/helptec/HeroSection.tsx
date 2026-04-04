@@ -190,10 +190,10 @@ const HeroSection = () => {
             </div>
 
             {/* Logo GRANDE centralizada com efeitos de choque */}
-            <div className="flex justify-center mb-2 relative">
+            <div className="flex justify-center mb-2 relative py-2 sm:py-4">
               {/* Ondas de choque saindo da logo */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
+                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-blue/15 animate-[shock-wave_3s_ease-out_infinite_0.6s]" />

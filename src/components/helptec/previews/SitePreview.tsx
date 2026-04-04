@@ -264,7 +264,7 @@ const SitePreview = ({ segment, name }: { segment?: string; name: string }) => {
   const Layout = segmentLayouts[layoutKey] || segmentLayouts.default;
 
   return (
-    <div className="w-full h-full p-2 pt-7 overflow-hidden animate-preview-scroll" style={{ minHeight: "250%" }}>
+    <div className="w-full p-2 pt-7 overflow-hidden animate-preview-scroll" style={{ minHeight: "200%" }}>
       {Layout(colors)}
     </div>
   );

@@ -170,7 +170,7 @@ const HeroSection = () => {
         {/* Logo centralizada com terminal IA */}
         <div className={`mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
           {/* Container glass com logo + mensagens IA */}
-          <div className="relative glass rounded-2xl p-4 md:p-5 max-w-lg w-full box-glow">
+          <div className="relative glass rounded-2xl px-6 md:px-8 py-3 md:py-4 max-w-3xl w-full box-glow">
             {/* Borda animada */}
             <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
               <div className="absolute inset-0 rounded-2xl border border-neon-cyan/20" />

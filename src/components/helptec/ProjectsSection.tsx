@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
+import SitePreview from "./previews/SitePreview";
+import SistemaPreview from "./previews/SistemaPreview";
+import AppPreview from "./previews/AppPreview";
+import IAPreview from "./previews/IAPreview";
+import LandingPreview from "./previews/LandingPreview";
+import LojaPreview from "./previews/LojaPreview";
 
 const categories = [
   { key: "site", label: "🌐 Site", count: 0 },
@@ -138,9 +144,9 @@ const ProjectsSection = () => {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
                     
                     {/* Preview area with animated content */}
-                    <div className={`aspect-video bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
-                      {/* Animated preview simulation */}
-                      <ProjectPreview category={demo.category} name={demo.name} />
+                    <div className={`aspect-[4/3] bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
+                      {/* Rich animated preview */}
+                      <CategoryPreview category={demo.category} segment={demo.segment} name={demo.name} />
 
                       {/* Browser chrome */}
                       <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
@@ -208,123 +214,16 @@ const ProjectsSection = () => {
   );
 };
 
-/* Animated preview component per category */
-const ProjectPreview = ({ category, name }: { category: string; name: string }) => {
-  const previews: Record<string, React.ReactNode> = {
-    site: (
-      <div className="w-full h-full p-3 pt-8 flex flex-col gap-1.5 animate-preview-scroll" style={{ minHeight: "200%" }}>
-        <div className="h-12 rounded bg-primary/15 animate-pulse" />
-        <div className="h-2 w-3/4 rounded-full bg-foreground/10" />
-        <div className="h-2 w-1/2 rounded-full bg-foreground/8" />
-        <div className="grid grid-cols-3 gap-1 mt-1">
-          {[1,2,3].map(i => <div key={i} className="h-8 rounded bg-neon-blue/10 animate-pulse" style={{ animationDelay: `${i*0.3}s` }} />)}
-        </div>
-        <div className="h-10 rounded bg-neon-purple/10 mt-1" />
-        <div className="grid grid-cols-2 gap-1">
-          {[1,2,3,4].map(i => <div key={i} className="h-6 rounded bg-muted/20 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
-        </div>
-        <div className="h-8 rounded-lg gradient-neon opacity-30 mt-1" />
-        <div className="h-6 rounded bg-muted/10" />
-      </div>
-    ),
-    sistema: (
-      <div className="w-full h-full p-2 pt-8 flex gap-1">
-        <div className="w-1/4 flex flex-col gap-1 p-1 bg-muted/10 rounded">
-          {[1,2,3,4,5].map(i => <div key={i} className="h-2 rounded bg-primary/20 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
-        </div>
-        <div className="flex-1 flex flex-col gap-1">
-          <div className="flex gap-1">
-            {[1,2,3].map(i => (
-              <div key={i} className="flex-1 h-8 rounded bg-neon-cyan/10 flex items-center justify-center animate-pulse" style={{ animationDelay: `${i*0.3}s` }}>
-                <div className="text-[5px] text-neon-cyan font-bold">{["R$12K", "+15%", "248"][i-1]}</div>
-              </div>
-            ))}
-          </div>
-          <div className="flex-1 flex items-end gap-0.5 p-1">
-            {[50,70,40,85,60,75,45,90].map((h,i) => (
-              <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary/30 to-neon-cyan/20 animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
-            ))}
-          </div>
-        </div>
-      </div>
-    ),
-    aplicativo: (
-      <div className="w-full h-full flex items-center justify-center pt-6">
-        <div className="w-20 h-36 rounded-2xl border-2 border-neon-purple/20 bg-card/50 overflow-hidden">
-          <div className="h-2 bg-muted/30 flex items-center justify-center">
-            <div className="w-4 h-0.5 rounded-full bg-muted/40" />
-          </div>
-          <div className="p-1.5 space-y-1 animate-preview-scroll" style={{ minHeight: "200%" }}>
-            <div className="h-1 w-2/3 rounded-full bg-foreground/15" />
-            <div className="h-8 rounded bg-gradient-to-br from-neon-purple/15 to-neon-cyan/10" />
-            <div className="grid grid-cols-2 gap-0.5">
-              {[1,2,3,4].map(i => <div key={i} className="h-4 rounded bg-primary/10 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
-            </div>
-            <div className="h-3 rounded-full bg-[hsl(var(--success))]/15" />
-            <div className="h-4 rounded bg-neon-cyan/10" />
-          </div>
-        </div>
-      </div>
-    ),
-    ia: (
-      <div className="w-full h-full p-3 pt-8 flex flex-col gap-2">
-        <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-full bg-neon-cyan/20 animate-pulse flex items-center justify-center">
-            <div className="w-2 h-2 rounded-full bg-neon-cyan/40" />
-          </div>
-          <div className="flex-1 h-4 rounded-lg bg-muted/20 px-1.5 flex items-center">
-            <div className="text-[5px] text-muted-foreground animate-pulse">IA processando...</div>
-          </div>
-        </div>
-        <div className="self-start bg-neon-cyan/10 rounded-lg rounded-bl-none px-2 py-1 max-w-[80%]">
-          <div className="text-[5px] text-neon-cyan animate-pulse">Analisando dados do cliente...</div>
-        </div>
-        <div className="self-end bg-primary/10 rounded-lg rounded-br-none px-2 py-1 max-w-[70%]">
-          <div className="text-[5px] text-primary animate-pulse" style={{ animationDelay: "1s" }}>Relatório gerado!</div>
-        </div>
-        <div className="flex-1 grid grid-cols-2 gap-1 mt-1">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="rounded bg-gradient-to-br from-neon-purple/10 to-neon-cyan/10 animate-pulse flex items-center justify-center" style={{ animationDelay: `${i*0.3}s` }}>
-              <div className="text-[4px] text-neon-cyan">📊</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
-    landing: (
-      <div className="w-full h-full p-3 pt-8 flex flex-col items-center gap-1.5 animate-preview-scroll" style={{ minHeight: "200%" }}>
-        <div className="h-3 w-3/4 rounded-full bg-foreground/15 animate-pulse" />
-        <div className="h-2 w-1/2 rounded-full bg-foreground/8" />
-        <div className="h-6 w-2/3 rounded-lg gradient-neon opacity-30 animate-pulse mt-1" />
-        <div className="grid grid-cols-3 gap-1 w-full mt-1">
-          {[1,2,3].map(i => <div key={i} className="h-8 rounded bg-neon-blue/10 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
-        </div>
-        <div className="h-8 w-full rounded bg-muted/10 mt-1" />
-        <div className="h-6 w-2/3 rounded-lg bg-[hsl(var(--success))]/15" />
-      </div>
-    ),
-    loja: (
-      <div className="w-full h-full p-2 pt-8 flex flex-col gap-1">
-        <div className="flex items-center gap-1">
-          <div className="h-2 flex-1 rounded-full bg-muted/20" />
-          <div className="h-3 w-6 rounded bg-primary/20 flex items-center justify-center">
-            <div className="text-[4px]">🛒</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-1 flex-1">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="rounded bg-muted/10 flex flex-col p-0.5 gap-0.5 animate-pulse" style={{ animationDelay: `${i*0.2}s` }}>
-              <div className="flex-1 rounded bg-gradient-to-br from-neon-blue/10 to-neon-purple/10" />
-              <div className="h-1 w-3/4 rounded-full bg-foreground/10" />
-              <div className="h-1 w-1/2 rounded-full bg-primary/20" />
-            </div>
-          ))}
-        </div>
-      </div>
-    ),
+const CategoryPreview = ({ category, segment, name }: { category: string; segment?: string; name: string }) => {
+  const previewMap: Record<string, React.ReactNode> = {
+    site: <SitePreview segment={segment} name={name} />,
+    sistema: <SistemaPreview segment={segment} name={name} />,
+    aplicativo: <AppPreview segment={segment} name={name} />,
+    ia: <IAPreview segment={segment} name={name} />,
+    landing: <LandingPreview segment={segment} name={name} />,
+    loja: <LojaPreview segment={segment} name={name} />,
   };
-
-  return previews[category] || previews.site;
+  return previewMap[category] || previewMap.site;
 };
 
 export default ProjectsSection;

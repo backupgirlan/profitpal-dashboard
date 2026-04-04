@@ -58,132 +58,123 @@ const segmentLayouts: Record<string, (colors: typeof colorSchemes[0]) => React.R
   ),
 
   Beleza: (c) => (
-    <div className="space-y-1.5">
-      {/* Elegant header */}
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.4", "0.8") }}>✨ STUDIO</div>
-        <div className="flex gap-1">
+        <div className="text-[7px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>✨ STUDIO</div>
+        <div className="flex gap-2">
           {["Serviços", "Galeria", "Agendar"].map((l, i) => (
-            <div key={i} className="text-[3px] text-muted-foreground/60">{l}</div>
+            <div key={i} className="text-[4px] text-foreground/70">{l}</div>
           ))}
         </div>
       </div>
-      {/* Hero with model image */}
-      <div className="h-12 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.secondary}, ${c.accent})` }}>
+      <div className="h-14 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.secondary}, ${c.accent})` }}>
         <div className="absolute inset-0 flex items-center justify-between px-2">
           <div>
-            <div className="text-[5px] font-bold text-foreground/80">Sua Beleza</div>
-            <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.4", "0.9") }}>Nossa Arte</div>
-            <div className="mt-1 w-10 h-2.5 rounded-full text-[3px] flex items-center justify-center" style={{ background: c.primary }}>AGENDAR</div>
+            <div className="text-[7px] font-bold text-foreground">Sua Beleza</div>
+            <div className="text-[7px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>Nossa Arte</div>
+            <div className="mt-1.5 w-14 h-3.5 rounded-full text-[4px] flex items-center justify-center font-bold text-foreground" style={{ background: c.primary }}>AGENDAR</div>
           </div>
-          <div className="w-10 h-10 rounded-full" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }} />
+          <div className="w-12 h-12 rounded-full" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }} />
         </div>
       </div>
-      {/* Services */}
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-1.5">
         {[
           { name: "Corte Feminino", price: "R$ 80", icon: "💇‍♀️" },
           { name: "Manicure", price: "R$ 35", icon: "💅" },
           { name: "Coloração", price: "R$ 150", icon: "🎨" },
           { name: "Hidratação", price: "R$ 60", icon: "✨" },
         ].map((s, i) => (
-          <div key={i} className="flex items-center gap-0.5 p-1 rounded border border-border/20 animate-pulse" style={{ animationDelay: `${i * 300}ms`, animationDuration: "3s" }}>
-            <div className="text-[6px]">{s.icon}</div>
+          <div key={i} className="flex items-center gap-1 p-1.5 rounded border border-foreground/20" style={{ background: c.secondary, animationDelay: `${i * 300}ms` }}>
+            <div className="text-[8px]">{s.icon}</div>
             <div className="flex-1">
-              <div className="text-[3px] font-medium text-foreground/70">{s.name}</div>
-              <div className="text-[3px]" style={{ color: c.primary.replace("0.4", "0.8") }}>{s.price}</div>
+              <div className="text-[4px] font-medium text-foreground/80">{s.name}</div>
+              <div className="text-[4px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>{s.price}</div>
             </div>
           </div>
         ))}
       </div>
-      {/* Gallery preview */}
-      <div className="flex gap-0.5">
+      <div className="flex gap-1">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="flex-1 h-5 rounded" style={{ background: `linear-gradient(${45 + i * 30}deg, ${c.secondary}, ${c.accent})`, animationDelay: `${i * 200}ms` }} />
+          <div key={i} className="flex-1 h-8 rounded" style={{ background: `linear-gradient(${45 + i * 30}deg, ${c.secondary}, ${c.accent})` }} />
         ))}
       </div>
     </div>
   ),
 
   Gastronomia: (c) => (
-    <div className="space-y-1.5">
-      {/* Restaurant header */}
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.4", "0.8") }}>🍽️ SABOR</div>
-        <div className="w-10 h-2.5 rounded-full text-[3px] flex items-center justify-center" style={{ background: "hsla(0,84%,60%,0.3)" }}>RESERVAR</div>
+        <div className="text-[7px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>🍽️ SABOR</div>
+        <div className="w-14 h-3.5 rounded-full text-[4px] flex items-center justify-center font-bold text-foreground" style={{ background: "hsla(0,84%,60%,0.5)" }}>RESERVAR</div>
       </div>
-      {/* Hero food */}
-      <div className="h-10 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.primary}, hsla(30,100%,50%,0.3))` }}>
+      <div className="h-14 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.primary}, hsla(30,100%,50%,0.5))` }}>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-[10px]">🍔</div>
-          <div className="text-[4px] font-bold text-foreground/80">Cardápio Digital</div>
-          <div className="text-[3px] text-foreground/50">Peça agora online</div>
+          <div className="text-[14px]">🍔</div>
+          <div className="text-[6px] font-bold text-foreground">Cardápio Digital</div>
+          <div className="text-[4px] text-foreground/70">Peça agora online</div>
         </div>
       </div>
-      {/* Menu categories */}
-      <div className="flex gap-0.5">
+      <div className="flex gap-1">
         {["🍕 Pizzas", "🍔 Burgers", "🥗 Saladas", "🍰 Sobremesas"].map((cat, i) => (
-          <div key={i} className="flex-1 text-center py-0.5 rounded text-[3px] border border-border/20 animate-pulse" style={{ background: i === 1 ? c.secondary : "transparent", animationDelay: `${i * 200}ms` }}>
+          <div key={i} className="flex-1 text-center py-1 rounded text-[4px] text-foreground/80 border border-foreground/20" style={{ background: i === 1 ? c.secondary : "transparent" }}>
             {cat}
           </div>
         ))}
       </div>
-      {/* Menu items */}
-      <div className="space-y-0.5">
+      <div className="space-y-1">
         {[
           { name: "X-Burger Especial", desc: "Pão, carne, queijo, bacon", price: "R$ 32,90" },
           { name: "X-Salada Premium", desc: "Pão, carne, salada completa", price: "R$ 28,90" },
           { name: "Combo Família", desc: "4 burgers + batata + refri", price: "R$ 99,90" },
         ].map((item, i) => (
-          <div key={i} className="flex items-center gap-1 p-0.5 rounded border border-border/15">
-            <div className="w-5 h-5 rounded" style={{ background: `linear-gradient(135deg, ${c.secondary}, ${c.accent})` }} />
+          <div key={i} className="flex items-center gap-1.5 p-1 rounded border border-foreground/15" style={{ background: c.secondary }}>
+            <div className="w-7 h-7 rounded" style={{ background: `linear-gradient(135deg, ${c.primary}, ${c.accent})` }} />
             <div className="flex-1">
-              <div className="text-[3px] font-medium text-foreground/70">{item.name}</div>
-              <div className="text-[2.5px] text-muted-foreground/50">{item.desc}</div>
+              <div className="text-[4px] font-medium text-foreground/80">{item.name}</div>
+              <div className="text-[3px] text-foreground/50">{item.desc}</div>
             </div>
-            <div className="text-[3px] font-bold" style={{ color: c.primary.replace("0.4", "0.8") }}>{item.price}</div>
+            <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>{item.price}</div>
           </div>
         ))}
       </div>
-      {/* Order button */}
-      <div className="h-3 rounded-lg flex items-center justify-center text-[3px] font-bold" style={{ background: c.primary }}>
+      <div className="h-4 rounded-lg flex items-center justify-center text-[5px] font-bold text-foreground" style={{ background: c.primary }}>
         📱 FAZER PEDIDO
       </div>
     </div>
   ),
 
   Saúde: (c) => (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.4", "0.8") }}>🏥 CLÍNICA</div>
-        <div className="text-[3px] text-muted-foreground/60">Agendar Consulta</div>
+        <div className="text-[7px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>🏥 CLÍNICA</div>
+        <div className="text-[4px] text-foreground/70">Agendar Consulta</div>
       </div>
-      <div className="h-10 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.secondary}, hsla(180,100%,50%,0.1))` }}>
+      <div className="h-14 rounded-lg relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${c.secondary}, hsla(180,100%,50%,0.3))` }}>
         <div className="absolute inset-0 flex items-center px-2">
           <div>
-            <div className="text-[5px] font-bold text-foreground/80">Cuidando da</div>
-            <div className="text-[5px] font-bold" style={{ color: c.primary.replace("0.4", "0.9") }}>sua saúde</div>
-            <div className="mt-1 w-12 h-2.5 rounded-full text-[3px] flex items-center justify-center" style={{ background: c.primary }}>MARCAR CONSULTA</div>
+            <div className="text-[7px] font-bold text-foreground">Cuidando da</div>
+            <div className="text-[7px] font-bold" style={{ color: c.primary.replace("0.7", "1") }}>sua saúde</div>
+            <div className="mt-1.5 w-16 h-3.5 rounded-full text-[4px] flex items-center justify-center font-bold text-foreground" style={{ background: c.primary }}>MARCAR CONSULTA</div>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-0.5">
+      <div className="grid grid-cols-3 gap-1">
         {["Clínico Geral", "Cardiologia", "Pediatria", "Ortopedia", "Dermatologia", "Oftalmologia"].map((s, i) => (
-          <div key={i} className="text-center p-1 rounded border border-border/15 animate-pulse" style={{ animationDelay: `${i * 150}ms`, animationDuration: "3s" }}>
-            <div className="text-[5px]">{["🩺", "❤️", "👶", "🦴", "🧴", "👁️"][i]}</div>
-            <div className="text-[2.5px] text-foreground/60 mt-0.5">{s}</div>
+          <div key={i} className="text-center p-1.5 rounded border border-foreground/20" style={{ background: c.secondary, animationDelay: `${i * 150}ms` }}>
+            <div className="text-[7px]">{["🩺", "❤️", "👶", "🦴", "🧴", "👁️"][i]}</div>
+            <div className="text-[3.5px] text-foreground/70 mt-0.5">{s}</div>
           </div>
         ))}
       </div>
-      <div className="flex gap-1">
-        <div className="flex-1 p-1 rounded border border-border/15">
-          <div className="text-[3px] font-medium text-foreground/70">📍 Localização</div>
-          <div className="h-4 mt-0.5 rounded" style={{ background: c.secondary }} />
+      <div className="flex gap-1.5">
+        <div className="flex-1 p-1.5 rounded border border-foreground/15" style={{ background: c.secondary }}>
+          <div className="text-[4px] font-medium text-foreground/80">📍 Localização</div>
+          <div className="h-6 mt-1 rounded" style={{ background: c.accent }} />
         </div>
-        <div className="flex-1 p-1 rounded border border-border/15">
-          <div className="text-[3px] font-medium text-foreground/70">⏰ Horários</div>
-          <div className="text-[2.5px] text-muted-foreground/50 mt-0.5">Seg-Sex: 8h-18h</div>
-          <div className="text-[2.5px] text-muted-foreground/50">Sáb: 8h-12h</div>
+        <div className="flex-1 p-1.5 rounded border border-foreground/15" style={{ background: c.secondary }}>
+          <div className="text-[4px] font-medium text-foreground/80">⏰ Horários</div>
+          <div className="text-[3.5px] text-foreground/60 mt-1">Seg-Sex: 8h-18h</div>
+          <div className="text-[3.5px] text-foreground/60">Sáb: 8h-12h</div>
         </div>
       </div>
     </div>

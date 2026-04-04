@@ -26,7 +26,7 @@ const Navbar = () => {
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
         <a href="#" className="font-display font-bold text-lg gradient-neon-text tracking-wider">
-          HELP TEC
+          HELP GB TEC
         </a>
 
         {/* Desktop */}

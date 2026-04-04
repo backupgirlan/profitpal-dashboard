@@ -241,7 +241,8 @@ const landingImages: ImageMap = [
   { keywords: ["hamburgueria", "hambúrguer", "hamburguer"], src: landingGastronomia },
   { keywords: ["pizzaria", "pizza"], src: landingGastronomia },
   { keywords: ["restaurante", "gastronomia"], src: landingGastronomia },
-  { keywords: ["imobiliária", "imobiliaria", "imóvel", "imovel", "apartamento", "condomínio", "condominio", "empreendimento", "construtora"], src: landingImobiliaria },
+  { keywords: ["condomínio", "condominio", "apartamento", "empreendimento"], src: landingImovel },
+  { keywords: ["imobiliária", "imobiliaria", "imóvel", "imovel", "construtora"], src: landingImobiliaria },
   { keywords: ["loja virtual", "e-commerce", "ecommerce", "loja"], src: landingEcommerce },
   { keywords: ["salão", "salao", "beleza", "cabeleireiro", "estética", "estetica"], src: landingBeleza },
   { keywords: ["evento", "festa", "vip", "show", "ingresso"], src: landingEventos },
@@ -252,7 +253,7 @@ const landingImages: ImageMap = [
   { keywords: ["produto", "digital", "ebook", "infoproduto", "lançamento", "lancamento", "oferta"], src: landingProduto },
   { keywords: ["saas", "software", "plataforma", "startup", "tech", "tecnologia", "sistema", "app", "aplicativo"], src: landingSaas },
   { keywords: ["fitness", "academia", "personal", "treino", "emagrecimento", "dieta", "nutrição", "nutricao"], src: landingFitness },
-  { keywords: ["casa", "imóvel", "imovel"], src: landingImovel },
+  { keywords: ["casa"], src: landingImovel },
 ];
 
 const lojaImages: ImageMap = [

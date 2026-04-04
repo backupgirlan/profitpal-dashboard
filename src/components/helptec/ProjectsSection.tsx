@@ -27,6 +27,7 @@ const ProjectsSection = () => {
   const [activeCategory, setActiveCategory] = useState("site");
   const [demos, setDemos] = useState<any[]>([]);
   const [autoPlay, setAutoPlay] = useState(true);
+  const [showAll, setShowAll] = useState(false);
   const autoRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {

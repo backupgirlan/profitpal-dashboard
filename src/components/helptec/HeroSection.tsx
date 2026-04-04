@@ -170,7 +170,7 @@ const HeroSection = () => {
         {/* Logo centralizada com terminal IA */}
         <div className={`mb-8 sm:mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
           {/* Container glass com logo + mensagens IA */}
-          <div className="relative glass rounded-xl sm:rounded-2xl px-4 sm:px-6 md:px-8 py-3 md:py-4 max-w-3xl w-full box-glow">
+          <div className="relative glass rounded-xl sm:rounded-2xl px-4 sm:px-6 md:px-8 py-1 md:py-2 max-w-3xl w-full box-glow">
             {/* Borda animada */}
             <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
               <div className="absolute inset-0 rounded-2xl border border-neon-cyan/20" />
@@ -178,7 +178,7 @@ const HeroSection = () => {
             </div>
             
             {/* Header do terminal */}
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-border/50">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 pb-1 sm:pb-2 border-b border-border/50">
               <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-destructive/70" />
               <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
               <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />
@@ -190,7 +190,7 @@ const HeroSection = () => {
             </div>
 
             {/* Logo GRANDE centralizada com efeitos de choque */}
-            <div className="flex justify-center mb-2 relative py-2 sm:py-4">
+            <div className="flex justify-center mb-0 relative py-0 sm:py-1">
               {/* Ondas de choque saindo da logo */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
@@ -248,11 +248,11 @@ const HeroSection = () => {
             </div>
 
             {/* Linha separadora com glow */}
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-1.5" />
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-1" />
 
             {/* Código PHP/HTML saindo da logo */}
             <div className="pl-2">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1">
                 <Brain className="w-3.5 h-3.5 text-neon-purple animate-pulse" />
                 <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC — BUILDING</span>
               </div>

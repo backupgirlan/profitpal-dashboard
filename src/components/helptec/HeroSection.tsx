@@ -212,7 +212,7 @@ const HeroSection = () => {
               <img 
                 src={logomarca} 
                 alt="HELP GB TEC" 
-                className="relative z-10 h-32 sm:h-44 md:h-56 lg:h-64 w-auto drop-shadow-[0_0_30px_hsl(var(--neon-blue)/0.5)]"
+                className="relative z-10 h-40 sm:h-44 md:h-56 lg:h-64 w-auto drop-shadow-[0_0_35px_hsl(var(--neon-blue)/0.6)] animate-[float_5s_ease-in-out_infinite]"
               />
             </div>
 

@@ -34,12 +34,12 @@ const CountUp = ({ target, suffix = "", label }: { target: number; suffix?: stri
   }, [target]);
 
   return (
-    <div ref={ref} className="text-center glass rounded-xl p-5 hover-magnetic group relative overflow-hidden">
+    <div ref={ref} className="text-center glass rounded-lg sm:rounded-xl p-3 sm:p-5 hover-magnetic group relative overflow-hidden">
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
-      <div className="text-3xl md:text-4xl font-bold gradient-neon-text font-display relative z-10">
+      <div className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-neon-text font-display relative z-10">
         +{count}{suffix}
       </div>
-      <p className="text-xs text-muted-foreground mt-1 relative z-10">{label}</p>
+      <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 relative z-10">{label}</p>
     </div>
   );
 };
@@ -146,17 +146,17 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-4 pt-20 pb-12 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center px-3 sm:px-4 pt-16 sm:pt-20 pb-8 sm:pb-12 overflow-hidden">
       {/* Background effects */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-neon-blue/10 rounded-full blur-[100px] animate-orb" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-neon-purple/10 rounded-full blur-[120px] animate-orb" style={{ animationDelay: "2s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-neon-cyan/5 animate-morph blur-[150px]" />
+      <div className="absolute top-20 left-10 w-48 sm:w-72 h-48 sm:h-72 bg-neon-blue/10 rounded-full blur-[80px] sm:blur-[100px] animate-orb" />
+      <div className="absolute bottom-20 right-10 w-64 sm:w-96 h-64 sm:h-96 bg-neon-purple/10 rounded-full blur-[100px] sm:blur-[120px] animate-orb" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-neon-cyan/5 animate-morph blur-[100px] sm:blur-[150px]" />
       <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 via-neon-purple/3 to-neon-cyan/5 animate-aurora pointer-events-none" />
 
       {/* Ripples */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon-blue/10 animate-ripple" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon-purple/10 animate-ripple" style={{ animationDelay: "0.7s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon-cyan/10 animate-ripple" style={{ animationDelay: "1.4s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-neon-blue/10 animate-ripple" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-neon-purple/10 animate-ripple" style={{ animationDelay: "0.7s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-neon-cyan/10 animate-ripple" style={{ animationDelay: "1.4s" }} />
 
       {/* Floating decorative icons */}
       <FloatingIcon icon={Monitor} className="top-[15%] left-[8%] hidden lg:block" delay="0s" />
@@ -166,11 +166,11 @@ const HeroSection = () => {
       <FloatingIcon icon={BarChart3} className="top-[45%] left-[3%] hidden xl:block" delay="2s" />
       <FloatingIcon icon={Smartphone} className="top-[40%] right-[5%] hidden xl:block" delay="3.5s" />
 
-      <div className="relative z-10 max-w-6xl mx-auto text-center">
+      <div className="relative z-10 max-w-6xl mx-auto text-center w-full">
         {/* Logo centralizada com terminal IA */}
-        <div className={`mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
+        <div className={`mb-8 sm:mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
           {/* Container glass com logo + mensagens IA */}
-          <div className="relative glass rounded-2xl px-6 md:px-8 py-3 md:py-4 max-w-3xl w-full box-glow">
+          <div className="relative glass rounded-xl sm:rounded-2xl px-4 sm:px-6 md:px-8 py-3 md:py-4 max-w-3xl w-full box-glow">
             {/* Borda animada */}
             <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
               <div className="absolute inset-0 rounded-2xl border border-neon-cyan/20" />
@@ -178,28 +178,28 @@ const HeroSection = () => {
             </div>
             
             {/* Header do terminal */}
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
-              <div className="w-2.5 h-2.5 rounded-full bg-destructive/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />
-              <span className="text-[10px] text-muted-foreground/50 font-mono ml-2">help-gb-tec-ai — terminal</span>
-              <div className="ml-auto flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-border/50">
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-destructive/70" />
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />
+              <span className="text-[8px] sm:text-[10px] text-muted-foreground/50 font-mono ml-1 sm:ml-2 truncate">help-gb-tec-ai — terminal</span>
+              <div className="ml-auto flex items-center gap-1 sm:gap-1.5 shrink-0">
                 <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse shadow-[0_0_6px_hsl(var(--neon-cyan)/0.6)]" />
-                <span className="text-[9px] text-neon-cyan font-mono">ONLINE</span>
+                <span className="text-[8px] sm:text-[9px] text-neon-cyan font-mono">ONLINE</span>
               </div>
             </div>
 
             {/* Logo GRANDE centralizada com efeitos de choque */}
-            <div className="flex justify-center mb-2 relative">
+            <div className="flex justify-center mb-2 relative py-2 sm:py-4">
               {/* Ondas de choque saindo da logo */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
+                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-blue/15 animate-[shock-wave_3s_ease-out_infinite_0.6s]" />
+                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-blue/15 animate-[shock-wave_3s_ease-out_infinite_0.6s]" />
               </div>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-purple/10 animate-[shock-wave_3s_ease-out_infinite_1.2s]" />
+                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-purple/10 animate-[shock-wave_3s_ease-out_infinite_1.2s]" />
               </div>
               {/* Raios de energia */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -229,14 +229,14 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass animate-surreal-float">
+          <div className="mt-4 sm:mt-5 inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full glass animate-surreal-float">
             <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
             <span className="text-xs text-neon-cyan font-medium">🚀 Tecnologia que transforma negócios</span>
           </div>
         </div>
 
         {/* Title with typewriter */}
-        <h1 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6 transition-all duration-1000 delay-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <h1 className={`text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-4 sm:mb-6 transition-all duration-1000 delay-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           Criamos{" "}
           <TypeWriter words={[
             "Sites Profissionais",
@@ -251,45 +251,45 @@ const HeroSection = () => {
         </h1>
 
         {/* Subtitle */}
-        <p className={`text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <p className={`text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2 transition-all duration-1000 delay-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           Transforme sua empresa com soluções modernas, profissionais e altamente tecnológicas.
           Desenvolvemos desde sites simples até plataformas completas com inteligência artificial,
           automações, aplicativos e sistemas personalizados.
         </p>
 
         {/* Buttons */}
-        <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 transition-all duration-1000 delay-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"}`}>
+        <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-16 px-2 transition-all duration-1000 delay-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"}`}>
           <Button
             size="lg"
-            className="gradient-neon text-primary-foreground font-semibold px-8 py-6 text-base rounded-xl box-glow hover:scale-105 transition-all duration-300 hover-magnetic animate-pulse-neon"
+            className="w-full sm:w-auto gradient-neon text-primary-foreground font-semibold px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl box-glow hover:scale-105 transition-all duration-300 hover-magnetic animate-pulse-neon"
             onClick={openWhatsApp}
           >
-            Solicitar Orçamento <ArrowRight className="ml-2 w-5 h-5" />
+            Solicitar Orçamento <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="border-neon-blue/30 text-foreground px-8 py-6 text-base rounded-xl hover:bg-neon-blue/10 transition-all duration-300 hover-magnetic"
+            className="w-full sm:w-auto border-neon-blue/30 text-foreground px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl hover:bg-neon-blue/10 transition-all duration-300 hover-magnetic"
             onClick={() => document.getElementById("projetos")?.scrollIntoView({ behavior: "smooth" })}
           >
-            <Eye className="mr-2 w-5 h-5" /> Ver Projetos
+            <Eye className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Ver Projetos
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="border-[hsl(142,71%,45%)]/30 text-[hsl(142,71%,45%)] px-8 py-6 text-base rounded-xl hover:bg-[hsl(142,71%,45%)]/10 transition-all duration-300 hover-magnetic"
+            className="w-full sm:w-auto border-[hsl(142,71%,45%)]/30 text-[hsl(142,71%,45%)] px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl hover:bg-[hsl(142,71%,45%)]/10 transition-all duration-300 hover-magnetic"
             onClick={openWhatsApp}
           >
-            <MessageCircle className="mr-2 w-5 h-5" /> Falar no WhatsApp
+            <MessageCircle className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Falar no WhatsApp
           </Button>
         </div>
 
         {/* Mockup area with device frames */}
-        <div className={`relative mb-16 transition-all duration-[1200ms] delay-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 [transform:perspective(800px)_rotateX(0deg)_translateY(0)]" : "opacity-0 [transform:perspective(800px)_rotateX(15deg)_translateY(40px)]"}`}>
-          <div className="glass rounded-2xl p-1 max-w-5xl mx-auto box-glow relative overflow-hidden">
-            <div className="absolute inset-0 animate-shimmer pointer-events-none rounded-2xl z-10" />
-            <div className="bg-card rounded-xl p-6 md:p-8 relative overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`relative mb-10 sm:mb-16 transition-all duration-[1200ms] delay-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 [transform:perspective(800px)_rotateX(0deg)_translateY(0)]" : "opacity-0 [transform:perspective(800px)_rotateX(15deg)_translateY(40px)]"}`}>
+          <div className="glass rounded-xl sm:rounded-2xl p-1 max-w-5xl mx-auto box-glow relative overflow-hidden">
+            <div className="absolute inset-0 animate-shimmer pointer-events-none rounded-xl sm:rounded-2xl z-10" />
+            <div className="bg-card rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 {/* Notebook mockup - Sites Modernos */}
                 <div className="glass rounded-xl p-4 text-center hover-3d group relative overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_hsl(var(--neon-blue)/0.3)]">
                   <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/0 to-neon-purple/0 group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-700" />
@@ -391,7 +391,7 @@ const HeroSection = () => {
         </div>
 
         {/* Counters */}
-        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto transition-all duration-1000 delay-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <div className={`grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto transition-all duration-1000 delay-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           <CountUp target={100} label="Projetos Criados" />
           <CountUp target={50} label="Clientes Atendidos" />
           <CountUp target={10} label="Segmentos Diferentes" />
@@ -399,9 +399,9 @@ const HeroSection = () => {
         </div>
 
         {/* Trust badges */}
-        <div className={`mt-10 flex flex-wrap items-center justify-center gap-4 transition-all duration-1000 delay-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <div className={`mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-4 transition-all duration-1000 delay-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           {["✅ Entrega Rápida", "🔒 100% Seguro", "💬 Suporte 24h", "⚡ Alta Performance"].map((badge) => (
-            <div key={badge} className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:box-glow transition-all cursor-default">
+            <div key={badge} className="glass rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs text-muted-foreground hover:text-foreground hover:box-glow transition-all cursor-default">
               {badge}
             </div>
           ))}

@@ -9,9 +9,9 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative border-t border-border/50 py-12 px-4">
+    <footer className="relative border-t border-border/50 py-8 sm:py-12 px-3 sm:px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Brand */}
           <div>
             <h3 className="font-display font-bold text-xl gradient-neon-text mb-3">HELP GB TEC</h3>

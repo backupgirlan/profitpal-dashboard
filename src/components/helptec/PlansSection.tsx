@@ -54,21 +54,21 @@ const PlansSection = () => {
   };
 
   return (
-    <section id="planos" className="relative py-20 px-4">
+    <section id="planos" className="relative py-14 sm:py-20 px-3 sm:px-4">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neon-blue/5 to-transparent pointer-events-none animate-aurora" style={{ animationDuration: "20s" }} />
-      <div className="absolute top-1/3 left-0 w-80 h-80 bg-neon-blue/5 rounded-full blur-[120px] animate-orb" />
+      <div className="absolute top-1/3 left-0 w-56 sm:w-80 h-56 sm:h-80 bg-neon-blue/5 rounded-full blur-[100px] sm:blur-[120px] animate-orb" />
       
       <div className="max-w-5xl mx-auto relative z-10">
         <ScrollReveal variant="fade-up">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+          <div className="text-center mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-3 sm:mb-4">
               Nossos <span className="gradient-neon-text text-glow">Planos</span>
             </h2>
-            <p className="text-muted-foreground">Escolha o plano ideal para o seu negócio</p>
+            <p className="text-sm sm:text-base text-muted-foreground">Escolha o plano ideal para o seu negócio</p>
           </div>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {plans.map((plan, i) => (
             <ScrollReveal key={plan.name} variant="flip-up" delay={i * 150}>
               <div

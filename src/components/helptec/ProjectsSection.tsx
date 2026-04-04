@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
+import SitePreview from "./previews/SitePreview";
+import SistemaPreview from "./previews/SistemaPreview";
+import AppPreview from "./previews/AppPreview";
+import IAPreview from "./previews/IAPreview";
+import LandingPreview from "./previews/LandingPreview";
+import LojaPreview from "./previews/LojaPreview";
 
 const categories = [
   { key: "site", label: "🌐 Site", count: 0 },

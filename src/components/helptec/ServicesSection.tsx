@@ -29,17 +29,17 @@ const services = [
 
 const ServicesSection = () => {
   return (
-    <section id="servicos" className="relative py-24 px-4">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-neon-blue/5 rounded-full blur-[150px] animate-orb" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-neon-purple/5 rounded-full blur-[120px] animate-orb" style={{ animationDelay: "2s" }} />
+    <section id="servicos" className="relative py-16 sm:py-24 px-3 sm:px-4">
+      <div className="absolute top-0 right-0 w-64 sm:w-96 h-64 sm:h-96 bg-neon-blue/5 rounded-full blur-[120px] sm:blur-[150px] animate-orb" />
+      <div className="absolute bottom-0 left-0 w-56 sm:w-80 h-56 sm:h-80 bg-neon-purple/5 rounded-full blur-[100px] sm:blur-[120px] animate-orb" style={{ animationDelay: "2s" }} />
       
       <div className="max-w-7xl mx-auto">
         <ScrollReveal variant="fade-up">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
               <span className="text-xs text-neon-cyan font-medium">🎯 Soluções Completas</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-3 sm:mb-4">
               O Que <span className="gradient-neon-text text-glow">Criamos</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">

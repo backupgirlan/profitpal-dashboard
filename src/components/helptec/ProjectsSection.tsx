@@ -131,7 +131,7 @@ const ProjectsSection = () => {
         <div className="min-h-[300px] sm:min-h-[400px]">
           {filtered.length > 0 ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-fade-in-up" key={activeCategory + String(showAll)}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 animate-fade-in-up" key={activeCategory + String(showAll)}>
                 {visibleProjects.map((demo, i) => (
                   <ScrollReveal
                     key={demo.id}

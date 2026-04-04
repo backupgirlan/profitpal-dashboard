@@ -178,14 +178,14 @@ const HeroSection = () => {
             </div>
             
             {/* Header do terminal */}
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border/50">
-              <div className="w-2.5 h-2.5 rounded-full bg-destructive/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />
-              <span className="text-[10px] text-muted-foreground/50 font-mono ml-2">help-gb-tec-ai — terminal</span>
-              <div className="ml-auto flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-border/50">
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-destructive/70" />
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(45,93%,47%)]/70" />
+              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(142,71%,45%)]/70" />
+              <span className="text-[8px] sm:text-[10px] text-muted-foreground/50 font-mono ml-1 sm:ml-2 truncate">help-gb-tec-ai — terminal</span>
+              <div className="ml-auto flex items-center gap-1 sm:gap-1.5 shrink-0">
                 <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse shadow-[0_0_6px_hsl(var(--neon-cyan)/0.6)]" />
-                <span className="text-[9px] text-neon-cyan font-mono">ONLINE</span>
+                <span className="text-[8px] sm:text-[9px] text-neon-cyan font-mono">ONLINE</span>
               </div>
             </div>
 

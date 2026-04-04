@@ -187,81 +187,100 @@ const HeroSection = () => {
             <div className="absolute inset-0 animate-shimmer pointer-events-none rounded-2xl z-10" />
             <div className="bg-card rounded-xl p-6 md:p-8 relative overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Notebook mockup */}
-                <div className="glass rounded-xl p-4 text-center hover-3d animate-surreal-float group relative overflow-hidden">
-                  <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Notebook mockup - Sites Modernos */}
+                <div className="glass rounded-xl p-4 text-center hover-3d group relative overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_hsl(var(--neon-blue)/0.3)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/0 to-neon-purple/0 group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-700" />
+                  <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -top-10 -right-10 w-20 h-20 bg-neon-blue/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700 animate-pulse" />
                   <div className="w-full h-36 rounded-lg bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 flex items-center justify-center mb-3 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--neon-blue)/0.1),transparent_70%)] animate-pulse" />
                     {/* Notebook frame */}
-                    <div className="w-28 h-20 rounded-t border-2 border-neon-blue/30 bg-card relative overflow-hidden">
+                    <div className="w-28 h-20 rounded-t border-2 border-neon-blue/30 bg-card relative overflow-hidden group-hover:border-neon-blue/60 transition-colors duration-500 group-hover:shadow-[0_0_15px_hsl(var(--neon-blue)/0.2)]">
                       <div className="absolute top-0 left-0 right-0 h-2 bg-muted/50 flex items-center gap-0.5 px-1">
-                        <div className="w-1 h-1 rounded-full bg-destructive/50" />
-                        <div className="w-1 h-1 rounded-full bg-[hsl(var(--success))]/50" />
-                        <div className="w-1 h-1 rounded-full bg-primary/50" />
+                        <div className="w-1 h-1 rounded-full bg-destructive/70 group-hover:animate-pulse" />
+                        <div className="w-1 h-1 rounded-full bg-[hsl(142,71%,45%)]/70 group-hover:animate-pulse" style={{ animationDelay: "0.2s" }} />
+                        <div className="w-1 h-1 rounded-full bg-primary/70 group-hover:animate-pulse" style={{ animationDelay: "0.4s" }} />
                       </div>
                       <div className="p-1.5 pt-3 space-y-1">
-                        <div className="h-1 w-full bg-primary/30 rounded animate-pulse" />
-                        <div className="h-1 w-3/4 bg-neon-purple/20 rounded animate-pulse" style={{ animationDelay: "0.5s" }} />
+                        <div className="h-1 w-full bg-primary/30 rounded animate-[pulse_2s_ease-in-out_infinite]" />
+                        <div className="h-1 w-3/4 bg-neon-purple/20 rounded animate-[pulse_2s_ease-in-out_infinite_0.5s]" />
                         <div className="flex gap-0.5 mt-1">
-                          <div className="h-3 flex-1 bg-neon-cyan/10 rounded animate-pulse" style={{ animationDelay: "1s" }} />
-                          <div className="h-3 flex-1 bg-primary/10 rounded animate-pulse" style={{ animationDelay: "1.5s" }} />
+                          <div className="h-3 flex-1 bg-neon-cyan/15 rounded animate-[pulse_3s_ease-in-out_infinite_1s]" />
+                          <div className="h-3 flex-1 bg-primary/15 rounded animate-[pulse_3s_ease-in-out_infinite_1.5s]" />
                         </div>
                       </div>
                     </div>
                     <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-muted/30 rounded" />
                   </div>
-                  <p className="text-sm font-medium text-foreground mt-2">Sites Modernos</p>
-                  <p className="text-[10px] text-muted-foreground">Responsivos e profissionais</p>
+                  <p className="text-sm font-semibold text-foreground mt-2 group-hover:gradient-neon-text transition-all duration-300 relative z-10">Sites Modernos</p>
+                  <p className="text-[10px] text-muted-foreground relative z-10">Responsivos e profissionais</p>
                 </div>
 
-                {/* Phone mockup */}
-                <div className="glass rounded-xl p-4 text-center hover-3d animate-surreal-float group relative overflow-hidden" style={{ animationDelay: "1s" }}>
-                  <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Sites Inteligentes com IA */}
+                <div className="glass rounded-xl p-4 text-center hover-3d group relative overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_hsl(var(--neon-purple)/0.3)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/0 to-neon-cyan/0 group-hover:from-neon-purple/10 group-hover:to-neon-cyan/10 transition-all duration-700" />
+                  <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -top-10 -left-10 w-20 h-20 bg-neon-purple/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700 animate-pulse" />
+                  <div className="absolute -bottom-10 -right-10 w-20 h-20 bg-neon-cyan/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700 animate-pulse" style={{ animationDelay: "1s" }} />
                   <div className="w-full h-36 rounded-lg bg-gradient-to-br from-neon-purple/20 to-neon-cyan/20 flex items-center justify-center mb-3 relative overflow-hidden">
-                    <div className="w-16 h-28 rounded-2xl border-2 border-neon-purple/30 bg-card relative overflow-hidden">
-                      <div className="absolute top-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-muted/30 rounded-full" />
-                      <div className="p-1.5 pt-3 space-y-1">
-                        <div className="h-1 w-full bg-neon-purple/30 rounded animate-pulse" />
-                        <div className="h-6 w-full bg-gradient-to-br from-neon-purple/10 to-neon-cyan/10 rounded animate-pulse" style={{ animationDelay: "0.5s" }} />
-                        <div className="flex gap-0.5">
-                          <div className="h-3 flex-1 bg-neon-cyan/10 rounded animate-pulse" style={{ animationDelay: "1s" }} />
-                          <div className="h-3 flex-1 bg-primary/10 rounded animate-pulse" style={{ animationDelay: "1.5s" }} />
-                        </div>
-                        <div className="h-2 w-full bg-[hsl(var(--success))]/10 rounded-full animate-pulse" style={{ animationDelay: "2s" }} />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,hsl(var(--neon-purple)/0.15),transparent_60%)] animate-pulse" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsl(var(--neon-cyan)/0.1),transparent_60%)] animate-pulse" style={{ animationDelay: "1.5s" }} />
+                    {/* AI Brain visualization */}
+                    <div className="relative w-28 h-24 flex items-center justify-center">
+                      {/* Central brain icon */}
+                      <div className="relative z-10 w-14 h-14 rounded-2xl border-2 border-neon-purple/40 bg-card flex items-center justify-center group-hover:border-neon-purple/70 transition-all duration-500 group-hover:shadow-[0_0_20px_hsl(var(--neon-purple)/0.3)]">
+                        <Brain className="w-7 h-7 text-neon-purple animate-[pulse_3s_ease-in-out_infinite]" />
                       </div>
+                      {/* Orbiting particles */}
+                      <div className="absolute inset-0 animate-[spin_8s_linear_infinite]">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-neon-cyan/60 shadow-[0_0_8px_hsl(var(--neon-cyan)/0.5)]" />
+                      </div>
+                      <div className="absolute inset-0 animate-[spin_6s_linear_infinite_reverse]">
+                        <div className="absolute bottom-0 right-0 w-1.5 h-1.5 rounded-full bg-neon-purple/60 shadow-[0_0_6px_hsl(var(--neon-purple)/0.5)]" />
+                      </div>
+                      <div className="absolute inset-0 animate-[spin_10s_linear_infinite]" style={{ animationDelay: "2s" }}>
+                        <div className="absolute top-1/2 left-0 w-1.5 h-1.5 rounded-full bg-primary/60 shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
+                      </div>
+                      {/* Connection lines */}
+                      <div className="absolute top-1 left-3 w-5 h-[1px] bg-gradient-to-r from-transparent to-neon-cyan/30 animate-[pulse_2s_ease-in-out_infinite]" style={{ transform: "rotate(-30deg)" }} />
+                      <div className="absolute bottom-2 right-2 w-5 h-[1px] bg-gradient-to-r from-transparent to-neon-purple/30 animate-[pulse_2s_ease-in-out_infinite_0.5s]" style={{ transform: "rotate(45deg)" }} />
+                      <div className="absolute top-3 right-1 w-4 h-[1px] bg-gradient-to-r from-transparent to-primary/30 animate-[pulse_2s_ease-in-out_infinite_1s]" style={{ transform: "rotate(20deg)" }} />
                     </div>
                   </div>
-                  <p className="text-sm font-medium text-foreground mt-2">Aplicativos</p>
-                  <p className="text-[10px] text-muted-foreground">Android e iOS</p>
+                  <p className="text-sm font-semibold text-foreground mt-2 group-hover:gradient-neon-text transition-all duration-300 relative z-10">Sites Inteligentes com IA</p>
+                  <p className="text-[10px] text-muted-foreground relative z-10">Automação e inteligência</p>
                 </div>
 
                 {/* Dashboard mockup */}
-                <div className="glass rounded-xl p-4 text-center hover-3d animate-surreal-float group relative overflow-hidden" style={{ animationDelay: "2s" }}>
-                  <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="glass rounded-xl p-4 text-center hover-3d group relative overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_hsl(var(--neon-cyan)/0.3)]">
+                  <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan/0 to-neon-blue/0 group-hover:from-neon-cyan/10 group-hover:to-neon-blue/10 transition-all duration-700" />
+                  <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute -bottom-10 -left-10 w-20 h-20 bg-neon-cyan/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-700 animate-pulse" />
                   <div className="w-full h-36 rounded-lg bg-gradient-to-br from-neon-cyan/20 to-neon-blue/20 flex items-center justify-center mb-3 relative overflow-hidden">
-                    <div className="w-full mx-3 h-24 rounded border border-neon-cyan/20 bg-card p-2 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsl(var(--neon-cyan)/0.1),transparent_70%)] animate-pulse" />
+                    <div className="w-full mx-3 h-24 rounded border border-neon-cyan/20 bg-card p-2 relative overflow-hidden group-hover:border-neon-cyan/50 transition-all duration-500 group-hover:shadow-[0_0_15px_hsl(var(--neon-cyan)/0.15)]">
                       <div className="flex gap-1 mb-1.5">
-                        <div className="h-6 flex-1 rounded bg-neon-cyan/10 flex items-center justify-center">
-                          <div className="text-[6px] text-neon-cyan font-bold animate-pulse">R$ 12.5K</div>
+                        <div className="h-6 flex-1 rounded bg-neon-cyan/10 flex items-center justify-center group-hover:bg-neon-cyan/20 transition-colors duration-500">
+                          <div className="text-[6px] text-neon-cyan font-bold animate-[pulse_2s_ease-in-out_infinite]">R$ 12.5K</div>
                         </div>
-                        <div className="h-6 flex-1 rounded bg-primary/10 flex items-center justify-center">
-                          <div className="text-[6px] text-primary font-bold animate-pulse" style={{ animationDelay: "0.5s" }}>+24%</div>
+                        <div className="h-6 flex-1 rounded bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-500">
+                          <div className="text-[6px] text-primary font-bold animate-[pulse_2s_ease-in-out_infinite_0.5s]">+24%</div>
                         </div>
                       </div>
                       <div className="flex items-end gap-0.5 h-10">
                         {[60, 35, 80, 45, 90, 55, 75, 40, 85, 65].map((h, i) => (
-                          <div key={i} className="flex-1 rounded-t transition-all duration-1000" style={{
+                          <div key={i} className="flex-1 rounded-t transition-all duration-700 group-hover:shadow-[0_0_4px_hsl(var(--neon-cyan)/0.3)]" style={{
                             height: `${h}%`,
                             background: `linear-gradient(to top, hsla(180,100%,50%,0.3), hsla(199,89%,48%,0.3))`,
-                            animationDelay: `${i * 0.1}s`,
                           }}>
-                            <div className="w-full h-full animate-pulse" style={{ animationDelay: `${i * 0.15}s` }} />
+                            <div className="w-full h-full animate-[pulse_2s_ease-in-out_infinite]" style={{ animationDelay: `${i * 0.15}s` }} />
                           </div>
                         ))}
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm font-medium text-foreground mt-2">Dashboards & IA</p>
-                  <p className="text-[10px] text-muted-foreground">Dados em tempo real</p>
+                  <p className="text-sm font-semibold text-foreground mt-2 group-hover:gradient-neon-text transition-all duration-300 relative z-10">Dashboards & IA</p>
+                  <p className="text-[10px] text-muted-foreground relative z-10">Dados em tempo real</p>
                 </div>
               </div>
             </div>

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { ArrowRight, MessageCircle, Eye, Sparkles, Monitor, Smartphone, BarChart3, Brain, Zap, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
-import logomarca from "@/assets/logomarca.png";
+import logomarca from "@/assets/helpgbtec-logo.png";
 
 const CountUp = ({ target, suffix = "", label }: { target: number; suffix?: string; label: string }) => {
   const [count, setCount] = useState(0);

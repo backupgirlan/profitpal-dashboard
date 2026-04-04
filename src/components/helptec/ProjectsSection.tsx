@@ -23,6 +23,7 @@ const categoryColors: Record<string, string> = {
   loja: "from-neon-cyan/20 to-neon-blue/5",
 };
 
+const ProjectsSection = () => {
   const [activeCategory, setActiveCategory] = useState("site");
   const [demos, setDemos] = useState<any[]>([]);
   const [autoPlay, setAutoPlay] = useState(true);

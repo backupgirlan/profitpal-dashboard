@@ -149,6 +149,12 @@
     animation: float 3s ease-in-out infinite;
   }
 
+  @keyframes shimmer-sweep {
+    0% { transform: translateX(-150%) skewX(-12deg); }
+    50% { transform: translateX(150%) skewX(-12deg); }
+    100% { transform: translateX(150%) skewX(-12deg); }
+  }
+
   /* ===== SURREAL FLOAT (slower, bigger) ===== */
   @keyframes surreal-float {
     0%, 100% { transform: translateY(0) rotate(0deg); }

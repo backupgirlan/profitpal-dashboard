@@ -391,7 +391,7 @@ const HeroSection = () => {
         </div>
 
         {/* Counters */}
-        <div className={`grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto transition-all duration-1000 delay-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <div className={`grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto transition-all duration-1000 delay-[1000ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           <CountUp target={100} label="Projetos Criados" />
           <CountUp target={50} label="Clientes Atendidos" />
           <CountUp target={10} label="Segmentos Diferentes" />
@@ -399,9 +399,9 @@ const HeroSection = () => {
         </div>
 
         {/* Trust badges */}
-        <div className={`mt-10 flex flex-wrap items-center justify-center gap-4 transition-all duration-1000 delay-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <div className={`mt-6 sm:mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-4 transition-all duration-1000 delay-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           {["✅ Entrega Rápida", "🔒 100% Seguro", "💬 Suporte 24h", "⚡ Alta Performance"].map((badge) => (
-            <div key={badge} className="glass rounded-full px-4 py-2 text-xs text-muted-foreground hover:text-foreground hover:box-glow transition-all cursor-default">
+            <div key={badge} className="glass rounded-full px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs text-muted-foreground hover:text-foreground hover:box-glow transition-all cursor-default">
               {badge}
             </div>
           ))}

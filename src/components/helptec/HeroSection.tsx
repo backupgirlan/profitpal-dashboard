@@ -251,7 +251,7 @@ const HeroSection = () => {
         </h1>
 
         {/* Subtitle */}
-        <p className={`text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed transition-all duration-1000 delay-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+        <p className={`text-sm sm:text-base md:text-lg text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2 transition-all duration-1000 delay-400 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           Transforme sua empresa com soluções modernas, profissionais e altamente tecnológicas.
           Desenvolvemos desde sites simples até plataformas completas com inteligência artificial,
           automações, aplicativos e sistemas personalizados.

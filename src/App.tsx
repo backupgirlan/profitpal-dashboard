@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AdminDemos from "./pages/AdminDemos";
+import Administrador from "./pages/Administrador";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const AppRoutes = () => (
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminDemos /></ProtectedRoute>} />
+    <Route path="/administrador" element={<Administrador />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

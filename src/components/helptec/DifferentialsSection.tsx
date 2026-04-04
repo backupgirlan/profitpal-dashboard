@@ -199,7 +199,7 @@ const DifferentialsSection = () => {
               Por que escolher a <span className="gradient-neon-text text-glow">Help Tec</span>?
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Diferenciais que fazem a diferença no resultado do seu projeto
+              Tecnologia, design e inteligência artificial reunidos para transformar sua ideia em resultado real
             </p>
           </div>
         </ScrollReveal>

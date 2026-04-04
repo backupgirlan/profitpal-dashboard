@@ -189,25 +189,43 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Logo centralizada */}
-            <div className="flex justify-center mb-5">
+            {/* Logo GRANDE centralizada com efeitos de choque */}
+            <div className="flex justify-center mb-5 relative">
+              {/* Ondas de choque saindo da logo */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-blue/15 animate-[shock-wave_3s_ease-out_infinite_0.6s]" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-purple/10 animate-[shock-wave_3s_ease-out_infinite_1.2s]" />
+              </div>
+              {/* Raios de energia */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                  <div key={deg} className="absolute w-full h-full" style={{ transform: `rotate(${deg}deg)` }}>
+                    <div className="absolute top-1/2 left-1/2 w-20 md:w-32 h-[1px] origin-left bg-gradient-to-r from-neon-cyan/40 to-transparent animate-[energy-ray_2.5s_ease-in-out_infinite]" style={{ animationDelay: `${deg * 0.01}s` }} />
+                  </div>
+                ))}
+              </div>
               <img 
                 src={logomarca} 
                 alt="HELP GB TEC" 
-                className="h-20 sm:h-28 md:h-36 w-auto drop-shadow-[0_0_20px_hsl(var(--neon-blue)/0.35)]"
+                className="relative z-10 h-32 sm:h-44 md:h-56 lg:h-64 w-auto drop-shadow-[0_0_30px_hsl(var(--neon-blue)/0.5)]"
               />
             </div>
 
             {/* Linha separadora com glow */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-4" />
 
-            {/* Mensagens IA saindo da logo */}
+            {/* Código PHP/HTML saindo da logo */}
             <div className="pl-2">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="w-3.5 h-3.5 text-neon-purple animate-pulse" />
-                <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC IA</span>
+                <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC — BUILDING</span>
               </div>
-              <AIMessageStream />
+              <CodeStream />
             </div>
           </div>
 

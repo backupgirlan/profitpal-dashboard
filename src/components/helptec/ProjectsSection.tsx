@@ -5,7 +5,24 @@ import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
 import RealPreview from "./previews/RealPreview";
 
-const ProjectsSection = () => {
+const categories = [
+  { key: "site", label: "🌐 Site", count: 0 },
+  { key: "sistema", label: "⚙️ Sistema", count: 0 },
+  { key: "aplicativo", label: "📱 Aplicativo", count: 0 },
+  { key: "ia", label: "🤖 Inteligência Artificial", count: 0 },
+  { key: "landing", label: "🚀 Landing Page", count: 0 },
+  { key: "loja", label: "🛒 Loja Virtual", count: 0 },
+];
+
+const categoryColors: Record<string, string> = {
+  site: "from-neon-blue/20 to-neon-blue/5",
+  sistema: "from-neon-purple/20 to-neon-purple/5",
+  aplicativo: "from-neon-cyan/20 to-neon-cyan/5",
+  ia: "from-neon-purple/20 to-neon-cyan/5",
+  landing: "from-neon-blue/20 to-neon-purple/5",
+  loja: "from-neon-cyan/20 to-neon-blue/5",
+};
+
   const [activeCategory, setActiveCategory] = useState("site");
   const [demos, setDemos] = useState<any[]>([]);
   const [autoPlay, setAutoPlay] = useState(true);

@@ -42,11 +42,35 @@ import appFitness from "@/assets/previews/app-fitness.jpg";
 import appPetshop from "@/assets/previews/app-petshop.jpg";
 import appImoveis from "@/assets/previews/app-imoveis.jpg";
 import appFinanceiro from "@/assets/previews/app-financeiro.jpg";
+import appEventos from "@/assets/previews/app-eventos.jpg";
+import appFidelidade from "@/assets/previews/app-fidelidade.jpg";
+import appGestao from "@/assets/previews/app-gestao.jpg";
+import appRastreamento from "@/assets/previews/app-rastreamento.jpg";
+import appTurismo from "@/assets/previews/app-turismo.jpg";
+import appEscola from "@/assets/previews/app-escola.jpg";
+import appSupermercado from "@/assets/previews/app-supermercado.jpg";
+import appBarbearia from "@/assets/previews/app-barbearia.jpg";
+import appFarmacia from "@/assets/previews/app-farmacia.jpg";
 
 import iaChatbot from "@/assets/previews/ia-chatbot.jpg";
 import iaAnalytics from "@/assets/previews/ia-analytics.jpg";
 import iaAutomacao from "@/assets/previews/ia-automacao.jpg";
 import iaRecomendacao from "@/assets/previews/ia-recomendacao.jpg";
+import iaVendas from "@/assets/previews/ia-vendas.jpg";
+import iaSuporte from "@/assets/previews/ia-suporte.jpg";
+import iaFinanceiro from "@/assets/previews/ia-financeiro.jpg";
+import iaEstoque from "@/assets/previews/ia-estoque.jpg";
+import iaCrm from "@/assets/previews/ia-crm.jpg";
+import iaWhatsapp from "@/assets/previews/ia-whatsapp.jpg";
+import iaAgendamento from "@/assets/previews/ia-agendamento.jpg";
+import iaEcommerce from "@/assets/previews/ia-ecommerce.jpg";
+import iaRestaurante from "@/assets/previews/ia-restaurante.jpg";
+import iaRelatorios from "@/assets/previews/ia-relatorios.jpg";
+import iaOrcamento from "@/assets/previews/ia-orcamento.jpg";
+import iaMonitoramento from "@/assets/previews/ia-monitoramento.jpg";
+import iaDashboard from "@/assets/previews/ia-dashboard.jpg";
+import iaEstetica from "@/assets/previews/ia-estetica.jpg";
+import iaSupermercado from "@/assets/previews/ia-supermercado.jpg";
 
 import landingCurso from "@/assets/previews/landing-curso.jpg";
 import landingServicos from "@/assets/previews/landing-servicos.jpg";
@@ -80,17 +104,17 @@ const siteImages: ImageMap = [
   { keywords: ["creche", "infantil", "berçário", "bercario", "maternal", "pré-escola", "pre-escola", "jardim"], src: siteCreche },
   { keywords: ["pet", "petshop", "pet shop", "veterinário", "veterinario", "animal", "cachorro", "gato", "banho e tosa"], src: sitePetshop },
   { keywords: ["farmácia", "farmacia", "drogaria", "medicamento"], src: siteFarmacia },
-  { keywords: ["oficina", "mecânica", "mecanica", "auto center", "funilaria", "elétrica automotiva", "eletrica automotiva", "autopeças", "autopecas"], src: siteOficina },
+  { keywords: ["oficina", "mecânica", "mecanica", "auto center", "funilaria", "autopeças", "autopecas"], src: siteOficina },
   { keywords: ["automóvel", "automovel", "concessionária", "concessionaria", "carro", "veículo", "veiculo", "moto", "revenda", "seminovo"], src: siteAutomoveis },
   { keywords: ["igreja", "religião", "religiao", "ministério", "ministerio", "pastoral", "evangélica", "evangelica", "católica", "catolica", "templo"], src: siteIgreja },
-  { keywords: ["fotografia", "fotógrafo", "fotografo", "estúdio foto", "estudio foto", "ensaio", "casamento foto"], src: siteFotografia },
-  { keywords: ["construção", "construcao", "engenharia", "arquitetura", "arquiteto", "reforma", "obra", "pedreiro", "empreiteira"], src: siteConstrucao },
-  { keywords: ["música", "musica", "escola de música", "instrumento", "banda", "estúdio musical", "violão", "piano", "guitarra", "DJ"], src: siteMusica },
-  { keywords: ["limpeza", "higienização", "higienizacao", "lavanderia", "dedetização", "dedetizacao", "jardinagem", "manutenção", "manutencao", "zelador"], src: siteLimpeza },
-  { keywords: ["tattoo", "tatuagem", "piercing", "body art", "estúdio tattoo", "estudio tattoo"], src: siteTattoo },
-  { keywords: ["floricultura", "flores", "florista", "jardim", "paisagismo", "buquê", "buque", "arranjo floral", "decoração floral"], src: siteFloricultura },
-  { keywords: ["evento", "festa", "buffet", "casamento", "decoração", "decoracao", "cerimonial", "som", "iluminação", "iluminacao", "DJ evento"], src: siteEventos },
-  { keywords: ["logística", "logistica", "transporte", "frete", "mudança", "mudanca", "caminhão", "caminhao", "entrega", "distribuidora", "transportadora"], src: siteLogistica },
+  { keywords: ["fotografia", "fotógrafo", "fotografo", "estúdio foto", "estudio foto", "ensaio"], src: siteFotografia },
+  { keywords: ["construção", "construcao", "engenharia", "arquitetura", "arquiteto", "reforma", "obra", "empreiteira"], src: siteConstrucao },
+  { keywords: ["música", "musica", "instrumento", "banda", "violão", "piano", "guitarra"], src: siteMusica },
+  { keywords: ["limpeza", "higienização", "higienizacao", "lavanderia", "jardinagem", "manutenção", "manutencao"], src: siteLimpeza },
+  { keywords: ["tattoo", "tatuagem", "piercing", "body art"], src: siteTattoo },
+  { keywords: ["floricultura", "flores", "florista", "paisagismo", "buquê", "buque", "arranjo floral"], src: siteFloricultura },
+  { keywords: ["evento", "festa", "buffet", "casamento", "cerimonial", "iluminação", "iluminacao"], src: siteEventos },
+  { keywords: ["logística", "logistica", "transporte", "frete", "mudança", "mudanca", "caminhão", "caminhao", "transportadora"], src: siteLogistica },
 ];
 
 const sistemaImages: ImageMap = [
@@ -100,29 +124,56 @@ const sistemaImages: ImageMap = [
   { keywords: ["estoque", "inventário", "inventario", "armazém", "armazem", "produto", "mercadoria", "depósito", "deposito", "almoxarifado"], src: sistemaEstoque },
   { keywords: ["pdv", "ponto de venda", "caixa registradora", "terminal", "balcão", "balcao", "comanda", "frente de caixa", "vendas"], src: sistemaPdv },
   { keywords: ["rh", "recursos humanos", "funcionário", "funcionario", "folha de pagamento", "ponto", "férias", "ferias", "admissão", "admissao", "colaborador"], src: sistemaRh },
-  { keywords: ["agendamento", "agenda", "calendário", "calendario", "reserva", "horário", "horario", "consulta", "marcação", "marcacao", "sessão", "sessao"], src: sistemaAgendamento },
+  { keywords: ["agendamento", "agenda", "calendário", "calendario", "reserva", "horário", "horario", "consulta", "marcação", "marcacao"], src: sistemaAgendamento },
 ];
 
 const appImages: ImageMap = [
-  { keywords: ["delivery", "entrega", "compras", "ifood", "rappi"], src: appDelivery },
+  { keywords: ["barbearia", "barber"], src: appBarbearia },
+  { keywords: ["salão", "salao", "cabeleireiro", "beleza"], src: appAgendamento },
+  { keywords: ["farmácia", "farmacia", "medicamento", "drogaria"], src: appFarmacia },
+  { keywords: ["delivery", "entrega"], src: appDelivery },
   { keywords: ["loja", "e-commerce", "ecommerce", "virtual", "marketplace", "shopping"], src: appLoja },
-  { keywords: ["agendamento", "salão", "salao", "barbearia", "beleza", "cabeleireiro", "consulta", "reserva"], src: appAgendamento },
-  { keywords: ["restaurante", "food", "comida", "hamburgueria", "pizzaria", "cardápio", "cardapio", "supermercado", "farmácia", "farmacia"], src: appFood },
-  { keywords: ["fitness", "academia", "treino", "exercício", "exercicio", "corrida", "gym", "workout", "saúde", "saude"], src: appFitness },
-  { keywords: ["pet", "petshop", "veterinário", "veterinario", "animal", "cachorro", "gato", "banho"], src: appPetshop },
-  { keywords: ["imóvel", "imovel", "imobiliária", "imobiliaria", "casa", "apartamento", "terreno", "aluguel", "corretor"], src: appImoveis },
-  { keywords: ["financeiro", "banco", "fintech", "pagamento", "investimento", "carteira", "transferência", "transferencia", "pix", "cartão", "cartao"], src: appFinanceiro },
+  { keywords: ["agendamento", "reserva", "serviço", "servico"], src: appAgendamento },
+  { keywords: ["restaurante", "food", "comida", "hamburgueria", "pizzaria", "cardápio", "cardapio", "alimentação", "alimentacao"], src: appFood },
+  { keywords: ["fitness", "academia", "treino", "exercício", "exercicio", "corrida", "gym", "workout"], src: appFitness },
+  { keywords: ["pet", "petshop", "veterinário", "veterinario", "animal", "cachorro", "gato"], src: appPetshop },
+  { keywords: ["imóvel", "imovel", "imobiliária", "imobiliaria", "casa", "apartamento", "terreno", "corretor", "imobiliário", "imobiliario"], src: appImoveis },
+  { keywords: ["financeiro", "finança", "financa", "banco", "fintech", "pagamento", "investimento", "carteira", "pix"], src: appFinanceiro },
+  { keywords: ["evento", "festa", "ingresso", "ticket", "show"], src: appEventos },
+  { keywords: ["fidelidade", "loyalty", "pontos", "recompensa", "cashback", "cupom", "varejo"], src: appFidelidade },
+  { keywords: ["gestão", "gestao", "cliente", "crm", "gerenciamento", "controle"], src: appGestao },
+  { keywords: ["rastreamento", "rastreio", "tracking", "logística", "logistica", "localização", "localizacao", "encomenda"], src: appRastreamento },
+  { keywords: ["turismo", "viagem", "travel", "passeio", "excursão", "excursao", "hotel", "voo"], src: appTurismo },
+  { keywords: ["escola", "educação", "educacao", "aluno", "estudante", "aula", "nota", "professor"], src: appEscola },
+  { keywords: ["supermercado", "mercado", "compras", "mercearia"], src: appSupermercado },
+  { keywords: ["clínica", "clinica", "saúde", "saude", "médico", "medico", "consulta"], src: appGestao },
 ];
 
 const iaImages: ImageMap = [
-  { keywords: ["chatbot", "chat", "whatsapp", "atendimento", "suporte", "assistente", "bot", "mensagem"], src: iaChatbot },
-  { keywords: ["análise", "analise", "analytics", "dashboard", "relatório", "relatorio", "dados", "monitoramento", "indicadores"], src: iaAnalytics },
+  { keywords: ["whatsapp", "zap"], src: iaWhatsapp },
+  { keywords: ["chatbot", "chat online", "bot"], src: iaChatbot },
+  { keywords: ["suporte", "técnico", "tecnico", "help desk", "ticket"], src: iaSuporte },
+  { keywords: ["atendimento automático", "atendimento automatico"], src: iaChatbot },
+  { keywords: ["assistente de vendas", "vendas", "venda", "comercial"], src: iaVendas },
+  { keywords: ["crm", "gestão de clientes", "relacionamento"], src: iaCrm },
+  { keywords: ["orçamento", "orcamento", "precificação", "precificacao", "cotação", "cotacao"], src: iaOrcamento },
+  { keywords: ["financeiro", "financeira", "contábil", "contabil", "caixa", "cobrança", "cobranca"], src: iaFinanceiro },
+  { keywords: ["estoque", "inventário", "inventario", "logística", "logistica", "supply"], src: iaEstoque },
+  { keywords: ["e-commerce", "ecommerce", "loja virtual", "carrinho", "checkout"], src: iaEcommerce },
+  { keywords: ["restaurante", "gastronomia", "cardápio", "cardapio", "cozinha"], src: iaRestaurante },
+  { keywords: ["supermercado", "mercearia", "prateleira"], src: iaSupermercado },
+  { keywords: ["agendamento", "salão", "salao", "beleza", "agenda"], src: iaAgendamento },
+  { keywords: ["clínica", "clinica", "estética", "estetica", "saúde", "saude"], src: iaEstetica },
+  { keywords: ["relatório", "relatorio", "geração", "geracao", "report", "documento"], src: iaRelatorios },
+  { keywords: ["monitoramento", "vigilância", "vigilancia", "câmera", "camera", "segurança", "seguranca"], src: iaMonitoramento },
+  { keywords: ["dashboard", "inteligente", "kpi", "gestão", "gestao"], src: iaDashboard },
+  { keywords: ["recomendação", "recomendacao", "personalização", "personalizacao", "machine learning", "produto"], src: iaRecomendacao },
+  { keywords: ["análise", "analise", "analytics", "dados", "indicadores"], src: iaAnalytics },
   { keywords: ["automação", "automacao", "workflow", "fluxo", "integração", "integracao", "pipeline", "processo", "n8n", "zapier", "make"], src: iaAutomacao },
-  { keywords: ["recomendação", "recomendacao", "personalização", "personalizacao", "machine learning", "previsão", "previsao", "predição", "predicao", "classificação", "classificacao", "segmentação", "segmentacao"], src: iaRecomendacao },
 ];
 
 const landingImages: ImageMap = [
-  { keywords: ["curso", "aula", "mentoria", "treinamento", "workshop"], src: landingCurso },
+  { keywords: ["curso", "aula", "mentoria", "treinamento", "workshop", "educação", "educacao"], src: landingCurso },
   { keywords: ["consultoria", "serviço", "servico", "advogado", "dentista", "energia", "freelancer", "profissional", "agência", "agencia"], src: landingServicos },
   { keywords: ["produto", "digital", "ebook", "infoproduto", "lançamento", "lancamento", "oferta"], src: landingProduto },
   { keywords: ["saas", "software", "plataforma", "startup", "tech", "tecnologia", "sistema", "app"], src: landingSaas },
@@ -135,7 +186,7 @@ const lojaImages: ImageMap = [
   { keywords: ["eletrônicos", "eletronicos", "celulares", "ferramentas", "autopeças", "autopecas", "informática", "informatica", "computador", "notebook", "tablet", "games"], src: lojaEletronicos },
   { keywords: ["alimentos", "comida", "orgânico", "organico", "natural", "suplemento", "bebidas", "doces", "saudável", "saudavel", "mercearia", "cesta"], src: lojaAlimentos },
   { keywords: ["cosméticos", "cosmeticos", "beleza", "perfume", "maquiagem", "skincare", "cuidados", "cabelo", "unha", "hidratante"], src: lojaCosmeticos },
-  { keywords: ["esportes", "esportivo", "tênis", "tenis", "academia", "fitness", "bike", "bicicleta", "camping", "pesca", "surf", "skate"], src: lojaEsportes },
+  { keywords: ["esportes", "esportivo", "tênis", "tenis", "bike", "bicicleta", "camping", "pesca", "surf", "skate"], src: lojaEsportes },
   { keywords: ["móveis", "moveis", "decoração", "decoracao", "casa", "cozinha", "quarto", "sala", "colchão", "colchao", "sofá", "sofa", "mesa", "cadeira"], src: lojaMoveis },
 ];
 

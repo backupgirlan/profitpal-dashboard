@@ -144,9 +144,9 @@ const ProjectsSection = () => {
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
                     
                     {/* Preview area with animated content */}
-                    <div className={`aspect-video bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
-                      {/* Animated preview simulation */}
-                      <ProjectPreview category={demo.category} name={demo.name} />
+                    <div className={`aspect-[4/3] bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
+                      {/* Rich animated preview */}
+                      <CategoryPreview category={demo.category} segment={demo.segment} name={demo.name} />
 
                       {/* Browser chrome */}
                       <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">

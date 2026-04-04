@@ -3,6 +3,7 @@ import {
   Calendar, MessageSquare, BookOpen, GraduationCap, Users,
   Heart, Scissors, UtensilsCrossed, Building2, Briefcase, Crown
 } from "lucide-react";
+import { ScrollReveal } from "@/hooks/useScrollAnimation";
 
 const services = [
   { icon: Globe, title: "Sites Institucionais", desc: "Presença online profissional para sua empresa" },
@@ -27,31 +28,42 @@ const services = [
 const ServicesSection = () => {
   return (
     <section id="servicos" className="relative py-20 px-4">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-neon-blue/5 rounded-full blur-[150px] animate-orb" />
+      
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-            O Que <span className="gradient-neon-text">Criamos</span>
-          </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Soluções digitais completas para qualquer segmento de mercado
-          </p>
-        </div>
+        <ScrollReveal variant="fade-up">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+              O Que <span className="gradient-neon-text text-glow">Criamos</span>
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Soluções digitais completas para qualquer segmento de mercado
+            </p>
+          </div>
+        </ScrollReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {services.map((service, i) => (
-            <div
+            <ScrollReveal
               key={service.title}
-              className="group glass rounded-xl p-5 hover:box-glow transition-all duration-500 hover:-translate-y-1 cursor-pointer animate-fade-in-up"
-              style={{ animationDelay: `${i * 0.05}s` }}
+              variant={i % 3 === 0 ? "fade-up" : i % 3 === 1 ? "zoom-in" : "fade-left"}
+              delay={i * 60}
             >
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 flex items-center justify-center mb-3 group-hover:from-neon-blue/40 group-hover:to-neon-purple/40 transition-all duration-500">
-                <service.icon className="w-5 h-5 text-primary group-hover:text-neon-cyan transition-colors duration-500" />
+              <div className="group glass rounded-xl p-5 hover-magnetic cursor-pointer h-full relative overflow-hidden">
+                {/* Hover glow background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/0 to-neon-purple/0 group-hover:from-neon-blue/5 group-hover:to-neon-purple/5 transition-all duration-700" />
+                <div className="relative z-10">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-blue/20 to-neon-purple/20 flex items-center justify-center mb-3 group-hover:from-neon-blue/40 group-hover:to-neon-purple/40 transition-all duration-500 group-hover:animate-pulse">
+                    <service.icon className="w-5 h-5 text-primary group-hover:text-neon-cyan transition-colors duration-500" />
+                  </div>
+                  <h3 className="font-display font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
+                    {service.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{service.desc}</p>
+                </div>
               </div>
-              <h3 className="font-display font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
-                {service.title}
-              </h3>
-              <p className="text-xs text-muted-foreground">{service.desc}</p>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

@@ -217,13 +217,6 @@ const HeroSection = () => {
                   transformStyle: "preserve-3d",
                 }}
               >
-                {/* Reflexo/sombra 3D atrás */}
-                <div 
-                  className="absolute inset-0 blur-md opacity-40"
-                  style={{ transform: "translateZ(-30px) scale(1.05)" }}
-                >
-                  <img src={logomarca} alt="" className="h-56 sm:h-64 md:h-80 lg:h-96 w-auto" />
-                </div>
                 {/* Glow ring 3D */}
                 <div 
                   className="absolute inset-0 flex items-center justify-center pointer-events-none"

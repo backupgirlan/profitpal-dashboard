@@ -119,16 +119,16 @@ const ProjectsSection = () => {
 
         {/* Auto-play indicator */}
         {autoPlay && (
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-4 sm:mb-6">
             <div className="glass rounded-full px-3 py-1 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[hsl(var(--success))] animate-pulse" />
-              <span className="text-[10px] text-muted-foreground">Rotação automática ativa</span>
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground">Rotação automática ativa</span>
             </div>
           </div>
         )}
 
         {/* Projects grid */}
-        <div className="min-h-[400px]">
+        <div className="min-h-[300px] sm:min-h-[400px]">
           {filtered.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-fade-in-up" key={activeCategory + String(showAll)}>

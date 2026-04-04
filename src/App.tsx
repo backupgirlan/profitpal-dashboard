@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 import AdminDemos from "./pages/AdminDemos";
+import Administrador from "./pages/Administrador";
 
 const queryClient = new QueryClient();
 

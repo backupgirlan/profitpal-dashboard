@@ -1,62 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ExternalLink, ArrowRight } from "lucide-react";
+import { ExternalLink, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
 
-// Local cover images for demos
-import clinicaSite from "@/assets/demos/clinica-site.jpg";
-import advocaciaSite from "@/assets/demos/advocacia-site.jpg";
-import imobiliariaSite from "@/assets/demos/imobiliaria-site.jpg";
-import barbeariaSistema from "@/assets/demos/barbearia-sistema.jpg";
-import dashboardFinanceiro from "@/assets/demos/dashboard-financeiro.jpg";
-import crmVendas from "@/assets/demos/crm-vendas.jpg";
-import restauranteSistema from "@/assets/demos/restaurante-sistema.jpg";
-import cursoLanding from "@/assets/demos/curso-landing.jpg";
-import saasLanding from "@/assets/demos/saas-landing.jpg";
-import eventoLanding from "@/assets/demos/evento-landing.jpg";
-import modaLoja from "@/assets/demos/moda-loja.jpg";
-import petshopLoja from "@/assets/demos/petshop-loja.jpg";
-import fitnessLoja from "@/assets/demos/fitness-loja.jpg";
-import deliveryApp from "@/assets/demos/delivery-app.jpg";
-import agendamentoApp from "@/assets/demos/agendamento-app.jpg";
-import chatbotIa from "@/assets/demos/chatbot-ia.jpg";
-import vendasIa from "@/assets/demos/vendas-ia.jpg";
-import analyticsIa from "@/assets/demos/analytics-ia.jpg";
-
-const localCovers: Record<string, string> = {
-  "Clínica Vida Saúde": clinicaSite,
-  "Escritório Advocacia Elite": advocaciaSite,
-  "Imobiliária Prime": imobiliariaSite,
-  "Gestão de Barbearia": barbeariaSistema,
-  "Dashboard Financeiro": dashboardFinanceiro,
-  "CRM para Vendas": crmVendas,
-  "Sistema para Restaurante": restauranteSistema,
-  "Lançamento Curso Online": cursoLanding,
-  "Captação de Leads SaaS": saasLanding,
-  "Evento Presencial VIP": eventoLanding,
-  "Moda Feminina Store": modaLoja,
-  "Pet Shop Online": petshopLoja,
-  "Suplementos Fitness": fitnessLoja,
-  "App Delivery Local": deliveryApp,
-  "App de Agendamento": agendamentoApp,
-  "Chatbot Atendimento 24h": chatbotIa,
-  "Assistente de Vendas IA": vendasIa,
-  "Análise de Dados com IA": analyticsIa,
-};
-
 const categories = [
-  { key: "site", label: "Site" },
-  { key: "sistema", label: "Sistema" },
-  { key: "aplicativo", label: "Aplicativo" },
-  { key: "ia", label: "Inteligência Artificial" },
-  { key: "landing", label: "Landing Page" },
-  { key: "loja", label: "Loja Virtual" },
+  { key: "site", label: "🌐 Site", count: 0 },
+  { key: "sistema", label: "⚙️ Sistema", count: 0 },
+  { key: "aplicativo", label: "📱 Aplicativo", count: 0 },
+  { key: "ia", label: "🤖 Inteligência Artificial", count: 0 },
+  { key: "landing", label: "🚀 Landing Page", count: 0 },
+  { key: "loja", label: "🛒 Loja Virtual", count: 0 },
 ];
+
+const categoryColors: Record<string, string> = {
+  site: "from-neon-blue/20 to-neon-blue/5",
+  sistema: "from-neon-purple/20 to-neon-purple/5",
+  aplicativo: "from-neon-cyan/20 to-neon-cyan/5",
+  ia: "from-neon-purple/20 to-neon-cyan/5",
+  landing: "from-neon-blue/20 to-neon-purple/5",
+  loja: "from-neon-cyan/20 to-neon-blue/5",
+};
 
 const ProjectsSection = () => {
   const [activeCategory, setActiveCategory] = useState("site");
   const [demos, setDemos] = useState<any[]>([]);
+  const [autoPlay, setAutoPlay] = useState(true);
+  const autoRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const fetchDemos = async () => {
@@ -70,9 +40,19 @@ const ProjectsSection = () => {
     fetchDemos();
   }, []);
 
-  const filtered = demos.filter((d) => d.category === activeCategory);
+  // Auto-rotate categories
+  useEffect(() => {
+    if (!autoPlay) return;
+    autoRef.current = setInterval(() => {
+      setActiveCategory(prev => {
+        const idx = categories.findIndex(c => c.key === prev);
+        return categories[(idx + 1) % categories.length].key;
+      });
+    }, 6000);
+    return () => clearInterval(autoRef.current);
+  }, [autoPlay]);
 
-  const getCover = (demo: any) => demo.cover_image || localCovers[demo.name] || "";
+  const filtered = demos.filter((d) => d.category === activeCategory);
 
   const openWhatsApp = (name: string) => {
     window.open(
@@ -82,133 +62,269 @@ const ProjectsSection = () => {
     );
   };
 
+  const handleCategoryClick = (key: string) => {
+    setActiveCategory(key);
+    setAutoPlay(false);
+    setTimeout(() => setAutoPlay(true), 15000);
+  };
+
   return (
-    <section id="projetos" className="relative py-20 px-4">
+    <section id="projetos" className="relative py-24 px-4">
       <div className="absolute top-1/2 right-0 w-72 h-72 bg-neon-cyan/5 rounded-full blur-[120px] animate-orb" />
+      <div className="absolute top-1/4 left-0 w-80 h-80 bg-neon-purple/5 rounded-full blur-[120px] animate-orb" style={{ animationDelay: "3s" }} />
 
       <div className="max-w-7xl mx-auto">
         <ScrollReveal variant="flip-up">
           <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-4">
+              <span className="text-xs text-neon-cyan font-medium">✨ Portfólio Completo</span>
+            </div>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Modelos de <span className="gradient-neon-text text-glow">Projetos</span>
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Conheça alguns dos nossos projetos e solicite algo semelhante
+              Conheça nossos projetos reais e solicite algo semelhante para o seu negócio.
+              <span className="text-primary font-medium"> Mais de 130 modelos disponíveis!</span>
             </p>
           </div>
         </ScrollReveal>
 
         {/* Category filters */}
         <ScrollReveal variant="fade-up" delay={200}>
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            {categories.map((cat) => (
-              <button
-                key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-500 ${
-                  activeCategory === cat.key
-                    ? "gradient-neon text-primary-foreground box-glow scale-105"
-                    : "glass text-muted-foreground hover:text-foreground hover:box-glow hover:scale-105"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap justify-center gap-2 mb-10">
+            {categories.map((cat) => {
+              const count = demos.filter(d => d.category === cat.key).length;
+              return (
+                <button
+                  key={cat.key}
+                  onClick={() => handleCategoryClick(cat.key)}
+                  className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-500 relative overflow-hidden ${
+                    activeCategory === cat.key
+                      ? "gradient-neon text-primary-foreground box-glow scale-105"
+                      : "glass text-muted-foreground hover:text-foreground hover:box-glow hover:scale-105"
+                  }`}
+                >
+                  {activeCategory === cat.key && (
+                    <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+                  )}
+                  <span className="relative z-10">{cat.label} ({count})</span>
+                </button>
+              );
+            })}
           </div>
         </ScrollReveal>
 
+        {/* Auto-play indicator */}
+        {autoPlay && (
+          <div className="flex justify-center mb-6">
+            <div className="glass rounded-full px-3 py-1 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[hsl(var(--success))] animate-pulse" />
+              <span className="text-[10px] text-muted-foreground">Rotação automática ativa</span>
+            </div>
+          </div>
+        )}
+
         {/* Projects grid */}
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((demo, i) => (
-              <ScrollReveal key={demo.id} variant="zoom-in" delay={i * 120}>
-                <div className="group glass rounded-2xl overflow-hidden hover-3d h-full relative">
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
-                  <div className="aspect-video bg-gradient-to-br from-neon-blue/10 to-neon-purple/10 relative overflow-hidden">
-                    {getCover(demo) ? (
-                      <img
-                        src={getCover(demo)}
-                        alt={demo.name}
-                        loading="lazy"
-                        width={800}
-                        height={512}
-                        className="w-full h-auto object-cover object-top animate-preview-scroll"
-                        style={{ minHeight: "200%" }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-muted-foreground text-sm">Preview</span>
+        <div className="min-h-[400px]">
+          {filtered.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-fade-in-up" key={activeCategory}>
+              {filtered.map((demo, i) => (
+                <ScrollReveal
+                  key={demo.id}
+                  variant={i % 5 === 0 ? "zoom-in" : i % 5 === 1 ? "fade-up" : i % 5 === 2 ? "flip-up" : i % 5 === 3 ? "fade-left" : "scale-rotate"}
+                  delay={i * 80}
+                >
+                  <div className="group glass rounded-2xl overflow-hidden hover-3d h-full relative">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
+                    
+                    {/* Preview area with animated content */}
+                    <div className={`aspect-video bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
+                      {/* Animated preview simulation */}
+                      <ProjectPreview category={demo.category} name={demo.name} />
+
+                      {/* Browser chrome */}
+                      <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
+                        <span className="w-2 h-2 rounded-full bg-destructive/60" />
+                        <span className="w-2 h-2 rounded-full bg-[hsl(40,100%,60%)]/60" />
+                        <span className="w-2 h-2 rounded-full bg-[hsl(var(--success))]/60" />
+                        <span className="ml-2 text-[8px] text-muted-foreground truncate">
+                          {demo.name?.toLowerCase().replace(/\s+/g, "-")}.com.br
+                        </span>
                       </div>
-                    )}
-                    {/* Browser chrome overlay */}
-                    <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
-                      <span className="w-2 h-2 rounded-full bg-red-400/80" />
-                      <span className="w-2 h-2 rounded-full bg-yellow-400/80" />
-                      <span className="w-2 h-2 rounded-full bg-green-400/80" />
-                      <span className="ml-2 text-[8px] text-muted-foreground truncate">{demo.name?.toLowerCase().replace(/\s+/g, "-")}.com.br</span>
+
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60 group-hover:opacity-20 transition-opacity duration-500 z-10" />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity duration-500 z-10" />
-                  </div>
-                  <div className="p-5 relative z-10">
-                    <div className="flex items-center gap-2 mb-2">
-                      {demo.is_featured && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full gradient-neon text-primary-foreground font-medium animate-pulse">
-                          Destaque
-                        </span>
-                      )}
-                      {demo.segment && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple font-medium">
-                          {demo.segment}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-display font-semibold mb-1">{demo.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-4">{demo.description}</p>
-                    <div className="flex gap-2">
-                      {demo.demo_link && (
+
+                    <div className="p-4 relative z-10">
+                      <div className="flex items-center gap-2 mb-2">
+                        {demo.is_featured && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full gradient-neon text-primary-foreground font-medium animate-pulse">
+                            ⭐ Destaque
+                          </span>
+                        )}
+                        {demo.segment && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple font-medium">
+                            {demo.segment}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-display font-semibold text-sm mb-1">{demo.name}</h3>
+                      <p className="text-[11px] text-muted-foreground mb-3 line-clamp-2">{demo.description}</p>
+                      <div className="flex gap-2">
+                        {demo.demo_link && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-[10px] h-7 border-neon-blue/30 hover:bg-neon-blue/10"
+                            onClick={() => window.open(demo.demo_link, "_blank")}
+                          >
+                            <ExternalLink className="w-3 h-3 mr-1" /> Demo
+                          </Button>
+                        )}
                         <Button
                           size="sm"
-                          variant="outline"
-                          className="text-xs border-neon-blue/30 hover:bg-neon-blue/10"
-                          onClick={() => window.open(demo.demo_link, "_blank")}
+                          className="text-[10px] h-7 gradient-neon text-primary-foreground flex-1"
+                          onClick={() => openWhatsApp(demo.name)}
                         >
-                          <ExternalLink className="w-3 h-3 mr-1" /> Ver Demo
+                          Solicitar Igual <ArrowRight className="w-3 h-3 ml-1" />
                         </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        className="text-xs gradient-neon text-primary-foreground"
-                        onClick={() => openWhatsApp(demo.name)}
-                      >
-                        Solicitar Igual <ArrowRight className="w-3 h-3 ml-1" />
-                      </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        ) : (
-          <ScrollReveal variant="zoom-in">
-            <div className="text-center py-12 glass rounded-2xl">
-              <p className="text-muted-foreground">Novos projetos em breve nesta categoria.</p>
-              <Button
-                className="mt-4 gradient-neon text-primary-foreground hover-magnetic"
-                onClick={() =>
-                  window.open(
-                    "https://wa.me/5575999401616?text=Olá! Quero solicitar um orçamento.",
-                    "_blank"
-                  )
-                }
-              >
-                Solicitar Orçamento
-              </Button>
+                </ScrollReveal>
+              ))}
             </div>
-          </ScrollReveal>
-        )}
+          ) : (
+            <ScrollReveal variant="zoom-in">
+              <div className="text-center py-12 glass rounded-2xl">
+                <p className="text-muted-foreground">Carregando projetos...</p>
+              </div>
+            </ScrollReveal>
+          )}
+        </div>
       </div>
     </section>
   );
+};
+
+/* Animated preview component per category */
+const ProjectPreview = ({ category, name }: { category: string; name: string }) => {
+  const previews: Record<string, React.ReactNode> = {
+    site: (
+      <div className="w-full h-full p-3 pt-8 flex flex-col gap-1.5 animate-preview-scroll" style={{ minHeight: "200%" }}>
+        <div className="h-12 rounded bg-primary/15 animate-pulse" />
+        <div className="h-2 w-3/4 rounded-full bg-foreground/10" />
+        <div className="h-2 w-1/2 rounded-full bg-foreground/8" />
+        <div className="grid grid-cols-3 gap-1 mt-1">
+          {[1,2,3].map(i => <div key={i} className="h-8 rounded bg-neon-blue/10 animate-pulse" style={{ animationDelay: `${i*0.3}s` }} />)}
+        </div>
+        <div className="h-10 rounded bg-neon-purple/10 mt-1" />
+        <div className="grid grid-cols-2 gap-1">
+          {[1,2,3,4].map(i => <div key={i} className="h-6 rounded bg-muted/20 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
+        </div>
+        <div className="h-8 rounded-lg gradient-neon opacity-30 mt-1" />
+        <div className="h-6 rounded bg-muted/10" />
+      </div>
+    ),
+    sistema: (
+      <div className="w-full h-full p-2 pt-8 flex gap-1">
+        <div className="w-1/4 flex flex-col gap-1 p-1 bg-muted/10 rounded">
+          {[1,2,3,4,5].map(i => <div key={i} className="h-2 rounded bg-primary/20 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
+        </div>
+        <div className="flex-1 flex flex-col gap-1">
+          <div className="flex gap-1">
+            {[1,2,3].map(i => (
+              <div key={i} className="flex-1 h-8 rounded bg-neon-cyan/10 flex items-center justify-center animate-pulse" style={{ animationDelay: `${i*0.3}s` }}>
+                <div className="text-[5px] text-neon-cyan font-bold">{["R$12K", "+15%", "248"][i-1]}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex-1 flex items-end gap-0.5 p-1">
+            {[50,70,40,85,60,75,45,90].map((h,i) => (
+              <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary/30 to-neon-cyan/20 animate-pulse" style={{ height: `${h}%`, animationDelay: `${i*0.1}s` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    ),
+    aplicativo: (
+      <div className="w-full h-full flex items-center justify-center pt-6">
+        <div className="w-20 h-36 rounded-2xl border-2 border-neon-purple/20 bg-card/50 overflow-hidden">
+          <div className="h-2 bg-muted/30 flex items-center justify-center">
+            <div className="w-4 h-0.5 rounded-full bg-muted/40" />
+          </div>
+          <div className="p-1.5 space-y-1 animate-preview-scroll" style={{ minHeight: "200%" }}>
+            <div className="h-1 w-2/3 rounded-full bg-foreground/15" />
+            <div className="h-8 rounded bg-gradient-to-br from-neon-purple/15 to-neon-cyan/10" />
+            <div className="grid grid-cols-2 gap-0.5">
+              {[1,2,3,4].map(i => <div key={i} className="h-4 rounded bg-primary/10 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
+            </div>
+            <div className="h-3 rounded-full bg-[hsl(var(--success))]/15" />
+            <div className="h-4 rounded bg-neon-cyan/10" />
+          </div>
+        </div>
+      </div>
+    ),
+    ia: (
+      <div className="w-full h-full p-3 pt-8 flex flex-col gap-2">
+        <div className="flex items-center gap-1.5">
+          <div className="w-5 h-5 rounded-full bg-neon-cyan/20 animate-pulse flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-neon-cyan/40" />
+          </div>
+          <div className="flex-1 h-4 rounded-lg bg-muted/20 px-1.5 flex items-center">
+            <div className="text-[5px] text-muted-foreground animate-pulse">IA processando...</div>
+          </div>
+        </div>
+        <div className="self-start bg-neon-cyan/10 rounded-lg rounded-bl-none px-2 py-1 max-w-[80%]">
+          <div className="text-[5px] text-neon-cyan animate-pulse">Analisando dados do cliente...</div>
+        </div>
+        <div className="self-end bg-primary/10 rounded-lg rounded-br-none px-2 py-1 max-w-[70%]">
+          <div className="text-[5px] text-primary animate-pulse" style={{ animationDelay: "1s" }}>Relatório gerado!</div>
+        </div>
+        <div className="flex-1 grid grid-cols-2 gap-1 mt-1">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="rounded bg-gradient-to-br from-neon-purple/10 to-neon-cyan/10 animate-pulse flex items-center justify-center" style={{ animationDelay: `${i*0.3}s` }}>
+              <div className="text-[4px] text-neon-cyan">📊</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+    landing: (
+      <div className="w-full h-full p-3 pt-8 flex flex-col items-center gap-1.5 animate-preview-scroll" style={{ minHeight: "200%" }}>
+        <div className="h-3 w-3/4 rounded-full bg-foreground/15 animate-pulse" />
+        <div className="h-2 w-1/2 rounded-full bg-foreground/8" />
+        <div className="h-6 w-2/3 rounded-lg gradient-neon opacity-30 animate-pulse mt-1" />
+        <div className="grid grid-cols-3 gap-1 w-full mt-1">
+          {[1,2,3].map(i => <div key={i} className="h-8 rounded bg-neon-blue/10 animate-pulse" style={{ animationDelay: `${i*0.2}s` }} />)}
+        </div>
+        <div className="h-8 w-full rounded bg-muted/10 mt-1" />
+        <div className="h-6 w-2/3 rounded-lg bg-[hsl(var(--success))]/15" />
+      </div>
+    ),
+    loja: (
+      <div className="w-full h-full p-2 pt-8 flex flex-col gap-1">
+        <div className="flex items-center gap-1">
+          <div className="h-2 flex-1 rounded-full bg-muted/20" />
+          <div className="h-3 w-6 rounded bg-primary/20 flex items-center justify-center">
+            <div className="text-[4px]">🛒</div>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-1 flex-1">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="rounded bg-muted/10 flex flex-col p-0.5 gap-0.5 animate-pulse" style={{ animationDelay: `${i*0.2}s` }}>
+              <div className="flex-1 rounded bg-gradient-to-br from-neon-blue/10 to-neon-purple/10" />
+              <div className="h-1 w-3/4 rounded-full bg-foreground/10" />
+              <div className="h-1 w-1/2 rounded-full bg-primary/20" />
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  };
+
+  return previews[category] || previews.site;
 };
 
 export default ProjectsSection;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles } from "lucide-react";
 
 const links = [
   { label: "Serviços", href: "#servicos" },
@@ -18,15 +18,20 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const openWhatsApp = () => {
+    window.open("https://wa.me/5575999401616?text=Olá! Gostaria de solicitar um orçamento.", "_blank", "noopener,noreferrer");
+  };
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "glass-strong py-3" : "py-5"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled ? "glass-strong py-3 box-glow" : "py-5"
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-        <a href="#" className="font-display font-bold text-lg gradient-neon-text tracking-wider">
-          HELP GB TEC
+        <a href="#" className="font-display font-bold text-lg gradient-neon-text tracking-wider flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
+          HELP TEC
         </a>
 
         {/* Desktop */}
@@ -35,19 +40,15 @@ const Navbar = () => {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors relative group"
             >
               {l.label}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 gradient-neon group-hover:w-full transition-all duration-300" />
             </a>
           ))}
           <button
-            onClick={() => {
-              const link = document.createElement("a");
-              link.href = "https://wa.me/5575999401616?text=Olá! Gostaria de solicitar um orçamento.";
-              link.target = "_blank";
-              link.click();
-            }}
-            className="gradient-neon text-primary-foreground text-sm font-semibold px-5 py-2 rounded-lg hover:scale-105 transition-transform"
+            onClick={openWhatsApp}
+            className="gradient-neon text-primary-foreground text-sm font-semibold px-5 py-2 rounded-lg hover:scale-105 transition-transform animate-pulse-neon"
           >
             Orçamento
           </button>
@@ -61,7 +62,7 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {open && (
-        <div className="md:hidden glass-strong mt-2 mx-4 rounded-xl p-4 space-y-3">
+        <div className="md:hidden glass-strong mt-2 mx-4 rounded-xl p-4 space-y-3 animate-fade-in-up">
           {links.map((l) => (
             <a
               key={l.href}
@@ -73,12 +74,7 @@ const Navbar = () => {
             </a>
           ))}
           <button
-            onClick={() => {
-              const link = document.createElement("a");
-              link.href = "https://wa.me/5575999401616";
-              link.target = "_blank";
-              link.click();
-            }}
+            onClick={openWhatsApp}
             className="w-full gradient-neon text-primary-foreground text-sm font-semibold px-5 py-2 rounded-lg"
           >
             Orçamento

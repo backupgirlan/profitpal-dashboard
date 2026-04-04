@@ -66,6 +66,7 @@ const ProjectsSection = () => {
 
   const handleCategoryClick = (key: string) => {
     setActiveCategory(key);
+    setShowAll(false);
     setAutoPlay(false);
     setTimeout(() => setAutoPlay(true), 15000);
   };

@@ -140,7 +140,7 @@ const categoryColors: Record<string, string> = {
                     {/* Preview area with animated content */}
                     <div className={`aspect-[4/3] bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
                       {/* Rich animated preview */}
-                      <CategoryPreview category={demo.category} segment={demo.segment} name={demo.name} />
+                      <RealPreview category={demo.category} segment={demo.segment} name={demo.name} />
 
                       {/* Browser chrome */}
                       <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">

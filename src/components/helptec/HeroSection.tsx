@@ -209,11 +209,42 @@ const HeroSection = () => {
                   </div>
                 ))}
               </div>
-              <img 
-                src={logomarca} 
-                alt="HELP GB TEC" 
-                className="relative z-10 h-40 sm:h-44 md:h-56 lg:h-64 w-auto drop-shadow-[0_0_35px_hsl(var(--neon-blue)/0.6)] animate-[float_5s_ease-in-out_infinite]"
-              />
+              {/* Logo 3D container */}
+              <div 
+                className="relative z-10 animate-[float_5s_ease-in-out_infinite]"
+                style={{ 
+                  perspective: "800px",
+                  transformStyle: "preserve-3d",
+                }}
+              >
+                {/* Reflexo/sombra 3D atrás */}
+                <div 
+                  className="absolute inset-0 blur-md opacity-40"
+                  style={{ transform: "translateZ(-30px) scale(1.05)" }}
+                >
+                  <img src={logomarca} alt="" className="h-48 sm:h-52 md:h-64 lg:h-72 w-auto" />
+                </div>
+                {/* Glow ring 3D */}
+                <div 
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  style={{ transform: "translateZ(-15px)" }}
+                >
+                  <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-neon-blue/20 via-neon-purple/15 to-neon-cyan/20 blur-xl animate-pulse" />
+                </div>
+                {/* Logo principal com efeito 3D */}
+                <img 
+                  src={logomarca} 
+                  alt="HELP GB TEC" 
+                  className="relative h-48 sm:h-52 md:h-64 lg:h-72 w-auto transition-transform duration-500 hover:scale-105"
+                  style={{ 
+                    filter: "drop-shadow(0 0 40px hsl(var(--neon-blue) / 0.6)) drop-shadow(0 20px 30px rgba(0,0,0,0.5)) drop-shadow(0 0 80px hsl(var(--neon-purple) / 0.3))",
+                    transform: "translateZ(20px) rotateX(2deg)",
+                    transformStyle: "preserve-3d",
+                  }}
+                />
+                {/* Reflexo inferior 3D */}
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-6 bg-gradient-to-t from-neon-blue/10 to-transparent blur-lg rounded-full" />
+              </div>
             </div>
 
             {/* Linha separadora com glow */}

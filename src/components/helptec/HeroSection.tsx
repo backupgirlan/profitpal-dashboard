@@ -86,42 +86,48 @@ const FloatingIcon = ({ icon: Icon, className, delay = "0s" }: { icon: any; clas
   </div>
 );
 
-const aiMessages = [
-  "Analisando seu mercado...",
-  "Criando design personalizado...",
-  "Integrando inteligência artificial...",
-  "Otimizando para conversão...",
-  "Automatizando processos...",
-  "Deploy em produção...",
-  "Sistema online e funcionando ✓",
+const codeLines = [
+  { lang: "php", code: '<?php echo "Conectando banco de dados..."; ?>' },
+  { lang: "html", code: '<div class="app-container" id="root">' },
+  { lang: "php", code: '$api = new HelpGBTec\\AI\\Engine();' },
+  { lang: "html", code: '<section class="hero" data-animate="true">' },
+  { lang: "php", code: '$result = $api->analyze($userData);' },
+  { lang: "html", code: '<script src="/assets/js/app.min.js"></script>' },
+  { lang: "php", code: 'return Response::json(["status" => "online"]);' },
+  { lang: "html", code: '<meta name="ai-powered" content="true" />' },
+  { lang: "php", code: '$site = Site::deploy($config)->publish();' },
+  { lang: "html", code: '</div><!-- Build complete ✓ -->' },
 ];
 
-const AIMessageStream = () => {
-  const [messages, setMessages] = useState<{ text: string; id: number }[]>([]);
+const CodeStream = () => {
+  const [lines, setLines] = useState<{ text: string; lang: string; id: number }[]>([]);
   const idRef = useRef(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const msg = aiMessages[idRef.current % aiMessages.length];
+      const line = codeLines[idRef.current % codeLines.length];
       const id = idRef.current;
       idRef.current += 1;
-      setMessages((prev) => [...prev.slice(-3), { text: msg, id }]);
-    }, 2200);
+      setLines((prev) => [...prev.slice(-4), { text: line.code, lang: line.lang, id }]);
+    }, 1800);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex flex-col items-start gap-1.5 min-h-[90px]">
-      {messages.map((m, i) => (
+    <div className="flex flex-col items-start gap-1 min-h-[100px] font-mono text-[11px] md:text-xs">
+      {lines.map((l, i) => (
         <div
-          key={m.id}
-          className="flex items-center gap-2 animate-fade-in"
-          style={{ animationDuration: "0.5s" }}
+          key={l.id}
+          className="flex items-center gap-2 animate-fade-in w-full"
+          style={{ animationDuration: "0.4s" }}
         >
-          <div className="w-1.5 h-1.5 rounded-full bg-neon-cyan shadow-[0_0_6px_hsl(var(--neon-cyan)/0.8)] animate-pulse" />
-          <span className={`text-xs font-mono ${i === messages.length - 1 ? "text-neon-cyan" : "text-muted-foreground/60"} transition-colors duration-300`}>
-            {m.text}
+          <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${l.lang === "php" ? "bg-neon-purple/20 text-neon-purple" : "bg-neon-cyan/20 text-neon-cyan"}`}>
+            {l.lang}
           </span>
+          <span className={`${i === lines.length - 1 ? "text-[hsl(142,71%,45%)]" : "text-muted-foreground/50"} transition-colors duration-300 truncate`}>
+            {l.text}
+          </span>
+          {i === lines.length - 1 && <span className="animate-blink text-[hsl(142,71%,45%)]">▌</span>}
         </div>
       ))}
     </div>
@@ -183,25 +189,43 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Logo centralizada */}
-            <div className="flex justify-center mb-5">
+            {/* Logo GRANDE centralizada com efeitos de choque */}
+            <div className="flex justify-center mb-5 relative">
+              {/* Ondas de choque saindo da logo */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-blue/15 animate-[shock-wave_3s_ease-out_infinite_0.6s]" />
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 rounded-full border border-neon-purple/10 animate-[shock-wave_3s_ease-out_infinite_1.2s]" />
+              </div>
+              {/* Raios de energia */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+                  <div key={deg} className="absolute w-full h-full" style={{ transform: `rotate(${deg}deg)` }}>
+                    <div className="absolute top-1/2 left-1/2 w-20 md:w-32 h-[1px] origin-left bg-gradient-to-r from-neon-cyan/40 to-transparent animate-[energy-ray_2.5s_ease-in-out_infinite]" style={{ animationDelay: `${deg * 0.01}s` }} />
+                  </div>
+                ))}
+              </div>
               <img 
                 src={logomarca} 
                 alt="HELP GB TEC" 
-                className="h-20 sm:h-28 md:h-36 w-auto drop-shadow-[0_0_20px_hsl(var(--neon-blue)/0.35)]"
+                className="relative z-10 h-32 sm:h-44 md:h-56 lg:h-64 w-auto drop-shadow-[0_0_30px_hsl(var(--neon-blue)/0.5)]"
               />
             </div>
 
             {/* Linha separadora com glow */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-4" />
 
-            {/* Mensagens IA saindo da logo */}
+            {/* Código PHP/HTML saindo da logo */}
             <div className="pl-2">
               <div className="flex items-center gap-2 mb-2">
                 <Brain className="w-3.5 h-3.5 text-neon-purple animate-pulse" />
-                <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC IA</span>
+                <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC — BUILDING</span>
               </div>
-              <AIMessageStream />
+              <CodeStream />
             </div>
           </div>
 

@@ -189,7 +189,7 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Logo centralizada com raios */}
+            {/* Logo centralizada com efeito IA */}
             <div className="flex justify-center mb-0 relative py-2 sm:py-3">
               {/* Raios de energia */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -202,6 +202,47 @@ const HeroSection = () => {
                   </div>
                 ))}
               </div>
+
+              {/* Circuito neural IA - anéis orbitais */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full border border-[hsl(var(--neon-cyan)/0.15)] animate-[spin_12s_linear_infinite]">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[hsl(var(--neon-cyan))] shadow-[0_0_8px_hsl(var(--neon-cyan)/0.8)]" />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[hsl(var(--neon-blue))] shadow-[0_0_6px_hsl(var(--neon-blue)/0.8)]" />
+                </div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-44 h-44 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-full border border-[hsl(var(--neon-purple)/0.1)] animate-[spin_18s_linear_infinite_reverse]">
+                  <div className="absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[hsl(var(--neon-purple))] shadow-[0_0_6px_hsl(var(--neon-purple)/0.8)]" />
+                  <div className="absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[hsl(var(--neon-cyan))] shadow-[0_0_8px_hsl(var(--neon-cyan)/0.8)]" />
+                </div>
+              </div>
+
+              {/* Scan line IA */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-lg z-20">
+                <div className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[hsl(var(--neon-cyan)/0.6)] to-transparent animate-[ai-scan_3s_ease-in-out_infinite]" />
+              </div>
+
+              {/* Partículas de dados IA */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {[...Array(8)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-1 h-1 rounded-full bg-[hsl(var(--neon-cyan))] shadow-[0_0_4px_hsl(var(--neon-cyan)/0.8)] animate-[ai-particle_4s_ease-in-out_infinite]"
+                    style={{
+                      left: `${15 + Math.random() * 70}%`,
+                      top: `${15 + Math.random() * 70}%`,
+                      animationDelay: `${i * 0.5}s`,
+                      animationDuration: `${3 + Math.random() * 2}s`,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Glow pulsante atrás da logo */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full bg-[hsl(var(--neon-cyan)/0.08)] blur-2xl animate-pulse" />
+              </div>
+
               <img 
                 src={logomarca} 
                 alt="HELP GB TEC" 

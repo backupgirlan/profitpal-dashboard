@@ -249,11 +249,10 @@ const HeroSection = () => {
 
             {/* Linha separadora com glow */}
             <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-1" />
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-neon-cyan/40 to-transparent mb-1.5" />
 
             {/* Código PHP/HTML saindo da logo */}
             <div className="pl-2">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-1">
                 <Brain className="w-3.5 h-3.5 text-neon-purple animate-pulse" />
                 <span className="text-[10px] text-neon-purple font-mono font-semibold tracking-wider">HELP GB TEC — BUILDING</span>
               </div>

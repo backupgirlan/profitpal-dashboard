@@ -285,11 +285,11 @@ const HeroSection = () => {
         </div>
 
         {/* Mockup area with device frames */}
-        <div className={`relative mb-16 transition-all duration-[1200ms] delay-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 [transform:perspective(800px)_rotateX(0deg)_translateY(0)]" : "opacity-0 [transform:perspective(800px)_rotateX(15deg)_translateY(40px)]"}`}>
-          <div className="glass rounded-2xl p-1 max-w-5xl mx-auto box-glow relative overflow-hidden">
-            <div className="absolute inset-0 animate-shimmer pointer-events-none rounded-2xl z-10" />
-            <div className="bg-card rounded-xl p-6 md:p-8 relative overflow-hidden">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={`relative mb-10 sm:mb-16 transition-all duration-[1200ms] delay-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 [transform:perspective(800px)_rotateX(0deg)_translateY(0)]" : "opacity-0 [transform:perspective(800px)_rotateX(15deg)_translateY(40px)]"}`}>
+          <div className="glass rounded-xl sm:rounded-2xl p-1 max-w-5xl mx-auto box-glow relative overflow-hidden">
+            <div className="absolute inset-0 animate-shimmer pointer-events-none rounded-xl sm:rounded-2xl z-10" />
+            <div className="bg-card rounded-lg sm:rounded-xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 {/* Notebook mockup - Sites Modernos */}
                 <div className="glass rounded-xl p-4 text-center hover-3d group relative overflow-hidden transition-all duration-500 hover:shadow-[0_0_30px_hsl(var(--neon-blue)/0.3)]">
                   <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/0 to-neon-purple/0 group-hover:from-neon-blue/10 group-hover:to-neon-purple/10 transition-all duration-700" />

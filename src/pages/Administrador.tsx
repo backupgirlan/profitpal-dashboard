@@ -97,6 +97,96 @@ const portfolioSites = [
       { label: "Detalhes", color: "from-indigo-600 to-blue-700", sections: ["nav", "gallery", "info"] },
     ]
   },
+  {
+    name: "Barbearia VIP",
+    url: "barbeariavip.com.br",
+    category: "Landing Page",
+    screens: [
+      { label: "Hero", color: "from-zinc-800 to-neutral-900", sections: ["nav", "hero-big", "cta"] },
+      { label: "Serviços", color: "from-neutral-800 to-stone-900", sections: ["nav", "grid-3", "pricing"] },
+      { label: "Agendamento", color: "from-stone-800 to-zinc-900", sections: ["nav", "calendar", "form"] },
+    ]
+  },
+  {
+    name: "Escola Digital+",
+    url: "escoladigital.edu.br",
+    category: "Sistema",
+    screens: [
+      { label: "Dashboard", color: "from-emerald-600 to-teal-700", sections: ["sidebar", "stats", "charts"] },
+      { label: "Cursos", color: "from-teal-700 to-cyan-700", sections: ["sidebar", "grid-4", "progress"] },
+      { label: "Alunos", color: "from-cyan-700 to-blue-600", sections: ["sidebar", "table", "filters"] },
+    ]
+  },
+  {
+    name: "Petshop Amigos",
+    url: "petshopamigos.com.br",
+    category: "Loja Virtual",
+    screens: [
+      { label: "Home", color: "from-lime-500 to-green-600", sections: ["nav", "banner", "categories"] },
+      { label: "Produtos", color: "from-green-600 to-emerald-600", sections: ["nav", "filters", "grid-4"] },
+      { label: "Carrinho", color: "from-emerald-600 to-teal-600", sections: ["nav", "cart-list", "checkout"] },
+    ]
+  },
+  {
+    name: "Advocacia Silva",
+    url: "advocaciasilva.com.br",
+    category: "Site",
+    screens: [
+      { label: "Home", color: "from-amber-800 to-yellow-900", sections: ["nav", "hero-img", "services"] },
+      { label: "Áreas", color: "from-yellow-900 to-amber-800", sections: ["nav", "grid-6", "text"] },
+      { label: "Contato", color: "from-amber-700 to-orange-800", sections: ["nav", "form", "map"] },
+    ]
+  },
+  {
+    name: "Fitness Pro",
+    url: "fitnesspro.app",
+    category: "Aplicativo",
+    screens: [
+      { label: "Treinos", color: "from-red-600 to-rose-700", sections: ["nav", "categories", "items"] },
+      { label: "Progresso", color: "from-rose-700 to-pink-700", sections: ["sidebar", "charts", "stats"] },
+      { label: "Dieta", color: "from-pink-700 to-fuchsia-700", sections: ["nav", "table", "form"] },
+    ]
+  },
+  {
+    name: "Contabilidade Express",
+    url: "contaexpress.com.br",
+    category: "Sistema",
+    screens: [
+      { label: "Dashboard", color: "from-blue-800 to-indigo-900", sections: ["sidebar", "stats", "charts"] },
+      { label: "Notas Fiscais", color: "from-indigo-900 to-violet-900", sections: ["sidebar", "table", "form"] },
+      { label: "Relatórios", color: "from-violet-800 to-purple-900", sections: ["sidebar", "charts", "analysis"] },
+    ]
+  },
+  {
+    name: "Agência Criativa",
+    url: "agenciacriativa.art",
+    category: "Landing Page",
+    screens: [
+      { label: "Hero", color: "from-fuchsia-600 to-purple-700", sections: ["nav", "hero-big", "cta"] },
+      { label: "Portfólio", color: "from-purple-700 to-violet-700", sections: ["nav", "grid-3", "cards"] },
+      { label: "Equipe", color: "from-violet-700 to-indigo-700", sections: ["nav", "grid-4", "text"] },
+    ]
+  },
+  {
+    name: "Hotel Paraíso",
+    url: "hotelparaiso.com.br",
+    category: "Site",
+    screens: [
+      { label: "Home", color: "from-cyan-500 to-sky-600", sections: ["nav", "hero-img", "featured"] },
+      { label: "Quartos", color: "from-sky-600 to-blue-600", sections: ["nav", "grid-3", "pricing"] },
+      { label: "Reservas", color: "from-blue-600 to-indigo-600", sections: ["nav", "calendar", "form"] },
+    ]
+  },
+  {
+    name: "Delivery Rápido",
+    url: "deliveryrapido.app",
+    category: "Aplicativo",
+    screens: [
+      { label: "Home", color: "from-yellow-500 to-orange-600", sections: ["nav", "search-bar", "categories"] },
+      { label: "Restaurantes", color: "from-orange-600 to-red-600", sections: ["nav", "grid-4", "items"] },
+      { label: "Pedido", color: "from-red-600 to-rose-600", sections: ["nav", "map-track", "status"] },
+    ]
+  },
 ];
 
 // Mini wireframe renderer

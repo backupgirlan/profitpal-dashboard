@@ -30,9 +30,8 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
-        <a href="#" className="font-display font-bold text-lg gradient-neon-text tracking-wider flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-neon-cyan animate-pulse" />
-          HELP GB TEC
+        <a href="#" className="flex items-center gap-2 group">
+          <img src={logomarca} alt="HELP GB TEC" className="h-10 md:h-12 w-auto drop-shadow-[0_0_10px_hsl(var(--neon-blue)/0.5)] group-hover:drop-shadow-[0_0_20px_hsl(var(--neon-cyan)/0.7)] transition-all duration-500" />
         </a>
 
         {/* Desktop */}

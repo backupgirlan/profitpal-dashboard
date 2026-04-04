@@ -146,17 +146,17 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center px-4 pt-20 pb-12 overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center px-3 sm:px-4 pt-16 sm:pt-20 pb-8 sm:pb-12 overflow-hidden">
       {/* Background effects */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-neon-blue/10 rounded-full blur-[100px] animate-orb" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-neon-purple/10 rounded-full blur-[120px] animate-orb" style={{ animationDelay: "2s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-neon-cyan/5 animate-morph blur-[150px]" />
+      <div className="absolute top-20 left-10 w-48 sm:w-72 h-48 sm:h-72 bg-neon-blue/10 rounded-full blur-[80px] sm:blur-[100px] animate-orb" />
+      <div className="absolute bottom-20 right-10 w-64 sm:w-96 h-64 sm:h-96 bg-neon-purple/10 rounded-full blur-[100px] sm:blur-[120px] animate-orb" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] bg-neon-cyan/5 animate-morph blur-[100px] sm:blur-[150px]" />
       <div className="absolute inset-0 bg-gradient-to-br from-neon-blue/5 via-neon-purple/3 to-neon-cyan/5 animate-aurora pointer-events-none" />
 
       {/* Ripples */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon-blue/10 animate-ripple" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon-purple/10 animate-ripple" style={{ animationDelay: "0.7s" }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full border border-neon-cyan/10 animate-ripple" style={{ animationDelay: "1.4s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-neon-blue/10 animate-ripple" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-neon-purple/10 animate-ripple" style={{ animationDelay: "0.7s" }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 sm:w-40 h-32 sm:h-40 rounded-full border border-neon-cyan/10 animate-ripple" style={{ animationDelay: "1.4s" }} />
 
       {/* Floating decorative icons */}
       <FloatingIcon icon={Monitor} className="top-[15%] left-[8%] hidden lg:block" delay="0s" />
@@ -166,11 +166,11 @@ const HeroSection = () => {
       <FloatingIcon icon={BarChart3} className="top-[45%] left-[3%] hidden xl:block" delay="2s" />
       <FloatingIcon icon={Smartphone} className="top-[40%] right-[5%] hidden xl:block" delay="3.5s" />
 
-      <div className="relative z-10 max-w-6xl mx-auto text-center">
+      <div className="relative z-10 max-w-6xl mx-auto text-center w-full">
         {/* Logo centralizada com terminal IA */}
-        <div className={`mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
+        <div className={`mb-8 sm:mb-12 flex flex-col items-center justify-center transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 -translate-y-10 scale-90"}`}>
           {/* Container glass com logo + mensagens IA */}
-          <div className="relative glass rounded-2xl px-6 md:px-8 py-3 md:py-4 max-w-3xl w-full box-glow">
+          <div className="relative glass rounded-xl sm:rounded-2xl px-4 sm:px-6 md:px-8 py-3 md:py-4 max-w-3xl w-full box-glow">
             {/* Borda animada */}
             <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
               <div className="absolute inset-0 rounded-2xl border border-neon-cyan/20" />

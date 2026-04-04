@@ -258,29 +258,29 @@ const HeroSection = () => {
         </p>
 
         {/* Buttons */}
-        <div className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 transition-all duration-1000 delay-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"}`}>
+        <div className={`flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-10 sm:mb-16 px-2 transition-all duration-1000 delay-[600ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${mounted ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-10 scale-95"}`}>
           <Button
             size="lg"
-            className="gradient-neon text-primary-foreground font-semibold px-8 py-6 text-base rounded-xl box-glow hover:scale-105 transition-all duration-300 hover-magnetic animate-pulse-neon"
+            className="w-full sm:w-auto gradient-neon text-primary-foreground font-semibold px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl box-glow hover:scale-105 transition-all duration-300 hover-magnetic animate-pulse-neon"
             onClick={openWhatsApp}
           >
-            Solicitar Orçamento <ArrowRight className="ml-2 w-5 h-5" />
+            Solicitar Orçamento <ArrowRight className="ml-2 w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="border-neon-blue/30 text-foreground px-8 py-6 text-base rounded-xl hover:bg-neon-blue/10 transition-all duration-300 hover-magnetic"
+            className="w-full sm:w-auto border-neon-blue/30 text-foreground px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl hover:bg-neon-blue/10 transition-all duration-300 hover-magnetic"
             onClick={() => document.getElementById("projetos")?.scrollIntoView({ behavior: "smooth" })}
           >
-            <Eye className="mr-2 w-5 h-5" /> Ver Projetos
+            <Eye className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Ver Projetos
           </Button>
           <Button
             size="lg"
             variant="outline"
-            className="border-[hsl(142,71%,45%)]/30 text-[hsl(142,71%,45%)] px-8 py-6 text-base rounded-xl hover:bg-[hsl(142,71%,45%)]/10 transition-all duration-300 hover-magnetic"
+            className="w-full sm:w-auto border-[hsl(142,71%,45%)]/30 text-[hsl(142,71%,45%)] px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base rounded-xl hover:bg-[hsl(142,71%,45%)]/10 transition-all duration-300 hover-magnetic"
             onClick={openWhatsApp}
           >
-            <MessageCircle className="mr-2 w-5 h-5" /> Falar no WhatsApp
+            <MessageCircle className="mr-2 w-4 h-4 sm:w-5 sm:h-5" /> Falar no WhatsApp
           </Button>
         </div>
 

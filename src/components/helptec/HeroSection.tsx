@@ -189,55 +189,13 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Logo GRANDE centralizada com efeitos de choque */}
-            <div className="flex justify-center mb-0 relative py-0 sm:py-1">
-              {/* Ondas de choque saindo da logo */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-cyan/15 animate-[shock-wave_3s_ease-out_infinite]" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-blue/15 animate-[shock-wave_3s_ease-out_infinite_0.6s]" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-80 md:h-80 rounded-full border border-neon-purple/10 animate-[shock-wave_3s_ease-out_infinite_1.2s]" />
-              </div>
-              {/* Raios de energia */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
-                  <div key={deg} className="absolute w-full h-full" style={{ transform: `rotate(${deg}deg)` }}>
-                    <div className="absolute top-1/2 left-1/2 w-20 md:w-32 h-[1px] origin-left bg-gradient-to-r from-neon-cyan/40 to-transparent animate-[energy-ray_2.5s_ease-in-out_infinite]" style={{ animationDelay: `${deg * 0.01}s` }} />
-                  </div>
-                ))}
-              </div>
-              {/* Logo 3D container */}
-              <div 
-                className="relative z-10 animate-[float_5s_ease-in-out_infinite]"
-                style={{ 
-                  perspective: "800px",
-                  transformStyle: "preserve-3d",
-                }}
-              >
-                {/* Glow ring 3D */}
-                <div 
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                  style={{ transform: "translateZ(-15px)" }}
-                >
-                  <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-neon-blue/20 via-neon-purple/15 to-neon-cyan/20 blur-xl animate-pulse" />
-                </div>
-                {/* Logo principal com efeito 3D */}
-                <img 
-                  src={logomarca} 
-                  alt="HELP GB TEC" 
-                  className="relative h-56 sm:h-64 md:h-80 lg:h-96 w-auto transition-transform duration-500 hover:scale-105"
-                  style={{ 
-                    filter: "drop-shadow(0 0 40px hsl(var(--neon-blue) / 0.6)) drop-shadow(0 20px 30px rgba(0,0,0,0.5)) drop-shadow(0 0 80px hsl(var(--neon-purple) / 0.3))",
-                    transform: "translateZ(20px) rotateX(2deg)",
-                    transformStyle: "preserve-3d",
-                  }}
-                />
-                {/* Reflexo inferior 3D */}
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-6 bg-gradient-to-t from-neon-blue/10 to-transparent blur-lg rounded-full" />
-              </div>
+            {/* Logo centralizada */}
+            <div className="flex justify-center mb-0 relative py-2 sm:py-3">
+              <img 
+                src={logomarca} 
+                alt="HELP GB TEC" 
+                className="relative h-28 sm:h-36 md:h-44 lg:h-52 w-auto"
+              />
             </div>
 
             {/* Linha separadora com glow */}

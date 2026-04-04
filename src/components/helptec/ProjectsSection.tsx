@@ -130,74 +130,98 @@ const ProjectsSection = () => {
         {/* Projects grid */}
         <div className="min-h-[400px]">
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-fade-in-up" key={activeCategory}>
-              {filtered.map((demo, i) => (
-                <ScrollReveal
-                  key={demo.id}
-                  variant={i % 5 === 0 ? "zoom-in" : i % 5 === 1 ? "fade-up" : i % 5 === 2 ? "flip-up" : i % 5 === 3 ? "fade-left" : "scale-rotate"}
-                  delay={i * 80}
-                >
-                  <div className="group glass rounded-2xl overflow-hidden hover-3d h-full relative">
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
-                    
-                    {/* Preview area with animated content */}
-                    <div className={`aspect-[4/3] bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
-                      {/* Rich animated preview */}
-                      <RealPreview category={demo.category} segment={demo.segment} name={demo.name} />
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 animate-fade-in-up" key={activeCategory + String(showAll)}>
+                {visibleProjects.map((demo, i) => (
+                  <ScrollReveal
+                    key={demo.id}
+                    variant={i % 5 === 0 ? "zoom-in" : i % 5 === 1 ? "fade-up" : i % 5 === 2 ? "flip-up" : i % 5 === 3 ? "fade-left" : "scale-rotate"}
+                    delay={i * 80}
+                  >
+                    <div className="group glass rounded-2xl overflow-hidden hover-3d h-full relative">
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-br from-neon-blue/5 to-neon-purple/5 pointer-events-none" />
+                      
+                      <div className={`aspect-[4/3] bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
+                        <RealPreview category={demo.category} segment={demo.segment} name={demo.name} />
 
-                      {/* Browser chrome */}
-                      <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
-                        <span className="w-2 h-2 rounded-full bg-destructive/60" />
-                        <span className="w-2 h-2 rounded-full bg-[hsl(40,100%,60%)]/60" />
-                        <span className="w-2 h-2 rounded-full bg-[hsl(var(--success))]/60" />
-                        <span className="ml-2 text-[8px] text-muted-foreground truncate">
-                          {demo.name?.toLowerCase().replace(/\s+/g, "-")}.com.br
-                        </span>
+                        <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
+                          <span className="w-2 h-2 rounded-full bg-destructive/60" />
+                          <span className="w-2 h-2 rounded-full bg-[hsl(40,100%,60%)]/60" />
+                          <span className="w-2 h-2 rounded-full bg-[hsl(var(--success))]/60" />
+                          <span className="ml-2 text-[8px] text-muted-foreground truncate">
+                            {demo.name?.toLowerCase().replace(/\s+/g, "-")}.com.br
+                          </span>
+                        </div>
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60 group-hover:opacity-20 transition-opacity duration-500 z-10" />
                       </div>
 
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60 group-hover:opacity-20 transition-opacity duration-500 z-10" />
-                    </div>
-
-                    <div className="p-4 relative z-10">
-                      <div className="flex items-center gap-2 mb-2">
-                        {demo.is_featured && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full gradient-neon text-primary-foreground font-medium animate-pulse">
-                            ⭐ Destaque
-                          </span>
-                        )}
-                        {demo.segment && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple font-medium">
-                            {demo.segment}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-display font-semibold text-sm mb-1">{demo.name}</h3>
-                      <p className="text-[11px] text-muted-foreground mb-3 line-clamp-2">{demo.description}</p>
-                      <div className="flex gap-2">
-                        {demo.demo_link && (
+                      <div className="p-4 relative z-10">
+                        <div className="flex items-center gap-2 mb-2">
+                          {demo.is_featured && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full gradient-neon text-primary-foreground font-medium animate-pulse">
+                              ⭐ Destaque
+                            </span>
+                          )}
+                          {demo.segment && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple font-medium">
+                              {demo.segment}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-display font-semibold text-sm mb-1">{demo.name}</h3>
+                        <p className="text-[11px] text-muted-foreground mb-3 line-clamp-2">{demo.description}</p>
+                        <div className="flex gap-2">
+                          {demo.demo_link && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-[10px] h-7 border-neon-blue/30 hover:bg-neon-blue/10"
+                              onClick={() => window.open(demo.demo_link, "_blank")}
+                            >
+                              <ExternalLink className="w-3 h-3 mr-1" /> Demo
+                            </Button>
+                          )}
                           <Button
                             size="sm"
-                            variant="outline"
-                            className="text-[10px] h-7 border-neon-blue/30 hover:bg-neon-blue/10"
-                            onClick={() => window.open(demo.demo_link, "_blank")}
+                            className="text-[10px] h-7 gradient-neon text-primary-foreground flex-1"
+                            onClick={() => openWhatsApp(demo.name)}
                           >
-                            <ExternalLink className="w-3 h-3 mr-1" /> Demo
+                            Solicitar Igual <ArrowRight className="w-3 h-3 ml-1" />
                           </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          className="text-[10px] h-7 gradient-neon text-primary-foreground flex-1"
-                          onClick={() => openWhatsApp(demo.name)}
-                        >
-                          Solicitar Igual <ArrowRight className="w-3 h-3 ml-1" />
-                        </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
+                  </ScrollReveal>
+                ))}
+              </div>
+
+              {!showAll && filtered.length > 4 && (
+                <div className="flex justify-center mt-10">
+                  <button
+                    onClick={() => { setShowAll(true); setAutoPlay(false); }}
+                    className="group relative px-8 py-3 rounded-full gradient-neon text-primary-foreground font-semibold text-sm overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-[0_0_30px_hsl(var(--neon-blue)/0.4)]"
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    <span className="relative z-10 flex items-center gap-2">
+                      Ver mais modelos ({filtered.length - 4}+)
+                      <ArrowRight className="w-4 h-4 animate-[bounce_1s_infinite_alternate] group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  </button>
+                </div>
+              )}
+
+              {showAll && filtered.length > 4 && (
+                <div className="flex justify-center mt-10">
+                  <button
+                    onClick={() => { setShowAll(false); setAutoPlay(true); }}
+                    className="px-6 py-2 rounded-full glass text-muted-foreground text-sm hover:text-foreground transition-all duration-300 hover:scale-105"
+                  >
+                    Mostrar menos
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <ScrollReveal variant="zoom-in">
               <div className="text-center py-12 glass rounded-2xl">

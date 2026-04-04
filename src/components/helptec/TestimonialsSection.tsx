@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, User } from "lucide-react";
+import { Star, User, Quote } from "lucide-react";
+import { ScrollReveal } from "@/hooks/useScrollAnimation";
 
 const fallbackTestimonials = [
   { id: "1", name: "Maria Silva", company: "Loja Elegância", comment: "A Help Tec transformou nosso negócio com um site incrível. As vendas aumentaram 200% em 3 meses!", rating: 5, photo_url: null },
@@ -31,54 +32,62 @@ const TestimonialsSection = () => {
 
   return (
     <section className="relative py-20 px-4">
+      <div className="absolute top-0 left-1/2 w-80 h-80 bg-neon-purple/5 rounded-full blur-[120px] animate-orb" />
+
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-            O que nossos <span className="gradient-neon-text">clientes</span> dizem
-          </h2>
-        </div>
+        <ScrollReveal variant="blur-in">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+              O que nossos <span className="gradient-neon-text text-glow">clientes</span> dizem
+            </h2>
+          </div>
+        </ScrollReveal>
 
-        <div className="relative overflow-hidden">
-          <div
-            className="flex transition-transform duration-700 ease-in-out"
-            style={{ transform: `translateX(-${current * 100}%)` }}
-          >
-            {testimonials.map((t) => (
-              <div key={t.id} className="w-full shrink-0 px-4">
-                <div className="glass-strong rounded-2xl p-8 text-center max-w-xl mx-auto box-glow">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-neon-blue/30 to-neon-purple/30 flex items-center justify-center mx-auto mb-4">
-                    {t.photo_url ? (
-                      <img src={t.photo_url} alt={t.name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <User className="w-7 h-7 text-muted-foreground" />
-                    )}
+        <ScrollReveal variant="flip-up">
+          <div className="relative overflow-hidden">
+            <div
+              className="flex transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              style={{ transform: `translateX(-${current * 100}%)` }}
+            >
+              {testimonials.map((t) => (
+                <div key={t.id} className="w-full shrink-0 px-4">
+                  <div className="glass-strong rounded-2xl p-8 text-center max-w-xl mx-auto box-glow relative overflow-hidden">
+                    <div className="absolute inset-0 animate-shimmer pointer-events-none" />
+                    <Quote className="w-8 h-8 text-primary/20 mx-auto mb-4" />
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-neon-blue/30 to-neon-purple/30 flex items-center justify-center mx-auto mb-4 animate-surreal-float">
+                      {t.photo_url ? (
+                        <img src={t.photo_url} alt={t.name} className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        <User className="w-7 h-7 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex justify-center gap-1 mb-4">
+                      {Array.from({ length: t.rating }).map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4 italic relative z-10">"{t.comment}"</p>
+                    <h4 className="font-display font-semibold">{t.name}</h4>
+                    <p className="text-xs text-muted-foreground">{t.company}</p>
                   </div>
-                  <div className="flex justify-center gap-1 mb-4">
-                    {Array.from({ length: t.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4 italic">"{t.comment}"</p>
-                  <h4 className="font-display font-semibold">{t.name}</h4>
-                  <p className="text-xs text-muted-foreground">{t.company}</p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Dots */}
-          <div className="flex justify-center gap-2 mt-6">
-            {testimonials.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrent(i)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  i === current ? "w-6 gradient-neon" : "bg-muted-foreground/30"
-                }`}
-              />
-            ))}
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrent(i)}
+                  className={`h-2 rounded-full transition-all duration-500 ${
+                    i === current ? "w-8 gradient-neon box-glow" : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

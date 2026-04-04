@@ -3,12 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/hooks/useScrollAnimation";
-import SitePreview from "./previews/SitePreview";
-import SistemaPreview from "./previews/SistemaPreview";
-import AppPreview from "./previews/AppPreview";
-import IAPreview from "./previews/IAPreview";
-import LandingPreview from "./previews/LandingPreview";
-import LojaPreview from "./previews/LojaPreview";
+import RealPreview from "./previews/RealPreview";
 
 const categories = [
   { key: "site", label: "🌐 Site", count: 0 },
@@ -26,18 +21,6 @@ const categoryColors: Record<string, string> = {
   ia: "from-neon-purple/20 to-neon-cyan/5",
   landing: "from-neon-blue/20 to-neon-purple/5",
   loja: "from-neon-cyan/20 to-neon-blue/5",
-};
-
-const CategoryPreview = ({ category, segment, name }: { category: string; segment?: string; name: string }) => {
-  const previewMap: Record<string, React.ReactNode> = {
-    site: <SitePreview segment={segment} name={name} />,
-    sistema: <SistemaPreview segment={segment} name={name} />,
-    aplicativo: <AppPreview segment={segment} name={name} />,
-    ia: <IAPreview segment={segment} name={name} />,
-    landing: <LandingPreview segment={segment} name={name} />,
-    loja: <LojaPreview segment={segment} name={name} />,
-  };
-  return <>{previewMap[category] || previewMap.site}</>;
 };
 
 const ProjectsSection = () => {
@@ -158,7 +141,7 @@ const ProjectsSection = () => {
                     {/* Preview area with animated content */}
                     <div className={`aspect-[4/3] bg-gradient-to-br ${categoryColors[demo.category] || "from-neon-blue/10 to-neon-purple/10"} relative overflow-hidden`}>
                       {/* Rich animated preview */}
-                      <CategoryPreview category={demo.category} segment={demo.segment} name={demo.name} />
+                      <RealPreview category={demo.category} segment={demo.segment} name={demo.name} />
 
                       {/* Browser chrome */}
                       <div className="absolute top-0 left-0 right-0 h-6 bg-background/90 backdrop-blur-sm flex items-center gap-1.5 px-2.5 z-20 border-b border-border/30">
